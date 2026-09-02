@@ -44,7 +44,7 @@ Phải thuộc chắc: **B01, B07, B09, B10, B11, B12, B14, B15, B16, B17, B19, 
 
 **SHORT ANSWER:** Quản lý Event, Speaker/Schedule, Registration/Ticket, CheckIn, Feedback, Analytics và Announcement theo role.
 
-**DETAILED ANSWER:** Hệ thống hướng đến một luồng xuyên suốt, dữ liệu nhất quán và vận hành đơn giản bằng Docker; AI chỉ hỗ trợ hai tác vụ nội dung.
+**DETAILED ANSWER:** Hệ thống hướng đến một luồng xuyên suốt, dữ liệu nhất quán và vận hành đơn giản bằng Docker; AI hỗ trợ tạo Announcement draft, tóm tắt Feedback và hỏi đáp theo Event context.
 
 **Nếu bị hỏi tiếp:** Dẫn flow `Event → Register → Ticket → CheckIn → Feedback → Analytics`.
 
@@ -202,7 +202,7 @@ Phải thuộc chắc: **B01, B07, B09, B10, B11, B12, B14, B15, B16, B17, B19, 
 
 **QUESTION:** Project có những AI feature nào?
 
-**SHORT ANSWER:** Hai feature: AI Feedback Summary và AI Announcement Draft.
+**SHORT ANSWER:** Ba feature: AI Announcement Draft, AI Feedback Summary và Event AI Chatbot.
 
 **DETAILED ANSWER:** Summary trả overview/strengths/issues/suggestions từ Feedback; draft trả title/content từ Event context và yêu cầu user.
 

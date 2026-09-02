@@ -9,6 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.api.auth import router as auth_router
 from app.api.ai_feedback import router as ai_feedback_router
 from app.api.ai_announcements import router as ai_announcements_router
+from app.api.ai_chat import router as ai_chat_router
 from app.api.announcements import router as announcements_router
 from app.api.attendee_events import router as attendee_events_router
 from app.api.checkins import router as checkins_router
@@ -78,5 +79,6 @@ app.include_router(feedbacks_router)
 app.include_router(statistics_router)
 app.include_router(ai_feedback_router)
 app.include_router(ai_announcements_router)
+app.include_router(ai_chat_router)
 app.include_router(announcements_router)
 app.include_router(attendee_events_router)

@@ -2,7 +2,7 @@
 
 Hệ thống quản lý sự kiện tích hợp AI.
 
-Event Manager AI là ứng dụng web hỗ trợ quản lý vòng đời sự kiện, diễn giả, lịch trình, đăng ký, vé QR, check-in, phản hồi, thống kê và hai tác vụ AI hỗ trợ nội dung. AI không tự điều hành hệ thống: người dùng vẫn kiểm soát dữ liệu và thao tác publish.
+Event Manager AI là ứng dụng web hỗ trợ quản lý vòng đời sự kiện, diễn giả, lịch trình, đăng ký, vé QR, check-in, phản hồi, thống kê và ba chức năng AI. AI không tự điều hành hệ thống: người dùng vẫn kiểm soát dữ liệu và thao tác publish.
 
 ## Chức năng chính
 
@@ -12,7 +12,7 @@ Event Manager AI là ứng dụng web hỗ trợ quản lý vòng đời sự ki
 - Hiển thị QR Ticket có xác thực; check-in bằng camera hoặc nhập ticket code.
 - Feedback sau check-in và Analytics theo Event.
 - Announcement dạng `DRAFT`/`PUBLISHED` cho attendee đang đăng ký.
-- AI Feedback Summary và AI Announcement Draft ở Mock Mode hoặc OpenAI Mode.
+- AI Announcement Draft, AI Feedback Summary và Event AI Chatbot ở Mock Mode hoặc OpenAI Mode.
 
 ## Vai trò người dùng
 
@@ -35,7 +35,7 @@ Giao diện được tách thành Management Workspace (`ADMIN`, `ORGANIZER`), S
 | Database | MySQL 8 | Lưu dữ liệu nghiệp vụ |
 | Container | Docker Compose | Khởi chạy frontend, backend và database |
 | Authentication | JWT, bcrypt | Session token và password hashing |
-| AI | OpenAI API hoặc Mock Mode | Tóm tắt Feedback và tạo Announcement draft |
+| AI | OpenAI API hoặc Mock Mode | Tạo Announcement draft, tóm tắt Feedback và hỏi đáp theo Event |
 
 ## Kiến trúc tổng quan
 
@@ -72,6 +72,7 @@ Một số quyết định thiết kế quan trọng:
 - Ticket vẫn `ACTIVE` sau check-in. Hủy registration chuyển Ticket sang `VOID`; đăng ký lại tái sử dụng registration và Ticket cũ.
 - Announcement recipient được xác định động từ registration đang `REGISTERED`.
 - AI Feedback Summary chạy on-demand; AI Announcement Draft chỉ điền bản nháp và không tự lưu/publish.
+- Event AI Chatbot chỉ trả lời từ Event, Speaker và Schedule được backend cấp quyền; hội thoại chỉ nằm trong state của frontend và không được lưu vào database.
 
 ## Cấu trúc project
 
@@ -151,7 +152,7 @@ Trong Docker, backend luôn kết nối MySQL qua hostname `db`, không phải `
 - `AI_MODE=mock`: không cần OpenAI key, phù hợp demo offline/local và phải được giới thiệu đúng là Mock Mode.
 - `AI_MODE=openai`: cần `OPENAI_API_KEY`, `OPENAI_MODEL` và kết nối ngoài. Frontend vẫn chỉ gọi FastAPI.
 
-AI output mang tính hỗ trợ. Người dùng phải review Announcement draft và tự chọn Save Draft hoặc Publish.
+AI output mang tính hỗ trợ. Người dùng phải review Announcement draft và tự chọn Save Draft hoặc Publish. Chatbot hiển thị rõ nguồn `mock`/`openai`, không gửi attendee, registration, Ticket hay dữ liệu xác thực vào AI context.
 
 ## Testing
 
@@ -183,9 +184,9 @@ Các biện pháp trên phù hợp phạm vi đồ án; repository không tuyên
 - [Final Defense Guide](docs/DEFENSE_GUIDE.md)
 - [Defense Q&A — 60 câu](docs/DEFENSE_QA.md)
 - [Demo Checklist và Cheat Sheet](docs/DEMO_CHECKLIST.md)
-- [Release Notes v1.0.0](RELEASE_NOTES.md)
+- [Release Notes v1.1.0](RELEASE_NOTES.md)
 - [Release và Submission Checklist](docs/RELEASE_CHECKLIST.md)
 
 ## Phạm vi hiện tại
 
-Đây là hệ thống quy mô vừa cho đồ án học phần, ưu tiên nghiệp vụ rõ ràng và triển khai Docker đơn giản. Phạm vi hiện tại không gồm payment, email delivery, Event–Staff assignment, seat booking, public portal không cần đăng nhập hoặc calendar scheduling nâng cao. AI chỉ hỗ trợ hai tác vụ đã nêu, không có chatbot hay recommendation engine.
+Đây là hệ thống quy mô vừa cho đồ án học phần, ưu tiên nghiệp vụ rõ ràng và triển khai Docker đơn giản. Phạm vi hiện tại không gồm payment, email delivery, Event–Staff assignment, seat booking, public portal không cần đăng nhập hoặc calendar scheduling nâng cao. Event AI Chatbot dùng structured Event context hiện có; project không có vector database, embedding retrieval, RAG platform, long-term chat memory hay recommendation engine.

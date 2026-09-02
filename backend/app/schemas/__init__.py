@@ -9,6 +9,7 @@ from app.schemas.ai_announcement import (
     AIAnnouncementDraftResponse,
     AIAnnouncementTone,
 )
+from app.schemas.ai_chat import EventChatContent, EventChatRequest, EventChatResponse
 from app.schemas.auth import LoginRequest, TokenResponse
 from app.schemas.ai_feedback import AIFeedbackSummaryResponse, AIInsightContent
 from app.schemas.checkin import CheckInEventResponse, CheckInRequest, CheckInResponse
@@ -26,6 +27,9 @@ __all__ = [
     "AIAnnouncementDraftRequest",
     "AIAnnouncementDraftResponse",
     "AIAnnouncementTone",
+    "EventChatContent",
+    "EventChatRequest",
+    "EventChatResponse",
     "AnnouncementCreate",
     "AnnouncementResponse",
     "AnnouncementUpdate",

@@ -125,6 +125,9 @@ Ticket không có public create/update/delete endpoint; service phát hành tự
 |---|---|---|---|
 | POST | `/api/events/{event_id}/ai/feedback-summary` | `ADMIN`, Own Event | On-demand Feedback Summary |
 | POST | `/api/events/{event_id}/ai/announcement-draft` | `ADMIN`, Own Event | Tạo title/content draft; không save/publish |
+| POST | `/api/events/{event_id}/ai/chat` | `ADMIN`; `ORGANIZER` Own Event; `STAFF`/`ATTENDEE` Published Event | Event-grounded Q&A; read-only và không lưu chat |
+
+Chat request dùng `{ "question": "..." }`; response gồm `event_id`, `answer` và source `mock` hoặc `openai`. Chat context chỉ chứa Event, Speaker và Schedule đã được backend authorize.
 
 ## Common response codes
 

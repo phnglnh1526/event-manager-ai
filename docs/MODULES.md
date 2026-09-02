@@ -201,6 +201,22 @@ Không có revenue, payment hoặc seat metrics.
 - Endpoint không save, không publish và không gửi Announcement.
 - User phải review output rồi chủ động Save Draft hoặc Publish qua Announcement module.
 
+## Event AI Chatbot
+
+**Purpose:** hỏi đáp ngắn gọn về Event đang chọn bằng dữ liệu do backend cung cấp.
+
+**Actors:** `ADMIN` với mọi Event; `ORGANIZER` với Event mình sở hữu; `STAFF` và `ATTENDEE` với Event `PUBLISHED`.
+
+**Endpoint:** `/api/events/{event_id}/ai/chat`.
+
+**Business rules:**
+
+- Context chỉ gồm Event, Speaker và Schedule; không gồm attendee, email, registration, Ticket, JWT hoặc secret.
+- Câu trả lời được grounded trong context, chống prompt injection và không tự bịa thông tin còn thiếu.
+- Endpoint là read-only và stateless: không lưu chat, không sửa Event và không tạo bất kỳ business record nào.
+- Response có source `mock` hoặc `openai`; khi đổi Event, frontend xóa hội thoại cũ và gửi câu hỏi theo Event mới.
+- Project không dùng vector database, embedding retrieval, RAG platform hoặc long-term chat memory.
+
 ## Workspaces
 
 - **Management Workspace:** Analytics, Events, Speaker, Schedule, Registration list và Announcements cho `ADMIN`/`ORGANIZER`.

@@ -225,6 +225,15 @@ export function generateAnnouncementDraft(eventId, payload, token) {
   });
 }
 
+export function askEventAI(eventId, question, token, signal) {
+  return apiRequest(`/api/events/${encodeURIComponent(eventId)}/ai/chat`, {
+    method: "POST",
+    token,
+    body: { question },
+    signal,
+  });
+}
+
 export function getMyAnnouncements(token, signal) {
   return apiRequest("/api/announcements/me", { token, signal });
 }

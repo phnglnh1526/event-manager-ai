@@ -65,6 +65,7 @@ Ký hiệu: `Own` = chỉ Event do Organizer sở hữu; `All` = mọi Event; `O
 | Analytics | All | Own | — | — |
 | Announcement management | All | Own | — | Published for active registrations |
 | AI Feedback/Announcement | All | Own | — | — |
+| Event AI Chatbot | All | Own | Published Events | Published Events |
 
 `get_event_for_management()` lọc `owner_id` đối với Organizer. Cross-owner access không trả dữ liệu Event của Organizer khác.
 
@@ -187,7 +188,7 @@ Announcement có `DRAFT` hoặc `PUBLISHED`. Attendee chỉ thấy bản `PUBLIS
 
 ```mermaid
 flowchart LR
-    UI[Management UI] --> API[FastAPI AI endpoint]
+    UI[Role workspace] --> API[FastAPI AI endpoint]
     API --> Context[Load authorized Event context]
     Context --> Mode{AI_MODE}
     Mode -->|mock| Local[Deterministic local response]
@@ -199,6 +200,8 @@ flowchart LR
 
 - AI Feedback Summary đọc aggregate và tối đa 100 comment gần nhất. Payload gửi cho service không gồm User object/email; summary không được lưu vào database.
 - AI Announcement Draft dùng Event và tối đa 20 Schedule làm context. Endpoint chỉ trả `title`/`content`; không tạo Announcement và không publish.
+- Event AI Chatbot dùng Event, Speaker và Schedule đã được authorize làm context. User question và dữ liệu Event đều được coi là untrusted; endpoint chống prompt injection, không gửi PII và không ghi database.
+- Chatbot là stateless ở backend; message chỉ nằm trong React state và được xóa khi đổi Event. Không có vector database, embedding retrieval, RAG platform hoặc long-term chat memory.
 - OpenAI request dùng structured JSON schema, `store=False`, timeout và giới hạn retry. `OPENAI_API_KEY` không ra frontend.
 
 ## QR và Check-in architecture

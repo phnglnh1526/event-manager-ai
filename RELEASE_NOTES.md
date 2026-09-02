@@ -1,6 +1,14 @@
-# Event Manager AI v1.0.0
+# Event Manager AI v1.1.0
 
-Release đầu tiên hoàn chỉnh cho phạm vi đồ án học phần.
+Release bổ sung Event AI Chatbot trên nền v1.0.0 ổn định.
+
+## Thay đổi từ v1.0.0
+
+- Thêm Event AI Chatbot tại `/api/events/{event_id}/ai/chat` ở Mock/OpenAI Mode.
+- Chatbot trả lời từ Event, Speaker và Schedule đã được backend authorize; hỗ trợ `ADMIN`, owner `ORGANIZER`, cùng `STAFF`/`ATTENDEE` cho Event `PUBLISHED`.
+- Bảo vệ prompt injection, không đưa attendee/registration/Ticket/secret vào AI context và không lưu lịch sử chat.
+- Thêm chatbot UI cho Management, Staff và Attendee workspace với Event context, suggested questions, source badge và mobile layout.
+- Không có migration: database vẫn đúng 9 bảng.
 
 ## Nội dung chính
 
@@ -9,7 +17,7 @@ Release đầu tiên hoàn chỉnh cho phạm vi đồ án học phần.
 - Registration lifecycle, Ticket tự động và protected QR.
 - Staff Check-in bằng camera scanner hoặc manual ticket code.
 - Feedback, Statistics/Analytics và Announcement.
-- AI Feedback Summary và AI Announcement Draft ở Mock/OpenAI Mode.
+- AI Announcement Draft, AI Feedback Summary và Event AI Chatbot ở Mock/OpenAI Mode.
 - Attendee, Staff và Management workspaces.
 - Docker Compose setup, regression/E2E tests và Documentation Pack.
 
@@ -25,13 +33,14 @@ Xem [README.md](README.md) và [docs/SETUP.md](docs/SETUP.md).
 - Schema được khởi tạo bằng SQLAlchemy `create_all()`, chưa có migration system như Alembic.
 - OpenAI Mode phụ thuộc API key, model access và external connectivity; Mock Mode dùng cho local test/demo.
 - AI output chỉ mang tính hỗ trợ; Announcement draft cần user review và thao tác save/publish riêng.
+- Chatbot dùng structured database context; không có vector database, RAG platform hoặc long-term chat memory.
 
 ## Release verification
 
 - Docker no-cache build: PASS.
 - Frontend `npm ci` và production build: PASS.
 - Production npm audit: 0 vulnerabilities.
-- Regression/E2E scripts Step 16, 18, 19, 29, 30, 31: PASS.
+- Regression/E2E scripts Step 16, 18, 19, 29, 30, 31, 40, 41, 43: PASS.
 - API, database, Swagger và OpenAPI health: PASS.
 - Database schema: 9 expected tables; persistence after restart/down-up: PASS.
 
