@@ -1,4 +1,5 @@
 import logging
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -25,14 +26,29 @@ from app.db.init_db import init_db
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
+DB_INIT_MAX_ATTEMPTS = 10
+DB_INIT_RETRY_SECONDS = 2
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    try:
-        init_db()
-    except SQLAlchemyError:
-        logger.exception("Database initialization failed")
+    for attempt in range(1, DB_INIT_MAX_ATTEMPTS + 1):
+        try:
+            init_db()
+            break
+        except SQLAlchemyError:
+            if attempt == DB_INIT_MAX_ATTEMPTS:
+                logger.exception(
+                    "Database initialization failed after %d attempts",
+                    attempt,
+                )
+                raise
+            logger.warning(
+                "Database initialization attempt %d/%d failed; retrying",
+                attempt,
+                DB_INIT_MAX_ATTEMPTS,
+            )
+            time.sleep(DB_INIT_RETRY_SECONDS)
     yield
 
 app = FastAPI(
