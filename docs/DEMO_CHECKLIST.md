@@ -56,6 +56,7 @@ docker compose ps
 | 6 | `ADMIN` | Refresh Analytics | “Metrics lấy từ dữ liệu nghiệp vụ thật.” | Attendance/rating cập nhật |
 | 7 | `ADMIN` | AI Summary | “Đây là Mock/OpenAI Mode đúng cấu hình.” | Structured insight |
 | 8 | `ADMIN` | AI Announcement Draft | “AI chỉ tạo draft; user review/publish.” | Draft chưa tự lưu |
+| 9 | `ADMIN` | Event AI Chatbot | “Chatbot chỉ trả lời từ Event, Speaker và Schedule.” | Grounded answer, đúng mode |
 
 ## D. Demo rút gọn 4–5 phút
 
@@ -115,7 +116,7 @@ Câu nói khi OpenAI không sẵn sàng:
 
 - **4 roles:** `ADMIN`, `ORGANIZER`, `STAFF`, `ATTENDEE`.
 - **9 tables:** users, events, speakers, schedules, registrations, tickets, checkins, feedbacks, announcements.
-- **2 AI features:** Feedback Summary, Announcement Draft.
+- **3 AI features:** AI Announcement Draft, AI Feedback Summary, Event AI Chatbot.
 - **4 Event statuses:** `DRAFT`, `PUBLISHED`, `CANCELLED`, `COMPLETED`.
 - **2 Registration statuses:** `REGISTERED`, `CANCELLED`.
 - **2 Ticket statuses:** `ACTIVE`, `VOID`.

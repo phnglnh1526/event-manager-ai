@@ -4,15 +4,15 @@ Tài liệu này là kịch bản nói và trình bày cho đồ án **Event Man
 
 ## 1. Thông điệp cốt lõi
 
-Event Manager AI tập trung các nghiệp vụ quản lý Event, Speaker, Schedule, Registration, Ticket/QR, CheckIn, Feedback, Analytics và Announcement trong một hệ thống. AI chỉ hỗ trợ tóm tắt Feedback và soạn Announcement draft; mọi authorization và quyết định nghiệp vụ vẫn nằm ở backend.
+Event Manager AI tập trung các nghiệp vụ quản lý Event, Speaker, Schedule, Registration, Ticket/QR, CheckIn, Feedback, Analytics và Announcement trong một hệ thống. Ba chức năng AI hỗ trợ tóm tắt Feedback, soạn Announcement draft và hỏi đáp theo Event context; mọi authorization và quyết định nghiệp vụ vẫn nằm ở backend.
 
 ### Tóm tắt 10 giây
 
-> Event Manager AI là hệ thống web quản lý vòng đời sự kiện từ lập lịch, đăng ký, vé QR, check-in đến phản hồi và Analytics, đồng thời dùng AI để hỗ trợ tổng hợp Feedback và soạn thông báo.
+> Event Manager AI là hệ thống web quản lý vòng đời sự kiện từ lập lịch, đăng ký, vé QR, check-in đến phản hồi và Analytics, đồng thời dùng AI để tổng hợp Feedback, soạn thông báo và hỏi đáp theo Event context.
 
 ### Tóm tắt 30 giây
 
-> Đề tài của nhóm là Event Manager AI, một ứng dụng web quản lý sự kiện theo bốn role: Admin, Organizer, Staff và Attendee. Hệ thống quản lý Event, Speaker, Schedule, Registration, Ticket QR, CheckIn, Feedback, Analytics và Announcement. Hai chức năng AI là Feedback Summary và Announcement Draft; AI chỉ tạo nội dung hỗ trợ, không quyết định nghiệp vụ. Hệ thống dùng React, FastAPI, MySQL và Docker Compose.
+> Đề tài của nhóm là Event Manager AI, một ứng dụng web quản lý sự kiện theo bốn role: Admin, Organizer, Staff và Attendee. Hệ thống quản lý Event, Speaker, Schedule, Registration, Ticket QR, CheckIn, Feedback, Analytics và Announcement. Ba chức năng AI là Feedback Summary, Announcement Draft và Event AI Chatbot; AI chỉ hỗ trợ nội dung/hỏi đáp theo Event context, không quyết định nghiệp vụ. Hệ thống dùng React, FastAPI, MySQL và Docker Compose.
 
 ### Tóm tắt kỹ thuật 1 phút
 
@@ -20,7 +20,7 @@ Event Manager AI tập trung các nghiệp vụ quản lý Event, Speaker, Sched
 
 ## 2. Kịch bản mở đầu 30–45 giây
 
-> Kính chào thầy cô. Nhóm em xin trình bày đề tài Event Manager AI — hệ thống quản lý sự kiện tích hợp AI. Trong một sự kiện, thông tin về lịch trình, người tham dự, vé, check-in và phản hồi thường nằm ở nhiều nơi, khiến việc theo dõi trở nên rời rạc. Nhóm xây dựng một hệ thống tập trung các nghiệp vụ này trong cùng một luồng, từ lúc tạo Event đến khi tổng hợp kết quả. AI được bổ sung cho hai tác vụ hỗ trợ là đọc Feedback và soạn Announcement, chứ không thay thế người quản lý hay business rules.
+> Kính chào thầy cô. Nhóm em xin trình bày đề tài Event Manager AI — hệ thống quản lý sự kiện tích hợp AI. Trong một sự kiện, thông tin về lịch trình, người tham dự, vé, check-in và phản hồi thường nằm ở nhiều nơi, khiến việc theo dõi trở nên rời rạc. Nhóm xây dựng một hệ thống tập trung các nghiệp vụ này trong cùng một luồng, từ lúc tạo Event đến khi tổng hợp kết quả. AI hỗ trợ ba chức năng: đọc Feedback, soạn Announcement và hỏi đáp theo Event context; AI không thay thế người quản lý hay business rules.
 
 ## 3. Kịch bản 5 phút
 
@@ -46,7 +46,7 @@ Event Manager AI tập trung các nghiệp vụ quản lý Event, Speaker, Sched
 
 ### 4:25–5:00 — Kết luận
 
-> Nhóm đã hoàn thành core lifecycle từ Event đến Analytics, với RBAC cho bốn role, Docker cho môi trường chạy thống nhất và hai AI feature có human-in-the-loop. Nếu mở rộng, nhóm ưu tiên Event–Staff assignment, email notification, refresh-token authentication, database migration và reporting nâng cao. Em xin cảm ơn thầy cô và sẵn sàng trả lời câu hỏi.
+> Nhóm đã hoàn thành core lifecycle từ Event đến Analytics, với RBAC cho bốn role, Docker cho môi trường chạy thống nhất và ba AI feature. Announcement Draft vẫn có human-in-the-loop; chatbot chỉ trả lời theo Event context. Nếu mở rộng, nhóm ưu tiên Event–Staff assignment, email notification, refresh-token authentication, database migration và reporting nâng cao. Em xin cảm ơn thầy cô và sẵn sàng trả lời câu hỏi.
 
 ## 4. Kịch bản khuyến nghị 7 phút
 
@@ -86,7 +86,7 @@ Dùng nguyên đoạn mở đầu ở phần 2.
 
 **FEEDBACK, ANALYTICS, AI:**
 
-> Sau CheckIn, Attendee mới có thể Feedback. Admin refresh Analytics để xem capacity, registration, attendance và rating. AI Feedback Summary nhận aggregate cùng rating/comment cần thiết và trả summary, strengths, issues, suggestions. AI Announcement Draft nhận purpose, key points, tone và Event context, nhưng không tự save hoặc publish. Trong demo ổn định, nhóm dùng Mock Mode và nói rõ đây không phải OpenAI thật.
+> Sau CheckIn, Attendee mới có thể Feedback. Admin refresh Analytics để xem capacity, registration, attendance và rating. AI Feedback Summary nhận aggregate cùng rating/comment cần thiết và trả summary, strengths, issues, suggestions. AI Announcement Draft nhận purpose, key points, tone và Event context, nhưng không tự save hoặc publish. Event AI Chatbot chỉ dùng Event, Speaker và Schedule đã được cấp quyền để trả lời. Trong demo ổn định, nhóm dùng Mock Mode và nói rõ đây không phải OpenAI thật.
 
 ### 5:50–6:30 — Testing và reliability
 
@@ -143,7 +143,7 @@ Với các đoạn mở rộng, tổng thời gian khoảng 8 phút 30 giây đ�
 
 - Event → Registration → Ticket → CheckIn → Feedback → Analytics.
 - Speaker, Schedule và Announcement.
-- Hai AI feature hỗ trợ.
+- Ba AI feature hỗ trợ: Announcement Draft, Feedback Summary và Event AI Chatbot.
 - Out of scope: payment, seating, email campaign, CRM.
 
 **Speaker note (30–40 giây):** nhấn mạnh out-of-scope là quyết định kiểm soát phạm vi.
@@ -152,12 +152,12 @@ Với các đoạn mở rộng, tổng thời gian khoảng 8 phút 30 giây đ�
 
 **Trên slide:**
 
-- `ADMIN`: mọi Event và Analytics/AI.
-- `ORGANIZER`: own Events.
-- `STAFF`: CheckIn.
-- `ATTENDEE`: register, Ticket, Feedback, Announcement.
+- `ADMIN`: quản lý mọi Event và dữ liệu liên quan; Analytics, Announcement và ba AI use case.
+- `ORGANIZER`: quản lý own Events, Speaker, Schedule, Registration list, Analytics, Announcement và ba AI use case.
+- `STAFF`: chọn Event `PUBLISHED`, Manual/QR CheckIn và Event AI Chatbot; không có Event CRUD hoặc Analytics.
+- `ATTENDEE`: xem Event `PUBLISHED`, register/cancel/re-register, Ticket/QR, Announcement, own Feedback và Event AI Chatbot.
 
-**Speaker note (35 giây):** AI không phải actor; authorization nằm ở backend.
+**Speaker note (35 giây):** AI là internal component, không phải actor. Diagram chỉ có bốn actor người dùng; authorization và ownership scope được kiểm tra ở backend.
 
 ### Slide 5 — Kiến trúc
 
@@ -198,8 +198,9 @@ Với các đoạn mở rộng, tổng thời gian khoảng 8 phút 30 giây đ�
 
 - Feedback Summary.
 - Announcement Draft.
+- Event AI Chatbot.
 - `AI_MODE=mock` / `AI_MODE=openai`.
-- Structured output + human review.
+- Structured output; human review trước khi lưu/publish draft.
 
 **Speaker note (40 giây):** AI không quyết định login, publish, registration hay CheckIn.
 
@@ -271,11 +272,11 @@ Với các đoạn mở rộng, tổng thời gian khoảng 8 phút 30 giây đ�
 
 **NGƯỜI TRÌNH BÀY:**
 
-> Quay lại Admin, Analytics đã phản ánh registration, attendance và rating. AI Feedback Summary hỗ trợ biến các comment thành summary, strengths, issues và suggestions. Trong demo này hệ thống dùng Mock Mode để ổn định, không giả là OpenAI thật. Với Announcement Draft, AI chỉ tạo title/content; người quản lý review rồi tự Save Draft hoặc Publish.
+> Quay lại Admin, Analytics đã phản ánh registration, attendance và rating. AI Feedback Summary hỗ trợ biến các comment thành summary, strengths, issues và suggestions. Trong demo này hệ thống dùng Mock Mode để ổn định, không giả là OpenAI thật. Với Announcement Draft, AI chỉ tạo title/content; người quản lý review rồi tự Save Draft hoặc Publish. Event AI Chatbot trả lời các câu hỏi về thời gian, địa điểm, diễn giả và lịch trình từ selected Event.
 
-**ACTION:** Admin → Analytics refresh → Generate AI Summary → Announcements → Generate Draft.
+**ACTION:** Admin → Analytics refresh → Generate AI Summary → Announcements → Generate Draft → Event AI Chatbot → gửi một câu hỏi theo selected Event.
 
-**EXPECTED:** Metrics cập nhật, AI response có source đúng mode, draft chưa tự lưu/publish.
+**EXPECTED:** Metrics cập nhật; cả ba AI response có source đúng mode; draft chưa tự lưu/publish; chatbot trả lời grounded theo Event context.
 
 ## 8. Negative demo tối đa hai case
 
@@ -342,7 +343,7 @@ Dù chia phần, cả ba người phải trả lời được architecture, 4 ro
 - Speaker không phải User; Schedule và Session là cùng khái niệm trong scope.
 - Organizer authorization nằm ở backend, không chỉ là ẩn button frontend.
 - Staff không có Event CRUD và chưa có Event–Staff assignment.
-- Không có payment, email delivery, chatbot, seat booking hay refresh token.
+- Không có payment, email delivery, seat booking, refresh token, vector database, RAG platform hay persistent chat history.
 - Không tuyên bố production-ready tuyệt đối hoặc test coverage chưa đo.
 - Không trình chiếu password, API key, JWT, `.env`, DB credentials.
 

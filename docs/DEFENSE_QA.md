@@ -24,7 +24,7 @@ Phải thuộc chắc: **B01, B07, B09, B10, B11, B12, B14, B15, B16, B17, B19, 
 
 **SHORT ANSWER:** Hệ thống tập trung toàn bộ core lifecycle của Event từ tổ chức đến attendance, Feedback và Analytics.
 
-**DETAILED ANSWER:** Dữ liệu Event, Schedule, attendee, Ticket, CheckIn và Feedback thường dễ phân tán. Project nối chúng thành một workflow, đồng thời dùng AI hỗ trợ đọc Feedback và soạn Announcement.
+**DETAILED ANSWER:** Dữ liệu Event, Schedule, attendee, Ticket, CheckIn và Feedback thường dễ phân tán. Project nối chúng thành một workflow, đồng thời dùng AI hỗ trợ đọc Feedback, soạn Announcement và hỏi đáp theo Event context.
 
 **Nếu bị hỏi tiếp:** Nêu rõ scope không gồm payment, seating, email campaign hoặc CRM.
 
@@ -204,9 +204,9 @@ Phải thuộc chắc: **B01, B07, B09, B10, B11, B12, B14, B15, B16, B17, B19, 
 
 **SHORT ANSWER:** Ba feature: AI Announcement Draft, AI Feedback Summary và Event AI Chatbot.
 
-**DETAILED ANSWER:** Summary trả overview/strengths/issues/suggestions từ Feedback; draft trả title/content từ Event context và yêu cầu user.
+**DETAILED ANSWER:** Summary trả overview/strengths/issues/suggestions từ Feedback; draft trả title/content từ Event context và yêu cầu user; chatbot trả lời từ Event, Speaker và Schedule đã được backend cấp quyền.
 
-**Nếu bị hỏi tiếp:** Không có chatbot, recommendation hoặc automatic publish.
+**Nếu bị hỏi tiếp:** Chatbot là stateless Event Q&A; không có recommendation, persistent chat history hoặc automatic publish.
 
 ### B20 — Docker giúp gì?
 

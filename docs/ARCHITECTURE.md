@@ -1,5 +1,7 @@
 # Kiến trúc hệ thống
 
+Các class, sequence và state diagram chi tiết được đồng bộ tại [UML Diagrams](UML_DIAGRAMS.md).
+
 ## System context
 
 Event Manager AI phục vụ bốn role: `ADMIN`, `ORGANIZER`, `STAFF`, `ATTENDEE`. Tất cả dùng browser để truy cập React SPA. Frontend gọi FastAPI bằng REST/JSON và Bearer JWT; FastAPI truy cập MySQL bằng SQLAlchemy/PyMySQL và tùy chọn gọi OpenAI từ backend.

@@ -1,10 +1,10 @@
-# Release và Submission Checklist — v1.0.0
+# Release và Submission Checklist — v1.1.0
 
 ## Freeze scope
 
 - [x] Không thêm feature, API, table hoặc column.
 - [x] Không đổi authentication, RBAC hoặc Docker architecture.
-- [x] Release version chọn là `v1.0.0`.
+- [x] Release version chọn là `v1.1.0`.
 - [x] Known limitations được ghi trung thực.
 
 ## Repository và security
@@ -16,7 +16,7 @@
 - [x] Không phát hiện cache/log/tmp/bak artifact trong source package.
 - [ ] Final commit được tạo sau user review.
 - [ ] Fresh clone được kiểm thử từ final commit.
-- [ ] Annotated tag `v1.0.0` được tạo sau fresh-clone PASS.
+- [ ] Annotated tag `v1.1.0` được tạo sau fresh-clone PASS.
 - [ ] Remote được cấu hình và push bởi người có thẩm quyền.
 
 ## Dependencies và build
@@ -33,7 +33,7 @@
 
 - [x] `db`, `backend`, `frontend` đạt healthy.
 - [x] `/api/health`, `/api/health/database`, `/docs`, `/openapi.json` trả 200.
-- [x] Regression/E2E Step 16, 18, 19, 29, 30, 31 PASS.
+- [x] Regression/E2E Step 16, 18, 19, 29, 30, 31, 40, 41, 43 PASS.
 - [x] 9 bảng nghiệp vụ, không có test table thừa.
 - [x] Không có destructive startup command.
 - [x] Persistence PASS sau `restart` và `down`/`up` không `-v`.
@@ -51,7 +51,7 @@
 
 ## Submission ZIP
 
-Tên khuyến nghị: `event-manager-ai-v1.0.0.zip`.
+Tên khuyến nghị: `event-manager-ai-v1.1.0.zip`.
 
 Include:
 
@@ -75,10 +75,10 @@ Xác minh branch/remote trước khi dùng. Repository hiện chưa có remote �
 ```text
 git status
 git add <reviewed-files>
-git commit -m "release: finalize Event Manager AI v1.0.0"
-git tag -a v1.0.0 -m "Event Manager AI v1.0.0"
+git commit -m "release: finalize Event Manager AI v1.1.0"
+git tag -a v1.1.0 -m "Event Manager AI v1.1.0"
 git push origin <verified-branch>
-git push origin v1.0.0
+git push origin v1.1.0
 ```
 
 Không force push. Không tạo tag nếu final commit, build hoặc fresh clone chưa PASS.
