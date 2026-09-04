@@ -19,9 +19,10 @@ database_url = URL.create(
 
 _connect_args: dict = {}
 if settings.mysql_ssl:
-    _ctx = _ssl.create_default_context()
-    _ctx.check_hostname = False
-    _ctx.verify_mode = _ssl.CERT_NONE
+    if settings.mysql_ssl_ca:
+        _ctx = _ssl.create_default_context(cadata=settings.mysql_ssl_ca)
+    else:
+        _ctx = _ssl.create_default_context()
     _connect_args["ssl"] = _ctx
 
 engine: Engine = create_engine(

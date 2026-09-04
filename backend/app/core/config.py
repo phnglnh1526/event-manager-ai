@@ -49,6 +49,7 @@ class Settings:
     mysql_user: str = os.getenv("MYSQL_USER", "event_user")
     mysql_password: str = os.getenv("MYSQL_PASSWORD", "")
     mysql_ssl: bool = os.getenv("MYSQL_SSL", "").strip().lower() in ("1", "true", "yes")
+    mysql_ssl_ca: str = os.getenv("MYSQL_SSL_CA", "").strip()
     jwt_secret_key: str = _required_env("JWT_SECRET_KEY")
     jwt_algorithm: str = _jwt_algorithm()
     jwt_access_token_expire_minutes: int = _positive_int_env(
