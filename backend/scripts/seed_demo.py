@@ -23,7 +23,7 @@ def run():
             ("staff", "STAFF", "Demo Check-in Staff"),
             *[(f"attendee{index}", "ATTENDEE", f"Demo Attendee {index}") for index in range(1, 9)],
         ]:
-            email = f"{key}@event-demo.local"
+            email = f"{key}@event-demo.com"
             user = db.scalar(select(User).where(User.email == email))
             if not user:
                 user = User(full_name=name, email=email, password_hash=hash_password(password), role=role, is_active=True)
@@ -40,8 +40,8 @@ def run():
         event = Event(title=EVENT_TITLE, description="A complete, real-data walkthrough for classroom presentation.", location="ICTU - Main Hall", start_time=datetime(2026, 10, 10, 8), end_time=datetime(2026, 10, 10, 17), status="PUBLISHED", max_attendees=100, owner_id=users["admin"].id)
         db.add(event); db.flush()
         speakers = [
-            Speaker(event_id=event.id, full_name="Nguyễn Minh Anh", title="AI Researcher", organization="ICTU AI Lab", email="minhanh@event-demo.local"),
-            Speaker(event_id=event.id, full_name="Trần Hoàng Nam", title="Senior Software Engineer", organization="TechVision", email="hoangnam@event-demo.local"),
+            Speaker(event_id=event.id, full_name="Nguyễn Minh Anh", title="AI Researcher", organization="ICTU AI Lab", email="minhanh@event-demo.com"),
+            Speaker(event_id=event.id, full_name="Trần Hoàng Nam", title="Senior Software Engineer", organization="TechVision", email="hoangnam@event-demo.com"),
         ]
         db.add_all(speakers); db.flush()
         db.add_all([
@@ -63,7 +63,7 @@ def run():
             db.add(Feedback(event_id=event.id, user_id=users[f"attendee{index}"].id, rating=rating, comment=f"Demo feedback {index}: clear sessions and useful event content."))
         db.add(Announcement(event_id=event.id, created_by_user_id=users["admin"].id, title="Welcome to the Demo Conference", content="Doors open at 07:30. Please have your ticket QR ready for check-in.", status="PUBLISHED", published_at=datetime.now()))
         db.commit()
-        print(f"DEMO_DATA_READY event_id={event.id} admin=admin@event-demo.local staff=staff@event-demo.local attendee=attendee7@event-demo.local")
+        print(f"DEMO_DATA_READY event_id={event.id} admin=admin@event-demo.com staff=staff@event-demo.com attendee=attendee7@event-demo.com")
     except Exception:
         db.rollback(); raise
     finally:

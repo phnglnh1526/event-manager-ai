@@ -21,7 +21,7 @@ Xác nhận:
 
 ## 2. Chuẩn bị demo accounts
 
-Repository có utility `backend/scripts/seed_demo.py`. Utility này dùng các email disposable dưới domain `@event-demo.local`, nhưng **không chứa password**. Người demo tự đặt một password tạm thời tối thiểu 8 ký tự qua environment.
+Repository có utility `backend/scripts/seed_demo.py`. Utility này dùng các email disposable dưới domain `@event-demo.com`, nhưng **không chứa password**. Người demo tự đặt một password tạm thời tối thiểu 8 ký tự qua environment.
 
 ```powershell
 docker cp backend/scripts/seed_demo.py event-manager-backend:/app/seed_demo.py
@@ -32,9 +32,9 @@ Các account được code xác minh:
 
 | Role | Email | Ghi chú |
 |---|---|---|
-| `ADMIN` | `admin@event-demo.local` | Quản lý Demo Event |
-| `STAFF` | `staff@event-demo.local` | Check-in workflow |
-| `ATTENDEE` | `attendee7@event-demo.local` | Có active, unchecked Ticket ban đầu |
+| `ADMIN` | `admin@event-demo.com` | Quản lý Demo Event |
+| `STAFF` | `staff@event-demo.com` | Check-in workflow |
+| `ATTENDEE` | `attendee7@event-demo.com` | Có active, unchecked Ticket ban đầu |
 
 Seed còn tạo `attendee1`–`attendee8`; attendee 1–6 đã check-in, attendee 8 có registration cancelled/Ticket `VOID`. Seed là idempotent đối với Demo Event và refresh password của các demo account hiện có.
 
@@ -56,7 +56,7 @@ Seed còn tạo `attendee1`–`attendee8`; attendee 1–6 đã check-in, attende
 
 ### B. ATTENDEE — 45–60 giây
 
-1. Logout và login `attendee7@event-demo.local`.
+1. Logout và login `attendee7@event-demo.com`.
 2. Mở **Events** và chỉ Event `PUBLISHED`.
 3. Nếu dùng dữ liệu khác chưa đăng ký: nhấn Register; với seed mặc định attendee7 đã `REGISTERED`.
 4. Mở **My Registrations**, rồi **My Tickets**.
@@ -64,7 +64,7 @@ Seed còn tạo `attendee1`–`attendee8`; attendee 1–6 đã check-in, attende
 
 ### C. STAFF CHECK-IN — 45–60 giây
 
-1. Login `staff@event-demo.local`.
+1. Login `staff@event-demo.com`.
 2. Chọn đúng Demo Event trong Staff Check-in Workspace.
 3. Quét QR bằng camera.
 4. Nếu camera không sẵn sàng, nhập ticket code thủ công.
