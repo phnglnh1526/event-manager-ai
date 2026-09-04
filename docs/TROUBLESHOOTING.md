@@ -75,7 +75,7 @@ docker compose up -d --build backend
 Kiểm tra:
 
 1. http://localhost:8000/api/health trả 200.
-2. `VITE_API_URL` là `http://localhost:8000` trong Compose.
+2. `VITE_API_BASE_URL` là `http://localhost:8000` trong Compose.
 3. Browser Network tab không báo CORS hoặc connection refused.
 4. Frontend/backend containers đều healthy.
 

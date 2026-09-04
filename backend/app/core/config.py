@@ -11,6 +11,14 @@ def _split_csv(value: str) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def _unique_values(*values: str) -> tuple[str, ...]:
+    seen: dict[str, None] = {}
+    for value in values:
+        if value and value not in seen:
+            seen[value] = None
+    return tuple(seen.keys())
+
+
 def _required_env(name: str) -> str:
     value = os.getenv(name, "").strip()
     if not value:
@@ -45,11 +53,23 @@ class Settings:
     jwt_access_token_expire_minutes: int = _positive_int_env(
         "JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "60"
     )
+    frontend_url: str = os.getenv("FRONTEND_URL", "").strip()
     cors_origins: tuple[str, ...] = tuple(
-        _split_csv(
-            os.getenv(
-                "CORS_ORIGINS",
-                "http://localhost:5173,http://127.0.0.1:5173",
+        _unique_values(
+            *_split_csv(
+                os.getenv(
+                    "CORS_ORIGINS",
+                    ",".join(
+                        value
+                        for value in (
+                            os.getenv("FRONTEND_URL", "").strip(),
+                            "http://localhost:3000",
+                            "http://localhost:5173",
+                            "http://127.0.0.1:5173",
+                        )
+                        if value
+                    ),
+                )
             )
         )
     )

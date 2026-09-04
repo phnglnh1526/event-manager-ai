@@ -133,7 +133,9 @@ Compose tự chờ MySQL healthy, backend healthy, rồi mới khởi động fr
 | `AI_MODE` | `mock` (mặc định) hoặc `openai` |
 | `OPENAI_API_KEY` | Chỉ cần khi `AI_MODE=openai`; không commit giá trị thật |
 | `OPENAI_MODEL` | Model backend sử dụng trong OpenAI Mode |
-| `VITE_API_URL` | Backend URL; Compose đặt là `http://localhost:8000` |
+| `FRONTEND_URL` | Allowed origin chính cho backend CORS trong production |
+| `CORS_ORIGINS` | Danh sách origin bổ sung cho backend CORS |
+| `VITE_API_BASE_URL` | Backend URL cho frontend; Compose đặt là `http://localhost:8000` |
 
 Trong Docker, backend luôn kết nối MySQL qua hostname `db`, không phải `localhost`. Xem cấu hình chi tiết tại [docs/SETUP.md](docs/SETUP.md).
 
@@ -147,6 +149,48 @@ Trong Docker, backend luôn kết nối MySQL qua hostname `db`, không phải `
 | API health | http://localhost:8000/api/health |
 | Database health | http://localhost:8000/api/health/database |
 | MySQL host port | `localhost:3306` |
+
+## Production Deployment
+
+Kiến trúc production được khuyến nghị:
+
+- Frontend: Vercel
+- Backend: Render hoặc Railway
+- Database: MySQL managed service
+
+URLs cần chuẩn bị sau khi deploy:
+
+- Frontend URL: `https://<your-vercel-app>.vercel.app`
+- Backend URL: `https://<your-backend-service>`
+- Health URL: `https://<your-backend-service>/api/health`
+
+Environment variables cần có:
+
+### Frontend
+
+- `VITE_API_BASE_URL=https://<your-backend-service>`
+
+### Backend
+
+- `MYSQL_HOST`
+- `MYSQL_PORT`
+- `MYSQL_DATABASE`
+- `MYSQL_USER`
+- `MYSQL_PASSWORD`
+- `JWT_SECRET_KEY`
+- `JWT_ALGORITHM`
+- `JWT_ACCESS_TOKEN_EXPIRE_MINUTES`
+- `AI_MODE=mock`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
+- `FRONTEND_URL=https://<your-vercel-app>.vercel.app`
+- `CORS_ORIGINS=https://<your-vercel-app>.vercel.app,http://localhost:3000,http://localhost:5173,http://127.0.0.1:5173`
+
+Lưu ý:
+
+- Không hard-code URL production trong component frontend.
+- Không commit secret, password hoặc database URL production vào Git.
+- Local vẫn giữ nguyên `docker compose up --build`.
 
 ## AI Modes
 

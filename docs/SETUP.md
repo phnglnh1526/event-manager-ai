@@ -51,7 +51,7 @@ Sau đó sửa `.env` bằng giá trị local riêng. Không commit `.env`.
 | `OPENAI_API_KEY` | Khi dùng OpenAI | Secret chỉ dành cho backend |
 | `OPENAI_MODEL` | Khi dùng OpenAI | Tên model được backend gọi |
 
-`backend/.env.example` và `frontend/.env.example` là tài liệu tham chiếu cho từng service. Trong Compose hiện tại, backend nhận biến từ root `.env` qua `docker-compose.yml`, `MYSQL_HOST` được cố định là `db`, và frontend nhận `VITE_API_URL=http://localhost:8000`; không cần tạo thêm hai file `.env` con để chạy Docker.
+`backend/.env.example` và `frontend/.env.example` là tài liệu tham chiếu cho từng service. Trong Compose hiện tại, backend nhận biến từ root `.env` qua `docker-compose.yml`, `MYSQL_HOST` được cố định là `db`, và frontend nhận `VITE_API_BASE_URL=http://localhost:8000` (có fallback `VITE_API_URL` cho cài đặt cũ); không cần tạo thêm hai file `.env` con để chạy Docker.
 
 ## AI Mock Mode
 
