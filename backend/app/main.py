@@ -6,12 +6,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.auth import router as auth_router
-from app.api.ai_feedback import router as ai_feedback_router
 from app.api.ai_announcements import router as ai_announcements_router
 from app.api.ai_chat import router as ai_chat_router
+from app.api.ai_feedback import router as ai_feedback_router
 from app.api.announcements import router as announcements_router
 from app.api.attendee_events import router as attendee_events_router
+from app.api.auth import router as auth_router
 from app.api.checkins import router as checkins_router
 from app.api.events import router as events_router
 from app.api.feedbacks import router as feedbacks_router
@@ -25,6 +25,7 @@ from app.api.tickets import router as tickets_router
 from app.api.users import router as users_router
 from app.core.config import get_settings
 from app.db.init_db import init_db
+from app.db.seed import seed_demo_if_enabled
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ async def lifespan(_: FastAPI):
     for attempt in range(1, DB_INIT_MAX_ATTEMPTS + 1):
         try:
             init_db()
+            seed_demo_if_enabled()
             break
         except SQLAlchemyError:
             if attempt == DB_INIT_MAX_ATTEMPTS:
@@ -52,6 +54,7 @@ async def lifespan(_: FastAPI):
             )
             time.sleep(DB_INIT_RETRY_SECONDS)
     yield
+
 
 app = FastAPI(
     title="Event Manager AI V2 API",

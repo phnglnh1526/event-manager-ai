@@ -78,6 +78,12 @@ class Settings:
     ai_mode: str = os.getenv("AI_MODE", "mock").strip().lower()
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "").strip()
     openai_model: str = os.getenv("OPENAI_MODEL", "").strip()
+    seed_demo: bool = os.getenv("SEED_DEMO", "").strip().lower() in ("1", "true", "yes")
+    demo_password: str = os.getenv("DEMO_PASSWORD", "").strip()
+    demo_admin_password: str = os.getenv("DEMO_ADMIN_PASSWORD", "").strip()
+    demo_organizer_password: str = os.getenv("DEMO_ORGANIZER_PASSWORD", "").strip()
+    demo_staff_password: str = os.getenv("DEMO_STAFF_PASSWORD", "").strip()
+    demo_attendee_password: str = os.getenv("DEMO_ATTENDEE_PASSWORD", "").strip()
 
 
 @lru_cache
