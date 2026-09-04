@@ -8,7 +8,7 @@ Mỗi module dưới đây được đối chiếu với router, schema, model v
 
 **Actors:** mọi User; đăng ký account công khai không cần token.
 
-**Main operations:** register, login, lấy current User và các endpoint kiểm tra RBAC.
+**Main operations:** register, login, lấy/cập nhật own profile, đổi own password và các endpoint kiểm tra RBAC.
 
 **Endpoints:** `/api/auth/register`, `/api/auth/login`, `/api/auth/me`, `/api/rbac/*`.
 
@@ -18,6 +18,26 @@ Mỗi module dưới đây được đối chiếu với router, schema, model v
 - Password dài 8–72 ký tự, được hash bằng bcrypt.
 - JWT được ký bằng `HS256`, có expiry và được frontend giữ trong `sessionStorage`.
 - Backend xác minh token, tải lại User và chặn account không active.
+- Mọi authenticated User được cập nhật own `full_name`/`email` và đổi password sau khi xác minh password hiện tại; profile schema từ chối `role`, `is_active`, `id`, `created_at` và password hash.
+- Đổi email không buộc đăng nhập lại: JWT `sub` xác định User ID và backend tải lại email/role/status từ database trên mỗi protected request.
+
+## Admin User Management
+
+**Purpose:** cho phép `ADMIN` quản lý account mà không thay đổi schema User.
+
+**Actors:** chỉ `ADMIN`.
+
+**Main operations:** list, create, sửa tên/email, đổi role, activate/deactivate và đặt mật khẩu tạm thời mới.
+
+**Endpoints:** `/api/admin/users`, `/api/admin/users/{user_id}`.
+
+**Business rules:**
+
+- Response không trả `password_hash`; module không có hard delete hoặc chức năng đọc/khôi phục mật khẩu hiện tại.
+- ADMIN có thể đặt mật khẩu tạm thời mới qua endpoint riêng; backend áp dụng cùng policy 8–72 UTF-8 bytes và bcrypt như registration.
+- Email được chuẩn hóa; password tạo mới dài 8–72 UTF-8 bytes và được hash bằng bcrypt.
+- Backend chặn Admin tự deactivate, tự hạ role và chặn làm mất active Admin cuối cùng.
+- Database role/status là source of truth; token cũ không duy trì quyền sau khi account bị đổi role hoặc deactivate.
 
 ## Event Management
 
@@ -219,6 +239,6 @@ Không có revenue, payment hoặc seat metrics.
 
 ## Workspaces
 
-- **Management Workspace:** Analytics, Events, Speaker, Schedule, Registration list và Announcements cho `ADMIN`/`ORGANIZER`.
+- **Management Workspace:** Analytics, Events, Speaker, Schedule, Registration list và Announcements cho `ADMIN`/`ORGANIZER`; trang Users chỉ hiển thị cho `ADMIN`.
 - **Staff Check-in Workspace:** Event selection, camera scanner và manual check-in cho `STAFF`.
 - **Attendee Workspace:** Events, My Registrations, My Tickets/QR, Feedback và Announcements cho `ATTENDEE`.

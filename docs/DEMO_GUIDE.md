@@ -21,22 +21,23 @@ Xác nhận:
 
 ## 2. Chuẩn bị demo accounts
 
-Repository có utility `backend/scripts/seed_demo.py`. Utility này dùng các email disposable dưới domain `@event-demo.local`, nhưng **không chứa password**. Người demo tự đặt một password tạm thời tối thiểu 8 ký tự qua environment.
+Repository có utility `backend/scripts/seed_demo.py`. Utility này dùng các email demo cố định dưới domain `example.com`, nhưng **không chứa password**. Người demo tự đặt một password tạm thời 8–72 UTF-8 bytes qua environment.
 
 ```powershell
-docker cp backend/scripts/seed_demo.py event-manager-backend:/app/seed_demo.py
-docker compose exec -T -e PYTHONPATH=/app -e DEMO_PASSWORD="<temporary-demo-password>" backend python seed_demo.py
+docker cp backend/scripts/seed_demo.py event-manager-backend:/tmp/seed_demo.py
+docker compose exec -T -e PYTHONPATH=/app -e DEMO_PASSWORD="<temporary-demo-password>" backend python /tmp/seed_demo.py
 ```
 
 Các account được code xác minh:
 
 | Role | Email | Ghi chú |
 |---|---|---|
-| `ADMIN` | `admin@event-demo.local` | Quản lý Demo Event |
-| `STAFF` | `staff@event-demo.local` | Check-in workflow |
-| `ATTENDEE` | `attendee7@event-demo.local` | Có active, unchecked Ticket ban đầu |
+| `ADMIN` | `admin-demo@example.com` | Quản lý mọi Demo Event |
+| `ORGANIZER` | `organizer-a-demo@example.com` | Sở hữu Main Demo Event |
+| `STAFF` | `staff-a-demo@example.com` | Check-in workflow |
+| `ATTENDEE` | `attendee-07-demo@example.com` | Có active, unchecked Ticket ban đầu |
 
-Seed còn tạo `attendee1`–`attendee8`; attendee 1–6 đã check-in, attendee 8 có registration cancelled/Ticket `VOID`. Seed là idempotent đối với Demo Event và refresh password của các demo account hiện có.
+Seed còn tạo `attendee-01`–`attendee-08`; attendee 01–06 đã check-in, attendee 08 có registration cancelled/Ticket `VOID`. Seed là idempotent, tạo năm Event cho status/ownership tests và refresh password của các demo account hiện có. Xem ma trận đầy đủ tại [DEMO_DATA.md](DEMO_DATA.md).
 
 > Password cố ý không được ghi trong tài liệu. Chỉ dùng password demo tạm thời, không dùng personal password và không trình chiếu `.env`, JWT, database credentials hoặc ticket code không cần thiết.
 
@@ -56,7 +57,7 @@ Seed còn tạo `attendee1`–`attendee8`; attendee 1–6 đã check-in, attende
 
 ### B. ATTENDEE — 45–60 giây
 
-1. Logout và login `attendee7@event-demo.local`.
+1. Logout và login `attendee-07-demo@example.com`.
 2. Mở **Events** và chỉ Event `PUBLISHED`.
 3. Nếu dùng dữ liệu khác chưa đăng ký: nhấn Register; với seed mặc định attendee7 đã `REGISTERED`.
 4. Mở **My Registrations**, rồi **My Tickets**.
@@ -64,7 +65,7 @@ Seed còn tạo `attendee1`–`attendee8`; attendee 1–6 đã check-in, attende
 
 ### C. STAFF CHECK-IN — 45–60 giây
 
-1. Login `staff@event-demo.local`.
+1. Login `staff-a-demo@example.com`.
 2. Chọn đúng Demo Event trong Staff Check-in Workspace.
 3. Quét QR bằng camera.
 4. Nếu camera không sẵn sàng, nhập ticket code thủ công.
@@ -72,7 +73,7 @@ Seed còn tạo `attendee1`–`attendee8`; attendee 1–6 đã check-in, attende
 
 ### D. FEEDBACK — 30–45 giây
 
-1. Login lại attendee7.
+1. Login lại `attendee-07-demo@example.com`.
 2. Mở **Feedback**.
 3. Gửi rating và comment cho Demo Event vừa check-in.
 4. Giải thích Feedback chỉ khả dụng sau Registration + Ticket + CheckIn hợp lệ.

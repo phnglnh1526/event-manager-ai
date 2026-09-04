@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import AnnouncementForm from "../components/AnnouncementForm";
 import EventSelector from "../components/EventSelector";
-import ManagementNav from "../components/ManagementNav";
+import WorkspaceHeader from "../components/WorkspaceHeader";
 import {
   createAnnouncement,
   deleteAnnouncement,
@@ -175,7 +175,7 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
 
   return (
     <div className="dashboard-shell">
-      <header className="dashboard-header"><div className="header-brand"><div className="brand-mark compact" aria-hidden="true"><span /><span /><span /></div><div><strong>EVENT MANAGER AI</strong><span>Management workspace</span></div></div><ManagementNav activeView={activeView} onChange={handleViewChange} /><div className="user-actions"><div className="user-copy"><strong>{currentUser.full_name}</strong><span className="role-badge">{currentUser.role}</span></div><button type="button" className="secondary-button" onClick={onLogout}>Logout</button></div></header>
+      <WorkspaceHeader currentUser={currentUser} activeView={activeView} onNavigate={handleViewChange} onLogout={onLogout} workspaceLabel="Event management workspace" />
       <main className="dashboard-main announcements-page">
         <section className="dashboard-title-row"><div><p className="eyebrow">EVENT COMMUNICATIONS</p><h1>Announcements</h1><p>Create, publish, and manage plain-text updates for event attendees.</p></div>{!eventsLoading && !eventsError && <EventSelector events={events} selectedEventId={selectedEventId} onChange={handleEventChange} disabled={eventsLoading || saving || ai.loading} />}</section>
         <div className="announcement-toolbar"><div>{success && <div className="inline-message success-message" role="status">{success}</div>}</div><button type="button" className="primary-button" onClick={openNew} disabled={!selectedEventId || eventsLoading}>+ New Announcement</button></div>

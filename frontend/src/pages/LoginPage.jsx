@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 
-function LoginPage({ onLogin, loading, error }) {
+import PasswordInput from "../components/PasswordInput";
+
+function LoginPage({ onLogin, onRegister, loading, error }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [validationError, setValidationError] = useState("");
@@ -35,11 +37,11 @@ function LoginPage({ onLogin, loading, error }) {
           <label htmlFor="email">Email</label>
           <input id="email" name="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com" disabled={loading} />
 
-          <label htmlFor="password">Password</label>
-          <input id="password" name="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" disabled={loading} />
+          <PasswordInput id="password" name="password" label="Password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your password" disabled={loading}/>
 
           {(validationError || error) && <div className="form-error" role="alert">{validationError || error}</div>}
           <button type="submit" className="primary-button login-button" disabled={loading}>{loading ? "Signing in..." : "Sign In"}</button>
+          <p className="auth-switch">Don&apos;t have an account? <button type="button" className="text-button" onClick={onRegister} disabled={loading}>Create account</button></p>
           <p className="secure-note">Secure access for every event role</p>
         </form>
       </section>

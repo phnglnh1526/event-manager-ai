@@ -22,6 +22,7 @@ from app.api.schedules import router as schedules_router
 from app.api.speakers import router as speakers_router
 from app.api.statistics import router as statistics_router
 from app.api.tickets import router as tickets_router
+from app.api.users import router as users_router
 from app.core.config import get_settings
 from app.db.init_db import init_db
 
@@ -82,3 +83,4 @@ app.include_router(ai_announcements_router)
 app.include_router(ai_chat_router)
 app.include_router(announcements_router)
 app.include_router(attendee_events_router)
+app.include_router(users_router)

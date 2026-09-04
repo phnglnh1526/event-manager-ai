@@ -11,6 +11,7 @@ AI là internal supporting component được gọi khi User chủ động thự
 ### ADMIN
 
 - Login và xem current account.
+- List, create và update User account/role/status.
 - View/manage mọi Event.
 - Manage Event-related Speakers và Schedules.
 - View Event Registrations, Tickets, CheckIns và Feedback.
@@ -20,8 +21,6 @@ AI là internal supporting component được gọi khi User chủ động thự
 - Generate AI Announcement Draft.
 - Ask Event AI trên mọi Event.
 - Thực hiện CheckIn khi cần vận hành.
-
-Implementation không có User Management API; use case đó không được đưa vào diagram.
 
 ### ORGANIZER
 
@@ -72,6 +71,9 @@ actor ATTENDEE
 rectangle "EVENT MANAGER AI v1.1.0" {
   usecase "Login" as UC_Login
   usecase "View current account" as UC_Me
+  usecase "Update Personal Information" as UC_ProfileUpdate
+  usecase "Change Own Password" as UC_ChangePassword
+  usecase "Manage User Accounts" as UC_ManageUsers
 
   usecase "View Events" as UC_ViewEvents
   usecase "Manage Events" as UC_ManageEvents
@@ -118,6 +120,9 @@ rectangle "EVENT MANAGER AI v1.1.0" {
 
 ADMIN --> UC_Login
 ADMIN --> UC_Me
+ADMIN --> UC_ProfileUpdate
+ADMIN --> UC_ChangePassword
+ADMIN --> UC_ManageUsers
 ADMIN --> UC_ViewEvents
 ADMIN --> UC_ManageEvents
 ADMIN --> UC_Speakers
@@ -136,6 +141,8 @@ ADMIN --> UC_AIChat
 
 ORGANIZER --> UC_Login
 ORGANIZER --> UC_Me
+ORGANIZER --> UC_ProfileUpdate
+ORGANIZER --> UC_ChangePassword
 ORGANIZER --> UC_ViewEvents
 ORGANIZER --> UC_ManageEvents
 ORGANIZER --> UC_Speakers
@@ -154,6 +161,8 @@ ORGANIZER --> UC_AIChat
 
 STAFF --> UC_Login
 STAFF --> UC_Me
+STAFF --> UC_ProfileUpdate
+STAFF --> UC_ChangePassword
 STAFF --> UC_SelectPublished
 STAFF --> UC_ManualCheckIn
 STAFF --> UC_QRCheckIn
@@ -162,6 +171,8 @@ STAFF --> UC_AIChat
 ATTENDEE --> UC_RegisterAccount
 ATTENDEE --> UC_Login
 ATTENDEE --> UC_Me
+ATTENDEE --> UC_ProfileUpdate
+ATTENDEE --> UC_ChangePassword
 ATTENDEE --> UC_PublishedEvents
 ATTENDEE --> UC_Register
 ATTENDEE --> UC_Cancel
@@ -196,6 +207,8 @@ end note
 | Use case | ADMIN | ORGANIZER | STAFF | ATTENDEE |
 |---|:---:|:---:|:---:|:---:|
 | Login / current account | ✓ | ✓ | ✓ | ✓ |
+| Update own name/email and change password | ✓ | ✓ | ✓ | ✓ |
+| Manage User accounts/roles/status | ✓ | — | — | — |
 | Create attendee account | — | — | — | ✓ |
 | View management Events | All | Own | — | — |
 | Manage Events | All | Own | — | — |
@@ -222,7 +235,7 @@ end note
 - Removed `Speaker` actor: Speaker is an Event-owned data entity without login.
 - Removed `Database` actor: MySQL is internal persistence infrastructure.
 - Removed `OpenAI` actor: it may be an external system in an architecture diagram, but not a business actor here.
-- Removed `Manage Users`: implementation has no User Management CRUD API.
+- Restored `Manage User Accounts` after implementation of the ADMIN-only list/create/update API; hard delete and password reset remain out of scope.
 - Removed STAFF Event CRUD, Analytics, Registration/Ticket management and CheckIn history.
 - Removed ATTENDEE access to Draft/Cancelled Event management data.
 - Removed direct CheckIn-to-Registration use case assumption; CheckIn operates through Ticket.

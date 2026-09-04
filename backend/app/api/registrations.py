@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy import select
@@ -54,7 +55,10 @@ def register_for_event(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Event not found",
             )
-        if event.status != EVENT_STATUS_PUBLISHED:
+        if (
+            event.status != EVENT_STATUS_PUBLISHED
+            or event.end_time <= datetime.now()
+        ):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Event is not open for registration",

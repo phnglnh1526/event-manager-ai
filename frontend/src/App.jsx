@@ -4,8 +4,11 @@ import DashboardPage from "./pages/DashboardPage";
 import EventsPage from "./pages/EventsPage";
 import AnnouncementsPage from "./pages/AnnouncementsPage";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import AttendeeWorkspace from "./pages/AttendeeWorkspace";
 import StaffCheckInPage from "./pages/StaffCheckInPage";
+import UsersPage from "./pages/UsersPage";
+import ProfilePage from "./pages/ProfilePage";
 import { getCurrentUser, login } from "./services/api";
 
 export const TOKEN_STORAGE_KEY = "event_manager_access_token";
@@ -17,12 +20,14 @@ function App() {
   const [authLoading, setAuthLoading] = useState(Boolean(token));
   const [authError, setAuthError] = useState("");
   const [activeView, setActiveView] = useState("analytics");
+  const [authView, setAuthView] = useState("login");
 
-  const clearAuth = () => {
+  const clearAuth = (message = "") => {
     sessionStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken(null);
     setCurrentUser(null);
-    setAuthError("");
+    setAuthView("login");
+    setAuthError(typeof message === "string" ? message : "");
     setAuthLoading(false);
     setActiveView("analytics");
   };
@@ -82,15 +87,20 @@ function App() {
   }
 
   if (!token || !currentUser) {
-    return <LoginPage onLogin={handleLogin} loading={authLoading} error={authError} />;
+    if (authView === "register") return <RegisterPage onSignIn={() => { setAuthView("login"); setAuthError(""); }} />;
+    return <LoginPage onLogin={handleLogin} onRegister={() => { setAuthView("register"); setAuthError(""); }} loading={authLoading} error={authError} />;
+  }
+
+  if (activeView === "profile") {
+    return <ProfilePage token={token} currentUser={currentUser} onUserUpdated={setCurrentUser} onBack={() => setActiveView("analytics")} onLogout={clearAuth} onUnauthorized={clearAuth}/>;
   }
 
   if (currentUser.role === "ATTENDEE") {
-    return <AttendeeWorkspace token={token} currentUser={currentUser} onLogout={clearAuth} onUnauthorized={clearAuth} />;
+    return <AttendeeWorkspace token={token} currentUser={currentUser} onLogout={clearAuth} onUnauthorized={clearAuth} onProfile={() => setActiveView("profile")} />;
   }
 
   if (currentUser.role === "STAFF") {
-    return <StaffCheckInPage token={token} currentUser={currentUser} onLogout={clearAuth} onUnauthorized={clearAuth} />;
+    return <StaffCheckInPage token={token} currentUser={currentUser} onLogout={clearAuth} onUnauthorized={clearAuth} onProfile={() => setActiveView("profile")} />;
   }
 
   if (!MANAGEMENT_ROLES.has(currentUser.role)) {
@@ -113,6 +123,10 @@ function App() {
 
   if (activeView === "events") {
     return <EventsPage token={token} currentUser={currentUser} onLogout={clearAuth} onUnauthorized={clearAuth} activeView={activeView} onViewChange={setActiveView} />;
+  }
+
+  if (activeView === "users" && currentUser.role === "ADMIN") {
+    return <UsersPage token={token} currentUser={currentUser} onLogout={clearAuth} onUnauthorized={clearAuth} activeView={activeView} onViewChange={setActiveView} />;
   }
 
   return (

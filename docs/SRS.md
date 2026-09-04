@@ -63,6 +63,13 @@ Mỗi chức năng hỗ trợ `AI_MODE=mock` và `AI_MODE=openai` qua backend.
 | `FR-AUTH-02` | Hệ thống cho phép login bằng email/password và trả JWT access token. |
 | `FR-AUTH-03` | Password phải được hash bằng bcrypt; plaintext password không được lưu. |
 | `FR-AUTH-04` | Protected API phải xác minh JWT, tải lại User từ database và chặn account inactive. |
+| `FR-AUTH-05` | Mọi authenticated User được xem và cập nhật own full name/email; role, active status và User ID là read-only trong Profile. |
+| `FR-AUTH-06` | Mọi authenticated User được đổi own password sau khi xác minh current password; password mới dùng cùng policy và bcrypt hiện hành. |
+| `FR-AUTH-07` | Profile endpoint phải từ chối protected/extra fields và chỉ tác động authenticated current User. |
+| `FR-USR-01` | Chỉ ADMIN được list, tạo và cập nhật tên, email, role, trạng thái User. |
+| `FR-USR-02` | User response không được lộ password hash; không có hard delete hoặc password reset trong scope. |
+| `FR-USR-03` | Hệ thống phải chặn Admin tự deactivate, tự hạ role và thao tác làm mất active Admin cuối cùng. |
+| `FR-USR-04` | Thay đổi role/status trong database phải có hiệu lực với JWT đã cấp trước đó. |
 | `FR-RBAC-01` | Backend phải thực thi role guard; frontend không phải lớp phân quyền duy nhất. |
 | `FR-RBAC-02` | Organizer chỉ truy cập management data của Event do mình sở hữu. |
 
@@ -141,6 +148,8 @@ Implementation note: update Event hiện chỉ kiểm tra `end_time > start_time
 
 | Capability | ADMIN | ORGANIZER | STAFF | ATTENDEE |
 |---|---|---|---|---|
+| Own profile/password | Own name, email, password | Own name, email, password | Own name, email, password | Own name, email, password |
+| User account management | Mọi account | Không | Không | Tự đăng ký account `ATTENDEE` |
 | Event management | Mọi Event | Own Event | Không | Browse `PUBLISHED` |
 | Speaker/Schedule | Mọi Event | Own Event | Không | Không |
 | Registration list | Mọi Event | Own Event | Không | Dữ liệu của mình |

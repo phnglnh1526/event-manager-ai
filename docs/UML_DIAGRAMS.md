@@ -371,6 +371,30 @@ sequenceDiagram
 
 Ba AI flow dùng local generator khi `AI_MODE=mock` và Responses API từ backend khi `AI_MODE=openai`. Thiếu config trả `503`; upstream/invalid output trả `502`; không silent fallback và browser không gọi OpenAI.
 
+### 2.10 Public registration and Admin user management
+
+```mermaid
+sequenceDiagram
+    actor Visitor
+    actor Admin
+    participant Frontend
+    participant Backend as FastAPI
+    participant DB as Users table
+    Visitor->>Frontend: Submit full name, email, password
+    Frontend->>Backend: POST /api/auth/register
+    Backend->>Backend: Validate input; force ATTENDEE; bcrypt hash
+    Backend->>DB: Insert active User
+    DB-->>Backend: Created User
+    Backend-->>Frontend: 201 safe User response
+    Admin->>Frontend: List/create/edit User
+    Frontend->>Backend: GET/POST/PATCH /api/admin/users
+    Backend->>DB: Reload caller; require current ADMIN
+    Backend->>Backend: Enforce self/last-active-admin guards
+    Backend->>DB: Read or persist allowed fields
+    Backend-->>Frontend: Safe User response without password hash
+    Note over Backend,DB: DB role/status controls old JWT authorization
+```
+
 ## 3. State diagrams
 
 ### 3.1 Event

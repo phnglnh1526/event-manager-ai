@@ -24,10 +24,25 @@ Authorization: Bearer <JWT>
 | POST | `/api/auth/register` | Public | Tạo account `ATTENDEE` |
 | POST | `/api/auth/login` | Public | Nhận JWT và User |
 | GET | `/api/auth/me` | Authenticated | Lấy current User |
+| PATCH | `/api/auth/me` | Authenticated | Cập nhật own `full_name` và `email`; role/status không được chấp nhận |
+| POST | `/api/auth/change-password` | Authenticated | Đổi own password sau khi xác minh mật khẩu hiện tại |
 | GET | `/api/rbac/admin` | `ADMIN` | Kiểm tra Admin access |
 | GET | `/api/rbac/organizer` | `ORGANIZER` | Kiểm tra Organizer access |
 | GET | `/api/rbac/staff` | `STAFF` | Kiểm tra Staff access |
 | GET | `/api/rbac/authenticated` | Any authenticated | Kiểm tra authentication |
+
+Public registration chỉ nhận `full_name`, `email`, `password` và luôn tạo account active có role `ATTENDEE`; field ngoài schema như `role` bị từ chối.
+
+## Admin user management
+
+| Method | Endpoint | Role | Purpose |
+|---|---|---|---|
+| GET | `/api/admin/users` | `ADMIN` | List User, không trả password hash |
+| POST | `/api/admin/users` | `ADMIN` | Tạo User với role và trạng thái được chọn |
+| PATCH | `/api/admin/users/{user_id}` | `ADMIN` | Sửa tên, email, role hoặc trạng thái active |
+| POST | `/api/admin/users/{user_id}/reset-password` | `ADMIN` | Đặt mật khẩu tạm thời mới bằng bcrypt; không trả password/hash |
+
+Module không có hard delete hoặc chức năng xem/khôi phục mật khẩu hiện tại. Backend chặn Admin tự deactivate hoặc tự hạ role, đồng thời không cho vô hiệu hóa/hạ quyền active Admin cuối cùng. Role và trạng thái trong database có hiệu lực ngay cả với JWT đã cấp trước đó. ADMIN có thể đặt một mật khẩu tạm thời mới; endpoint chỉ trả thông báo thành công và không làm mất hiệu lực session hiện tại.
 
 ## Events
 

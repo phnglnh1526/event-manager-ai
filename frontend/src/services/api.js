@@ -4,10 +4,11 @@ const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8000").r
 );
 
 export class ApiError extends Error {
-  constructor(message, status = 0) {
+  constructor(message, status = 0, details = null) {
     super(message);
     this.name = "ApiError";
     this.status = status;
+    this.details = details;
   }
 }
 
@@ -32,7 +33,7 @@ export async function apiRequest(path, { token, body, headers, ...options } = {}
   const data = contentType.includes("application/json") ? await response.json() : null;
   if (!response.ok) {
     const detail = typeof data?.detail === "string" ? data.detail : "Request failed.";
-    throw new ApiError(detail, response.status);
+    throw new ApiError(detail, response.status, data?.detail ?? null);
   }
   return data;
 }
@@ -61,8 +62,36 @@ export function login(email, password) {
   });
 }
 
+export function registerAccount(payload) {
+  return apiRequest("/api/auth/register", { method: "POST", body: payload });
+}
+
+export function getUsers(token, signal) {
+  return apiRequest("/api/admin/users", { token, signal });
+}
+
+export function createUser(payload, token) {
+  return apiRequest("/api/admin/users", { method: "POST", token, body: payload });
+}
+
+export function updateUser(userId, payload, token) {
+  return apiRequest(`/api/admin/users/${encodeURIComponent(userId)}`, { method: "PATCH", token, body: payload });
+}
+
+export function resetUserPassword(userId, newPassword, token) {
+  return apiRequest(`/api/admin/users/${encodeURIComponent(userId)}/reset-password`, { method: "POST", token, body: { new_password: newPassword } });
+}
+
 export function getCurrentUser(token, signal) {
   return apiRequest("/api/auth/me", { token, signal });
+}
+
+export function updateMyProfile(payload, token) {
+  return apiRequest("/api/auth/me", { method: "PATCH", token, body: payload });
+}
+
+export function changeMyPassword(payload, token) {
+  return apiRequest("/api/auth/change-password", { method: "POST", token, body: payload });
 }
 
 export function getEvents(token, signal) {

@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import EventForm from "../components/EventForm";
 import EventAIChat from "../components/EventAIChat";
-import ManagementNav from "../components/ManagementNav";
 import SpeakerManagement from "../components/SpeakerManagement";
 import ScheduleManagement from "../components/ScheduleManagement";
 import RegistrationManagement from "../components/RegistrationManagement";
+import WorkspaceHeader from "../components/WorkspaceHeader";
 import { createEvent, deleteEvent, getEvent, getEvents, updateEvent } from "../services/api";
 
 const EMPTY_FORM = { title: "", description: "", location: "", start_time: "", end_time: "", status: "DRAFT", max_attendees: "100" };
@@ -123,7 +123,7 @@ function EventsPage({ token, currentUser, onLogout, onUnauthorized, activeView, 
   const visibleEvents = filter === "ALL" ? events : events.filter((event) => event.status === filter);
   return (
     <div className="dashboard-shell">
-      <header className="dashboard-header"><div className="header-brand"><div className="brand-mark compact" aria-hidden="true"><span /><span /><span /></div><div><strong>EVENT MANAGER AI</strong><span>Management workspace</span></div></div><ManagementNav activeView={activeView} onChange={handleViewChange} /><div className="user-actions"><div className="user-copy"><strong>{currentUser.full_name}</strong><span className="role-badge">{currentUser.role}</span></div><button type="button" className="secondary-button" onClick={onLogout}>Logout</button></div></header>
+      <WorkspaceHeader currentUser={currentUser} activeView={activeView} onNavigate={handleViewChange} onLogout={onLogout} workspaceLabel="Event management workspace" />
       <main className="dashboard-main events-page"><section className="dashboard-title-row"><div><p className="eyebrow">EVENT OPERATIONS</p><h1>Events</h1><p>Create and maintain the core details and lifecycle status of your events.</p></div><button type="button" className="primary-button" onClick={openNew} disabled={submitting}>+ New Event</button></section>
         {success && <div className="inline-message success-message page-message" role="status">{success}</div>}
         <div className="event-filters" aria-label="Filter events by status">{FILTERS.map((status) => <button type="button" key={status} className={filter === status ? "active" : ""} onClick={() => setFilter(status)}>{status === "ALL" ? "All" : status[0] + status.slice(1).toLowerCase()}</button>)}</div>

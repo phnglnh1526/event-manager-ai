@@ -11,7 +11,7 @@ from app.core.roles import ROLE_ATTENDEE
 from app.core.security import create_access_token, hash_password, verify_password
 from app.db.database import get_db
 from app.models import User
-from app.schemas import LoginRequest, TokenResponse, UserRegisterRequest, UserResponse
+from app.schemas import ChangePasswordRequest, LoginRequest, PasswordResetResponse, ProfileUpdateRequest, TokenResponse, UserRegisterRequest, UserResponse
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 logger = logging.getLogger(__name__)
@@ -117,3 +117,45 @@ def login_user(
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)) -> User:
     return current_user
+
+
+@router.patch("/me", response_model=UserResponse)
+def update_me(
+    payload: ProfileUpdateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> User:
+    changes = payload.model_dump(exclude_unset=True)
+    for field_name, value in changes.items():
+        setattr(current_user, field_name, str(value) if field_name == "email" else value)
+    try:
+        db.commit()
+        db.refresh(current_user)
+        return current_user
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered") from None
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Failed to update current user profile")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not update profile") from None
+
+
+@router.post("/change-password", response_model=PasswordResetResponse)
+def change_password(
+    payload: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> PasswordResetResponse:
+    if not verify_password(payload.current_password, current_user.password_hash):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
+    if verify_password(payload.new_password, current_user.password_hash):
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="New password must be different from current password")
+    current_user.password_hash = hash_password(payload.new_password)
+    try:
+        db.commit()
+        return PasswordResetResponse(message="Password updated successfully")
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Failed to change current user password")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not change password") from None

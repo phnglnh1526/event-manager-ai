@@ -2,13 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 
 import EventAIChat from "../components/EventAIChat";
 import QRScanner from "../components/QRScanner";
+import WorkspaceHeader from "../components/WorkspaceHeader";
 import { checkInTicket, getCheckInEvents } from "../services/api";
 
 const literal = (value) => typeof value === "string" ? value.slice(0, 16) : "";
 const dateLabel = (value) => { const item = literal(value); return item ? `${item.slice(8, 10)}/${item.slice(5, 7)}/${item.slice(0, 4)}` : "—"; };
 const clock = (value) => literal(value).slice(11, 16) || "—";
 
-function StaffCheckInPage({ token, currentUser, onLogout, onUnauthorized }) {
+function StaffCheckInPage({ token, currentUser, onLogout, onUnauthorized, onProfile }) {
   const [events, setEvents] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [ticketCode, setTicketCode] = useState("");
@@ -66,7 +67,7 @@ function StaffCheckInPage({ token, currentUser, onLogout, onUnauthorized }) {
 
   return (
     <div className="staff-checkin-shell">
-      <header className="staff-header"><div className="header-brand"><div className="brand-mark compact" aria-hidden="true"><span/><span/><span/></div><div><strong>EVENT MANAGER AI</strong><span>Check-in Workspace</span></div></div><div className="user-actions"><div className="user-copy"><strong>{currentUser.full_name}</strong><span className="role-badge">STAFF</span></div><button type="button" className="secondary-button" onClick={onLogout}>Logout</button></div></header>
+      <WorkspaceHeader currentUser={currentUser} activeView="checkin" onProfile={onProfile} onLogout={onLogout} workspaceLabel="Check-in workspace" />
       <main className="staff-checkin-main">
         <section className="staff-checkin-card">
           <div><p className="eyebrow">VENUE OPERATIONS</p><h1>Event Check-in</h1><p>Verify attendee tickets at the venue.</p></div>

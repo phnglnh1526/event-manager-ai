@@ -7,6 +7,7 @@ Event Manager AI là ứng dụng web hỗ trợ quản lý vòng đời sự ki
 ## Chức năng chính
 
 - Authentication bằng JWT và phân quyền backend theo role.
+- Đăng ký tài khoản công khai an toàn cho `ATTENDEE`; `ADMIN` quản lý tài khoản, role và trạng thái active.
 - Quản lý Event, Speaker và Schedule/Session.
 - Đăng ký, hủy đăng ký, đăng ký lại và phát hành Ticket tự động.
 - Hiển thị QR Ticket có xác thực; check-in bằng camera hoặc nhập ticket code.
@@ -18,7 +19,7 @@ Event Manager AI là ứng dụng web hỗ trợ quản lý vòng đời sự ki
 
 | Role | Chức năng chính |
 |---|---|
-| `ADMIN` | Quản lý mọi Event và dữ liệu liên quan; Analytics, Announcement và AI. |
+| `ADMIN` | Quản lý tài khoản người dùng, mọi Event và dữ liệu liên quan; Analytics, Announcement và AI. |
 | `ORGANIZER` | Quản lý Event do mình sở hữu cùng Speaker, Schedule, danh sách đăng ký, Analytics, Announcement và AI. |
 | `STAFF` | Dùng Staff Check-in Workspace, chọn Event `PUBLISHED`, quét QR hoặc nhập ticket code; không có Event CRUD. |
 | `ATTENDEE` | Xem Event `PUBLISHED`, đăng ký/hủy/đăng ký lại, xem Ticket/QR, gửi Feedback và đọc Announcement. |
@@ -168,6 +169,8 @@ Smoke/E2E scripts nằm trong `backend/tests/`. Cách chạy bằng backend cont
 
 - Password được hash bằng bcrypt; authentication dùng JWT.
 - Backend thực thi role và Event ownership; UI không phải lớp phân quyền duy nhất.
+- Role và trạng thái active trong database là nguồn phân quyền hiện hành; token cũ không giữ lại quyền đã bị thu hồi.
+- Public registration không nhận role từ client; chỉ `ADMIN` được tạo/cập nhật tài khoản có role đặc quyền.
 - Secrets được truyền qua environment và `.env` bị Git ignore.
 - OpenAI key chỉ thuộc backend.
 

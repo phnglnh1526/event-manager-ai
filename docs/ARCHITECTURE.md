@@ -57,6 +57,7 @@ Ký hiệu: `Own` = chỉ Event do Organizer sở hữu; `All` = mọi Event; `O
 
 | Capability | ADMIN | ORGANIZER | STAFF | ATTENDEE |
 |---|---|---|---|---|
+| User account management | All | — | — | Public self-registration only |
 | Event CRUD | All | Own | — | — |
 | Speaker CRUD | All | Own | — | — |
 | Schedule CRUD | All | Own | — | — |
@@ -70,6 +71,8 @@ Ký hiệu: `Own` = chỉ Event do Organizer sở hữu; `All` = mọi Event; `O
 | Event AI Chatbot | All | Own | Published Events | Published Events |
 
 `get_event_for_management()` lọc `owner_id` đối với Organizer. Cross-owner access không trả dữ liệu Event của Organizer khác.
+
+User management dùng backend role guard `ADMIN`, response schema không lộ `password_hash`, và chỉ cho phép cập nhật các field đã liệt kê. Public registration luôn ép role `ATTENDEE`. Vì mỗi protected request tải lại User từ database, thay đổi role hoặc deactivate account có hiệu lực với cả access token đã cấp; self-deactivation, self-demotion và thao tác làm mất active Admin cuối cùng bị chặn.
 
 ## Database ERD
 
