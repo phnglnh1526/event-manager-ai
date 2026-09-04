@@ -18,12 +18,10 @@ database_url = URL.create(
 )
 
 _connect_args: dict = {}
-if settings.mysql_ssl:
-    if settings.mysql_ssl_ca:
-        _ctx = _ssl.create_default_context(cadata=settings.mysql_ssl_ca)
-    else:
-        _ctx = _ssl.create_default_context()
-    _connect_args["ssl"] = _ctx
+if settings.mysql_ssl_ca:
+    _connect_args["ssl"] = {"ca": settings.mysql_ssl_ca}
+elif settings.mysql_ssl:
+    _connect_args["ssl"] = _ssl.create_default_context()
 
 engine: Engine = create_engine(
     database_url,
