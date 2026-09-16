@@ -68,9 +68,23 @@ function App() {
       sessionStorage.removeItem(TOKEN_STORAGE_KEY);
       setToken(null);
       setCurrentUser(null);
-      setAuthError(
-        error.status === 401 ? "Invalid email or password." : error.message || "Unable to sign in.",
-      );
+      let message = "Unable to sign in.";
+      if (error.status === 400) {
+        message = error.message || "Invalid request.";
+      } else if (error.status === 401) {
+        message = "Invalid email or password.";
+      } else if (error.status === 403) {
+        message = "Account is inactive or access is forbidden.";
+      } else if (error.status === 422) {
+        message = error.message || "Invalid email format or missing login fields.";
+      } else if (error.status >= 500) {
+        message = "Server error. Please try again later.";
+      } else if (error.status === 0 || !error.status) {
+        message = "Unable to connect to the server.";
+      } else {
+        message = error.message || "Unable to sign in.";
+      }
+      setAuthError(message);
       return false;
     } finally {
       setAuthLoading(false);

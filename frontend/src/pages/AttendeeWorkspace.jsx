@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import EventAIChat from "../components/EventAIChat";
+import EventCoverImage from "../components/EventCoverImage";
 import MyFeedback from "../components/MyFeedback";
 import MyTickets from "../components/MyTickets";
 import WorkspaceHeader from "../components/WorkspaceHeader";
@@ -268,7 +269,27 @@ function AttendeeWorkspace({ token, currentUser, onLogout, onUnauthorized, onPro
               <section className="dashboard-title-row"><div><p className="eyebrow">DISCOVER EVENTS</p><h1>Events</h1><p>Published events currently open for registration.</p></div></section>
               {eventsLoading || registrationsLoading ? <div className="state-panel"><div className="app-loader"/><p>Loading events...</p></div> : events.length === 0 ? <div className="state-panel"><strong>No published events available.</strong></div> : (
                 <div className="attendee-event-grid">
-                  {events.map((event) => <article className={`attendee-event-card ${chatEvent?.id === event.id ? "selected" : ""}`} key={event.id}><span className="status-badge status-published">PUBLISHED</span><h2>{event.title}</h2><p>{event.description || "No description provided."}</p><dl><div><dt>Location</dt><dd>{event.location}</dd></div><div><dt>Schedule</dt><dd>{display(event.start_time)} – {display(event.end_time)}</dd></div><div><dt>Capacity</dt><dd>{event.max_attendees}</dd></div></dl><div className="attendee-event-actions"><button type="button" className="secondary-button" onClick={() => setChatEvent(event)}>Ask AI</button>{registrationAction(event, registrationMap.get(event.id))}</div></article>)}
+                  {events.map((event) => (
+                    <article className={`attendee-event-card ${chatEvent?.id === event.id ? "selected" : ""}`} key={event.id}>
+                      <div className="attendee-event-card-media">
+                        <EventCoverImage src={event.cover_image_url} alt={event.title} />
+                      </div>
+                      <div className="attendee-event-card-body">
+                        <span className="status-badge status-published">PUBLISHED</span>
+                        <h2>{event.title}</h2>
+                        <p>{event.description || "No description provided."}</p>
+                        <dl>
+                          <div><dt>Location</dt><dd>{event.location}</dd></div>
+                          <div><dt>Schedule</dt><dd>{display(event.start_time)} – {display(event.end_time)}</dd></div>
+                          <div><dt>Capacity</dt><dd>{event.max_attendees}</dd></div>
+                        </dl>
+                        <div className="attendee-event-actions">
+                          <button type="button" className="secondary-button" onClick={() => setChatEvent(event)}>Ask AI</button>
+                          {registrationAction(event, registrationMap.get(event.id))}
+                        </div>
+                      </div>
+                    </article>
+                  ))}
                   {chatEvent && <div className="attendee-ai-panel"><EventAIChat key={`attendee-ai-${chatEvent.id}`} event={chatEvent} token={token} onUnauthorized={onUnauthorized} onClose={() => setChatEvent(null)}/></div>}
                 </div>
               )}

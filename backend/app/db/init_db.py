@@ -50,6 +50,47 @@ def ensure_registration_tickets() -> None:
         db.close()
 
 
+def ensure_admin_password() -> None:
+    """Safely ensure admin@example.com password matches the configured administrative password."""
+    try:
+        import os
+        from app.core.security import hash_password, verify_password
+
+        target_password = os.getenv("ADMIN_PASSWORD", "MAT_KHAU_MOI_CUA_TOI").strip()
+        if not target_password:
+            return
+
+        db = SessionLocal()
+        try:
+            admin = db.scalar(select(User).where(User.email == "admin@example.com"))
+            if not admin:
+                logger.warning("Account admin@example.com not found in database.")
+                return
+
+            if admin.role != "ADMIN" or not admin.is_active:
+                logger.error(
+                    "Account admin@example.com check failed: role=%s, is_active=%s",
+                    admin.role,
+                    admin.is_active,
+                )
+                return
+
+            if not verify_password(target_password, admin.password_hash):
+                admin.password_hash = hash_password(target_password)
+                db.commit()
+                db.refresh(admin)
+                is_verified = verify_password(target_password, admin.password_hash)
+                logger.info("Admin password reset status for admin@example.com: %s", is_verified)
+            else:
+                logger.info("Admin password for admin@example.com is already up to date.")
+        finally:
+            db.close()
+    except Exception:
+        logger.exception("Admin password verification failed")
+
+
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
     ensure_registration_tickets()
+    ensure_admin_password()
+

@@ -1,14 +1,25 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import EventForm from "../components/EventForm";
+import EventCoverImage from "../components/EventCoverImage";
 import EventAIChat from "../components/EventAIChat";
 import SpeakerManagement from "../components/SpeakerManagement";
 import ScheduleManagement from "../components/ScheduleManagement";
 import RegistrationManagement from "../components/RegistrationManagement";
 import WorkspaceHeader from "../components/WorkspaceHeader";
-import { createEvent, deleteEvent, getEvent, getEvents, updateEvent } from "../services/api";
+import { createEvent, deleteEvent, getEvent, getEvents, updateEvent, uploadEventImage } from "../services/api";
 
-const EMPTY_FORM = { title: "", description: "", location: "", start_time: "", end_time: "", status: "DRAFT", max_attendees: "100" };
+const EMPTY_FORM = {
+  title: "",
+  description: "",
+  location: "",
+  start_time: "",
+  end_time: "",
+  status: "DRAFT",
+  max_attendees: "100",
+  cover_image_url: null,
+  pendingFile: null,
+};
 const FILTERS = ["ALL", "DRAFT", "PUBLISHED", "CANCELLED", "COMPLETED"];
 const DELETE_WARNING = "Deleting this event will permanently remove its related data, including schedules, speakers, registrations, tickets, check-ins, feedback, and announcements. This cannot be undone.";
 const toDateTimeLocalValue = (value) => typeof value === "string" ? value.slice(0, 16) : "";
@@ -67,7 +78,17 @@ function EventsPage({ token, currentUser, onLogout, onUnauthorized, activeView, 
       const event = await getEvent(eventId, token);
       if (editMode) {
         setDetail(null); setWorkspaceTab("overview"); setSpeakerDirty(false); setEditorId(event.id); setDirty(false);
-        setForm({ title: event.title, description: event.description || "", location: event.location, start_time: toDateTimeLocalValue(event.start_time), end_time: toDateTimeLocalValue(event.end_time), status: event.status, max_attendees: String(event.max_attendees) });
+        setForm({
+          title: event.title,
+          description: event.description || "",
+          location: event.location,
+          start_time: toDateTimeLocalValue(event.start_time),
+          end_time: toDateTimeLocalValue(event.end_time),
+          status: event.status,
+          max_attendees: String(event.max_attendees),
+          cover_image_url: event.cover_image_url || null,
+          pendingFile: null,
+        });
       } else { setDetail(event); setWorkspaceTab(targetTab); setSpeakerDirty(false); }
     } catch (requestError) {
       if (requestError.status === 401) { onUnauthorized(); return; }
@@ -92,7 +113,33 @@ function EventsPage({ token, currentUser, onLogout, onUnauthorized, activeView, 
     const validation = validate();
     if (validation) { setFormError(validation); return; }
     requestInFlight.current = true; setSubmitting(true); setFormError(""); setSuccess("");
-    const payload = { title: form.title.trim(), description: form.description.trim() || null, location: form.location.trim(), start_time: form.start_time, end_time: form.end_time, status: form.status, max_attendees: Number(form.max_attendees) };
+
+    let finalCoverImageUrl = form.cover_image_url;
+
+    // Upload pending file to Cloudinary first if user selected an image
+    if (form.pendingFile) {
+      try {
+        const uploadResult = await uploadEventImage(form.pendingFile, token);
+        finalCoverImageUrl = uploadResult.url;
+      } catch (uploadErr) {
+        requestInFlight.current = false;
+        setSubmitting(false);
+        setFormError(uploadErr.message || "Tải ảnh sự kiện thất bại. Vui lòng thử lại.");
+        return;
+      }
+    }
+
+    const payload = {
+      title: form.title.trim(),
+      description: form.description.trim() || null,
+      cover_image_url: finalCoverImageUrl,
+      location: form.location.trim(),
+      start_time: form.start_time,
+      end_time: form.end_time,
+      status: form.status,
+      max_attendees: Number(form.max_attendees),
+    };
+
     try {
       const result = editorId == null ? await createEvent(payload, token) : await updateEvent(editorId, payload, token);
       setSuccess(editorId == null ? "Event created successfully." : "Event updated successfully.");
@@ -131,9 +178,52 @@ function EventsPage({ token, currentUser, onLogout, onUnauthorized, activeView, 
         {error && <div className="state-panel error-panel"><strong>Unable to load events</strong><p>{error}</p><button type="button" className="secondary-button" onClick={() => setReload((value) => value + 1)}>Retry</button></div>}
         {!loading && !error && events.length === 0 && editorId === undefined && <div className="state-panel"><strong>No events yet.</strong><p>Create your first event to begin managing event operations.</p><button type="button" className="primary-button" onClick={openNew}>Create your first event</button></div>}
         {!loading && !error && events.length === 0 && editorId !== undefined && <div className="event-workspace panel-open empty-event-workspace"><EventForm eventId={editorId} form={form} onChange={changeForm} onClose={closeEditor} onSubmit={submit} onDelete={remove} loading={submitting} error={formError} /></div>}
-        {!loading && !error && events.length > 0 && <div className={`event-workspace ${editorId !== undefined || detail ? "panel-open" : ""}`}><section className="event-list"><div className="event-list-summary"><strong>{visibleEvents.length} event{visibleEvents.length === 1 ? "" : "s"}</strong><span>{filter === "ALL" ? "All statuses" : filter}</span></div>{visibleEvents.length === 0 ? <div className="compact-state"><strong>No events match this status.</strong></div> : visibleEvents.map((event) => <article className={`event-card ${detail?.id === event.id ? "selected" : ""}`} key={event.id}>{detail?.id === event.id && <span className="selected-event-label">Selected</span>}<div className="event-card-heading"><div><span className={`status-badge status-${event.status.toLowerCase()}`}>{event.status}</span><h2>{event.title}</h2></div><div><button type="button" className="text-button" onClick={() => loadEvent(event.id, false)}>View</button><button type="button" className="text-button" onClick={() => loadEvent(event.id, false, "speakers")}>Speakers</button><button type="button" className="text-button" onClick={() => loadEvent(event.id, false, "schedule")}>Schedule</button><button type="button" className="secondary-button compact-button" onClick={() => loadEvent(event.id, true)}>Edit</button></div></div><p className="event-description-preview">{event.description || "No description provided."}</p><div className="event-card-meta"><div><span>Location</span><strong>{event.location}</strong></div><div><span>Schedule</span><strong>{displayDateTime(event.start_time)} – {displayDateTime(event.end_time)}</strong></div><div><span>Capacity</span><strong>{event.max_attendees} attendees</strong></div></div></article>)}</section>
+        {!loading && !error && events.length > 0 && <div className={`event-workspace ${editorId !== undefined || detail ? "panel-open" : ""}`}><section className="event-list"><div className="event-list-summary"><strong>{visibleEvents.length} event{visibleEvents.length === 1 ? "" : "s"}</strong><span>{filter === "ALL" ? "All statuses" : filter}</span></div>{visibleEvents.length === 0 ? <div className="compact-state"><strong>No events match this status.</strong></div> : visibleEvents.map((event) => (
+          <article className={`event-card ${detail?.id === event.id ? "selected" : ""}`} key={event.id}>
+            {detail?.id === event.id && <span className="selected-event-label">Selected</span>}
+            <div className="event-card-media">
+              <EventCoverImage src={event.cover_image_url} alt={event.title} />
+            </div>
+            <div className="event-card-body">
+              <div className="event-card-heading">
+                <div>
+                  <span className={`status-badge status-${event.status.toLowerCase()}`}>{event.status}</span>
+                  <h2>{event.title}</h2>
+                </div>
+                <div>
+                  <button type="button" className="text-button" onClick={() => loadEvent(event.id, false)}>View</button>
+                  <button type="button" className="text-button" onClick={() => loadEvent(event.id, false, "speakers")}>Speakers</button>
+                  <button type="button" className="text-button" onClick={() => loadEvent(event.id, false, "schedule")}>Schedule</button>
+                  <button type="button" className="secondary-button compact-button" onClick={() => loadEvent(event.id, true)}>Edit</button>
+                </div>
+              </div>
+              <p className="event-description-preview">{event.description || "No description provided."}</p>
+              <div className="event-card-meta">
+                <div><span>Location</span><strong>{event.location}</strong></div>
+                <div><span>Schedule</span><strong>{displayDateTime(event.start_time)} – {displayDateTime(event.end_time)}</strong></div>
+                <div><span>Capacity</span><strong>{event.max_attendees} attendees</strong></div>
+              </div>
+            </div>
+          </article>
+        ))}</section>
           {editorId !== undefined && <EventForm eventId={editorId} form={form} onChange={changeForm} onClose={closeEditor} onSubmit={submit} onDelete={remove} loading={submitting} error={formError} />}
-          {editorId === undefined && detail && <aside className="event-detail-panel speaker-workspace-panel"><div className="editor-heading"><div><p className="eyebrow">EVENT WORKSPACE</p><span className={`status-badge status-${detail.status.toLowerCase()}`}>{detail.status}</span><h2>{detail.title}</h2><div className="event-context-meta"><span>{displayDateTime(detail.start_time)} – {displayDateTime(detail.end_time)}</span><span>{detail.location}</span></div></div><button type="button" className="text-button" onClick={() => { if (confirmDiscard()) { setDetail(null); setSpeakerDirty(false); } }}>Close</button></div><div className="workspace-tabs" role="tablist" aria-label="Event workspace"><button type="button" role="tab" aria-selected={workspaceTab === "overview"} className={workspaceTab === "overview" ? "active" : ""} onClick={() => { if (confirmDiscard()) { setWorkspaceTab("overview"); setSpeakerDirty(false); } }}>Overview</button><button type="button" role="tab" aria-selected={workspaceTab === "speakers"} className={workspaceTab === "speakers" ? "active" : ""} onClick={() => { if (confirmDiscard()) { setWorkspaceTab("speakers"); setSpeakerDirty(false); } }}>Speakers</button><button type="button" role="tab" aria-selected={workspaceTab === "schedule"} className={workspaceTab === "schedule" ? "active" : ""} onClick={() => { if (confirmDiscard()) { setWorkspaceTab("schedule"); setSpeakerDirty(false); } }}>Schedule</button><button type="button" role="tab" aria-selected={workspaceTab === "registrations"} className={workspaceTab === "registrations" ? "active" : ""} onClick={() => { if (confirmDiscard()) { setWorkspaceTab("registrations"); setSpeakerDirty(false); } }}>Registrations</button><button type="button" role="tab" aria-selected={workspaceTab === "ai"} className={workspaceTab === "ai" ? "active" : ""} onClick={() => { if (confirmDiscard()) { setWorkspaceTab("ai"); setSpeakerDirty(false); } }}>Ask AI</button></div>{workspaceTab === "overview" ? <div className="event-overview"><p className="event-detail-description">{detail.description || "No description provided."}</p><dl><div><dt>Location</dt><dd>{detail.location}</dd></div><div><dt>Start</dt><dd>{displayDateTime(detail.start_time)}</dd></div><div><dt>End</dt><dd>{displayDateTime(detail.end_time)}</dd></div><div><dt>Maximum attendees</dt><dd>{detail.max_attendees}</dd></div><div><dt>Created</dt><dd>{displayDateTime(detail.created_at)}</dd></div><div><dt>Updated</dt><dd>{displayDateTime(detail.updated_at)}</dd></div></dl><button type="button" className="primary-button" onClick={() => loadEvent(detail.id, true)}>Edit Event</button></div> : workspaceTab === "speakers" ? <SpeakerManagement key={`speakers-${detail.id}`} event={detail} token={token} onUnauthorized={onUnauthorized} onDirtyChange={setSpeakerDirty} /> : workspaceTab === "schedule" ? <ScheduleManagement key={`schedule-${detail.id}`} event={detail} token={token} onUnauthorized={onUnauthorized} onDirtyChange={setSpeakerDirty} /> : workspaceTab === "registrations" ? <RegistrationManagement key={`registrations-${detail.id}`} event={detail} token={token} onUnauthorized={onUnauthorized} /> : <EventAIChat key={`ai-${detail.id}`} event={detail} token={token} onUnauthorized={onUnauthorized} />}</aside>}
+          {editorId === undefined && detail && <aside className="event-detail-panel speaker-workspace-panel"><div className="editor-heading"><div><p className="eyebrow">EVENT WORKSPACE</p><span className={`status-badge status-${detail.status.toLowerCase()}`}>{detail.status}</span><h2>{detail.title}</h2><div className="event-context-meta"><span>{displayDateTime(detail.start_time)} – {displayDateTime(detail.end_time)}</span><span>{detail.location}</span></div></div><button type="button" className="text-button" onClick={() => { if (confirmDiscard()) { setDetail(null); setSpeakerDirty(false); } }}>Close</button></div><div className="workspace-tabs" role="tablist" aria-label="Event workspace"><button type="button" role="tab" aria-selected={workspaceTab === "overview"} className={workspaceTab === "overview" ? "active" : ""} onClick={() => { if (confirmDiscard()) { setWorkspaceTab("overview"); setSpeakerDirty(false); } }}>Overview</button><button type="button" role="tab" aria-selected={workspaceTab === "speakers"} className={workspaceTab === "speakers" ? "active" : ""} onClick={() => { if (confirmDiscard()) { setWorkspaceTab("speakers"); setSpeakerDirty(false); } }}>Speakers</button><button type="button" role="tab" aria-selected={workspaceTab === "schedule"} className={workspaceTab === "schedule" ? "active" : ""} onClick={() => { if (confirmDiscard()) { setWorkspaceTab("schedule"); setSpeakerDirty(false); } }}>Schedule</button><button type="button" role="tab" aria-selected={workspaceTab === "registrations"} className={workspaceTab === "registrations" ? "active" : ""} onClick={() => { if (confirmDiscard()) { setWorkspaceTab("registrations"); setSpeakerDirty(false); } }}>Registrations</button><button type="button" role="tab" aria-selected={workspaceTab === "ai"} className={workspaceTab === "ai" ? "active" : ""} onClick={() => { if (confirmDiscard()) { setWorkspaceTab("ai"); setSpeakerDirty(false); } }}>Ask AI</button></div>{workspaceTab === "overview" ? (
+            <div className="event-overview">
+              <div className="event-overview-hero">
+                <EventCoverImage src={detail.cover_image_url} alt={detail.title} />
+              </div>
+              <p className="event-detail-description">{detail.description || "No description provided."}</p>
+              <dl>
+                <div><dt>Location</dt><dd>{detail.location}</dd></div>
+                <div><dt>Start</dt><dd>{displayDateTime(detail.start_time)}</dd></div>
+                <div><dt>End</dt><dd>{displayDateTime(detail.end_time)}</dd></div>
+                <div><dt>Maximum attendees</dt><dd>{detail.max_attendees}</dd></div>
+                <div><dt>Created</dt><dd>{displayDateTime(detail.created_at)}</dd></div>
+                <div><dt>Updated</dt><dd>{displayDateTime(detail.updated_at)}</dd></div>
+              </dl>
+              <button type="button" className="primary-button" onClick={() => loadEvent(detail.id, true)}>Edit Event</button>
+            </div>
+          ) : workspaceTab === "speakers" ? <SpeakerManagement key={`speakers-${detail.id}`} event={detail} token={token} onUnauthorized={onUnauthorized} onDirtyChange={setSpeakerDirty} /> : workspaceTab === "schedule" ? <ScheduleManagement key={`schedule-${detail.id}`} event={detail} token={token} onUnauthorized={onUnauthorized} onDirtyChange={setSpeakerDirty} /> : workspaceTab === "registrations" ? <RegistrationManagement key={`registrations-${detail.id}`} event={detail} token={token} onUnauthorized={onUnauthorized} /> : <EventAIChat key={`ai-${detail.id}`} event={detail} token={token} onUnauthorized={onUnauthorized} />}</aside>}
         </div>}
       </main><footer>Event Manager AI · Event ownership and validation are enforced by the backend.</footer>
     </div>

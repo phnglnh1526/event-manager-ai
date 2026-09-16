@@ -9,12 +9,18 @@ function LoginPage({ onLogin, onRegister, loading, error }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!email.trim() || !password) {
-      setValidationError("Enter your email and password.");
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
+      setValidationError("Please enter your email and password.");
+      return;
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(cleanEmail)) {
+      setValidationError("Please enter a valid email address (e.g., admin@example.com).");
       return;
     }
     setValidationError("");
-    const succeeded = await onLogin(email.trim(), password);
+    const succeeded = await onLogin(cleanEmail, password);
     if (succeeded) setPassword("");
   };
 

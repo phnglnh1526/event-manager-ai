@@ -1,11 +1,12 @@
-const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL
-  || import.meta.env.VITE_API_URL
-  || "http://localhost:8000"
-).replace(
-  /\/$/,
-  "",
-);
+const rawBaseUrl = (
+  import.meta.env.DEV
+    ? (import.meta.env.VITE_USE_DIRECT_API ? (import.meta.env.VITE_API_BASE_URL || "https://event-manager-api-aeyc.onrender.com") : "")
+    : (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "https://event-manager-api-aeyc.onrender.com")
+).trim().replace(/\/+$/, "");
+
+export const API_BASE_URL = rawBaseUrl.endsWith("/api")
+  ? rawBaseUrl.slice(0, -4)
+  : rawBaseUrl;
 
 export class ApiError extends Error {
   constructor(message, status = 0, details = null) {
@@ -36,7 +37,16 @@ export async function apiRequest(path, { token, body, headers, ...options } = {}
   const contentType = response.headers.get("content-type") || "";
   const data = contentType.includes("application/json") ? await response.json() : null;
   if (!response.ok) {
-    const detail = typeof data?.detail === "string" ? data.detail : "Request failed.";
+    let detail = "Request failed.";
+    if (typeof data?.detail === "string") {
+      detail = data.detail;
+    } else if (Array.isArray(data?.detail) && data.detail.length > 0) {
+      const first = data.detail[0];
+      const field = Array.isArray(first?.loc) ? first.loc[first.loc.length - 1] : "";
+      if (first?.msg) {
+        detail = field ? `${field}: ${first.msg}` : first.msg;
+      }
+    }
     throw new ApiError(detail, response.status, data?.detail ?? null);
   }
   return data;
@@ -108,6 +118,34 @@ export function getEvent(eventId, token, signal) {
 
 export function createEvent(payload, token) {
   return apiRequest("/api/events", { method: "POST", token, body: payload });
+}
+
+export async function uploadEventImage(file, token) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const requestHeaders = {};
+  if (token) requestHeaders.Authorization = `Bearer ${token}`;
+
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}/api/uploads/event-image`, {
+      method: "POST",
+      headers: requestHeaders,
+      body: formData,
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") throw error;
+    throw new ApiError("Unable to connect to the server.");
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json") ? await response.json() : null;
+  if (!response.ok) {
+    const detail = typeof data?.detail === "string" ? data.detail : "Upload failed.";
+    throw new ApiError(detail, response.status, data?.detail ?? null);
+  }
+  return data;
 }
 
 export function updateEvent(eventId, payload, token) {

@@ -10,6 +10,7 @@ class EventCreate(BaseModel):
 
     title: str = Field(min_length=3, max_length=200)
     description: str | None = None
+    cover_image_url: str | None = Field(default=None, max_length=500)
     location: str = Field(min_length=2, max_length=255)
     start_time: datetime
     end_time: datetime
@@ -35,6 +36,7 @@ class EventUpdate(BaseModel):
 
     title: str | None = Field(default=None, min_length=3, max_length=200)
     description: str | None = None
+    cover_image_url: str | None = Field(default=None, max_length=500)
     location: str | None = Field(default=None, min_length=2, max_length=255)
     start_time: datetime | None = None
     end_time: datetime | None = None
@@ -50,7 +52,7 @@ class EventUpdate(BaseModel):
 
     @model_validator(mode="after")
     def validate_fields(self):
-        nullable_fields = {"description"}
+        nullable_fields = {"description", "cover_image_url"}
         for field_name in self.model_fields_set - nullable_fields:
             if getattr(self, field_name) is None:
                 raise ValueError(f"{field_name} cannot be null")
@@ -70,6 +72,7 @@ class EventResponse(BaseModel):
     id: int
     title: str
     description: str | None
+    cover_image_url: str | None = None
     location: str
     start_time: datetime
     end_time: datetime
@@ -84,6 +87,7 @@ class AttendeeEventResponse(BaseModel):
     id: int
     title: str
     description: str | None
+    cover_image_url: str | None = None
     location: str
     start_time: datetime
     end_time: datetime
