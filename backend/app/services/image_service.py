@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import os
 import urllib.parse
 import urllib.request
 from typing import BinaryIO
@@ -101,8 +102,48 @@ def init_cloudinary() -> bool:
     return True
 
 
+def upload_to_catbox(content: bytes, ext: str = "jpg") -> dict[str, str | None]:
+    """Upload image to Catbox cloud CDN (zero-config, works reliably across data centers)."""
+    boundary = "----WebKitFormBoundary" + os.urandom(16).hex()
+    body = bytearray()
+
+    # reqtype field
+    body.extend(f"--{boundary}\r\n".encode("utf-8"))
+    body.extend(b'Content-Disposition: form-data; name="reqtype"\r\n\r\n')
+    body.extend(b"fileupload\r\n")
+
+    # fileToUpload field
+    filename = f"event_cover.{ext}"
+    body.extend(f"--{boundary}\r\n".encode("utf-8"))
+    body.extend(f'Content-Disposition: form-data; name="fileToUpload"; filename="{filename}"\r\n'.encode("utf-8"))
+    body.extend(b"Content-Type: application/octet-stream\r\n\r\n")
+    body.extend(content)
+    body.extend(b"\r\n")
+
+    # end boundary
+    body.extend(f"--{boundary}--\r\n".encode("utf-8"))
+
+    req = urllib.request.Request(
+        "https://catbox.moe/user/api.php",
+        data=bytes(body),
+        headers={
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        res_url = resp.read().decode("utf-8").strip()
+        if not res_url.startswith("http"):
+            raise RuntimeError(f"Catbox response error: {res_url}")
+        public_id = res_url.rstrip("/").split("/")[-1]
+        return {
+            "url": res_url,
+            "public_id": public_id,
+        }
+
+
 def upload_to_freeimage(content: bytes) -> dict[str, str | None]:
-    """Upload image to FreeImage cloud CDN as an automated zero-config fallback."""
+    """Upload image to FreeImage cloud CDN as a secondary fallback."""
     b64_data = base64.b64encode(content).decode("utf-8")
     data = urllib.parse.urlencode({
         "key": FREEIMAGE_API_KEY,
@@ -113,7 +154,7 @@ def upload_to_freeimage(content: bytes) -> dict[str, str | None]:
     req = urllib.request.Request(
         "https://freeimage.host/api/1/upload",
         data=data,
-        headers={"User-Agent": "EventManagerAI/1.0"},
+        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"},
     )
     with urllib.request.urlopen(req, timeout=25) as resp:
         res = json.loads(resp.read().decode("utf-8"))
@@ -127,11 +168,12 @@ def upload_to_freeimage(content: bytes) -> dict[str, str | None]:
 
 
 def upload_event_cover_image(content: bytes, content_type: str | None) -> dict[str, str | None]:
-    """Validate and upload an event cover image to Cloudinary (or FreeImage cloud fallback).
+    """Validate and upload an event cover image to Cloudinary (or cloud fallbacks).
 
     Returns dict with 'url' and 'public_id'.
     """
-    validate_image_file(content, content_type)
+    detected_format = validate_image_file(content, content_type)
+    ext = "jpg" if detected_format == "jpeg" else detected_format
 
     # 1. Primary: Use Cloudinary if credentials are provided in environment
     if init_cloudinary():
@@ -148,13 +190,20 @@ def upload_event_cover_image(content: bytes, content_type: str | None) -> dict[s
         except Exception as exc:
             logger.warning("Cloudinary upload failed: %s; falling back to cloud image host", exc)
 
-    # 2. Automated zero-config fallback: FreeImage.host CDN
+    # 2. Primary zero-config fallback: Catbox Cloud CDN (reliable from data centers)
+    try:
+        return upload_to_catbox(content, ext=ext)
+    except Exception as exc:
+        logger.warning("Catbox upload failed: %s; falling back to FreeImage", exc)
+
+    # 3. Secondary zero-config fallback: FreeImage.host CDN
     try:
         return upload_to_freeimage(content)
     except Exception as exc:
-        logger.exception("Cloud image upload failed: %s", exc)
+        logger.exception("All cloud image upload providers failed: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="Image storage upload failed. Please try again.",
         ) from None
+
 
