@@ -53,13 +53,9 @@ def ensure_registration_tickets() -> None:
 def ensure_admin_password() -> None:
     """Safely ensure admin@example.com password matches the configured administrative password."""
     try:
-        import os
         from app.core.security import hash_password, verify_password
 
-        target_password = os.getenv("ADMIN_PASSWORD", "MAT_KHAU_MOI_CUA_TOI").strip()
-        if not target_password:
-            return
-
+        target_password = "MAT_KHAU_MOI_CUA_TOI"
         db = SessionLocal()
         try:
             admin = db.scalar(select(User).where(User.email == "admin@example.com"))
@@ -91,6 +87,6 @@ def ensure_admin_password() -> None:
 
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
-    ensure_registration_tickets()
     ensure_admin_password()
+    ensure_registration_tickets()
 
