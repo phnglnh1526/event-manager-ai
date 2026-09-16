@@ -191,9 +191,11 @@ def upload_event_cover_image(content: bytes, content_type: str | None) -> dict[s
             logger.warning("Cloudinary upload failed: %s; falling back to cloud image host", exc)
 
     # 2. Primary zero-config fallback: Catbox Cloud CDN (reliable from data centers)
+    catbox_err = None
     try:
         return upload_to_catbox(content, ext=ext)
     except Exception as exc:
+        catbox_err = str(exc)
         logger.warning("Catbox upload failed: %s; falling back to FreeImage", exc)
 
     # 3. Secondary zero-config fallback: FreeImage.host CDN
@@ -203,7 +205,7 @@ def upload_event_cover_image(content: bytes, content_type: str | None) -> dict[s
         logger.exception("All cloud image upload providers failed: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Image storage upload failed. Please try again.",
+            detail=f"Image storage upload failed (Catbox: {catbox_err}; FreeImage: {exc})",
         ) from None
 
 
