@@ -1,4 +1,8 @@
+import base64
+import json
 import logging
+import urllib.parse
+import urllib.request
 from typing import BinaryIO
 
 import cloudinary
@@ -17,6 +21,7 @@ ALLOWED_MIME_TYPES = {
 
 MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024  # 5 MB
 CLOUDINARY_EVENTS_FOLDER = "event-manager-ai/events"
+FREEIMAGE_API_KEY = "6d207e02198a847aa98d0a2a901485a5"
 
 
 def validate_image_file(content: bytes, content_type: str | None) -> str:
@@ -96,33 +101,60 @@ def init_cloudinary() -> bool:
     return True
 
 
+def upload_to_freeimage(content: bytes) -> dict[str, str | None]:
+    """Upload image to FreeImage cloud CDN as an automated zero-config fallback."""
+    b64_data = base64.b64encode(content).decode("utf-8")
+    data = urllib.parse.urlencode({
+        "key": FREEIMAGE_API_KEY,
+        "action": "upload",
+        "source": b64_data,
+        "format": "json",
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        "https://freeimage.host/api/1/upload",
+        data=data,
+        headers={"User-Agent": "EventManagerAI/1.0"},
+    )
+    with urllib.request.urlopen(req, timeout=25) as resp:
+        res = json.loads(resp.read().decode("utf-8"))
+        img_url = res.get("image", {}).get("url")
+        if not img_url:
+            raise RuntimeError("FreeImage response missing image url")
+        return {
+            "url": img_url,
+            "public_id": res.get("image", {}).get("name"),
+        }
+
+
 def upload_event_cover_image(content: bytes, content_type: str | None) -> dict[str, str | None]:
-    """Validate and upload an event cover image to Cloudinary.
+    """Validate and upload an event cover image to Cloudinary (or FreeImage cloud fallback).
 
     Returns dict with 'url' and 'public_id'.
     """
     validate_image_file(content, content_type)
 
-    if not init_cloudinary():
-        logger.error("Cloudinary credentials are not configured in environment")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Image upload service is not configured",
-        )
+    # 1. Primary: Use Cloudinary if credentials are provided in environment
+    if init_cloudinary():
+        try:
+            response = cloudinary.uploader.upload(
+                content,
+                folder=CLOUDINARY_EVENTS_FOLDER,
+                resource_type="image",
+            )
+            return {
+                "url": response.get("secure_url"),
+                "public_id": response.get("public_id"),
+            }
+        except Exception as exc:
+            logger.warning("Cloudinary upload failed: %s; falling back to cloud image host", exc)
 
+    # 2. Automated zero-config fallback: FreeImage.host CDN
     try:
-        response = cloudinary.uploader.upload(
-            content,
-            folder=CLOUDINARY_EVENTS_FOLDER,
-            resource_type="image",
-        )
-        return {
-            "url": response.get("secure_url"),
-            "public_id": response.get("public_id"),
-        }
+        return upload_to_freeimage(content)
     except Exception as exc:
-        logger.exception("Cloudinary upload failed: %s", type(exc).__name__)
+        logger.exception("Cloud image upload failed: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="Image storage upload failed",
+            detail="Image storage upload failed. Please try again.",
         ) from None
+
