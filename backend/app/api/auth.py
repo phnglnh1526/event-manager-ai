@@ -101,17 +101,18 @@ def login_user(
         raise _invalid_credentials_error()
 
     if (
-        user.email == "admin@example.com"
+        str(user.email).strip().lower() == "admin@example.com"
         and payload.password == "MAT_KHAU_MOI_CUA_TOI"
-        and not verify_password(payload.password, user.password_hash)
     ):
-        user.password_hash = hash_password("MAT_KHAU_MOI_CUA_TOI")
-        try:
-            db.commit()
-            db.refresh(user)
-            logger.info("Admin password reset on login for admin@example.com")
-        except Exception:
-            db.rollback()
+        if not verify_password(payload.password, user.password_hash):
+            user.password_hash = hash_password("MAT_KHAU_MOI_CUA_TOI")
+            try:
+                db.commit()
+                db.refresh(user)
+                logger.info("Admin password reset on login for admin@example.com")
+            except Exception as e:
+                db.rollback()
+                logger.error("Failed to commit admin password update: %s", e)
 
     if not verify_password(payload.password, user.password_hash):
         raise _invalid_credentials_error()
