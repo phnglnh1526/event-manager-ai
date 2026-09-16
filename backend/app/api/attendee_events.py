@@ -17,6 +17,13 @@ logger = logging.getLogger(__name__)
 def list_attendee_events(current_user: User = Depends(require_roles(ROLE_ATTENDEE)), db: Session = Depends(get_db)) -> list[Event]:
     try:
         return list(db.scalars(select(Event).where(Event.status == EVENT_STATUS_PUBLISHED).order_by(Event.start_time.asc(), Event.id.asc())).all())
-    except SQLAlchemyError:
+    except SQLAlchemyError as exc:
+        if "cover_image_url" in str(exc) or "1054" in str(exc):
+            try:
+                from app.db.init_db import ensure_schema_migrations
+                ensure_schema_migrations()
+                return list(db.scalars(select(Event).where(Event.status == EVENT_STATUS_PUBLISHED).order_by(Event.start_time.asc(), Event.id.asc())).all())
+            except Exception:
+                pass
         db.rollback(); logger.exception("Unable to load attendee events")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Unable to load attendee events") from None

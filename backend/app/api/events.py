@@ -54,7 +54,14 @@ def list_events(
 
     try:
         return list(db.scalars(statement).all())
-    except SQLAlchemyError:
+    except SQLAlchemyError as exc:
+        if "cover_image_url" in str(exc) or "1054" in str(exc):
+            try:
+                from app.db.init_db import ensure_schema_migrations
+                ensure_schema_migrations()
+                return list(db.scalars(statement).all())
+            except Exception:
+                pass
         raise _database_error(db, "list") from None
 
 

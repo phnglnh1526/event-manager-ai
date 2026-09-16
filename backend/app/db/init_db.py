@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy import select
+from sqlalchemy import inspect, select, text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.registration_status import REGISTRATION_STATUS_REGISTERED
@@ -85,8 +85,25 @@ def ensure_admin_password() -> None:
         logger.exception("Admin password verification failed")
 
 
+def ensure_schema_migrations() -> None:
+    """Safely apply schema additions without data loss or dropping tables."""
+    try:
+        inspector = inspect(engine)
+        if "events" in inspector.get_table_names():
+            columns = [c["name"] for c in inspector.get_columns("events")]
+            if "cover_image_url" not in columns:
+                logger.info("Applying safe migration: adding cover_image_url to events table")
+                with engine.begin() as conn:
+                    conn.execute(text("ALTER TABLE events ADD COLUMN cover_image_url VARCHAR(500) NULL"))
+                logger.info("Migration successful: cover_image_url column added to events")
+    except Exception:
+        logger.exception("Schema migration check/execution failed")
+
+
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
+    ensure_schema_migrations()
     ensure_admin_password()
     ensure_registration_tickets()
+
 
