@@ -70,6 +70,7 @@ class EventResponse(BaseModel):
     id: int
     title: str
     description: str | None
+    image_url: str
     location: str
     start_time: datetime
     end_time: datetime
@@ -84,6 +85,7 @@ class AttendeeEventResponse(BaseModel):
     id: int
     title: str
     description: str | None
+    image_url: str
     location: str
     start_time: datetime
     end_time: datetime

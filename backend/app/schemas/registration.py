@@ -12,3 +12,8 @@ class RegistrationResponse(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+
+
+class MyRegistrationResponse(RegistrationResponse):
+    event_title: str
+    event_status: str

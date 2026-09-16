@@ -7,7 +7,7 @@ const EVENT_STATUSES = [
   ["COMPLETED", "Completed"],
 ];
 
-function EventForm({ eventId, form, onChange, onClose, onSubmit, onDelete, loading, error }) {
+function EventForm({ eventId, form, imageFile, onImageChange, onClose, onSubmit, onDelete, loading, error }) {
   const isEditing = eventId != null;
   return (
     <section className="event-editor" aria-labelledby="event-form-title">
@@ -17,6 +17,12 @@ function EventForm({ eventId, form, onChange, onClose, onSubmit, onDelete, loadi
       </div>
       <div className="editor-field"><label htmlFor="event-title">Title *</label><input id="event-title" value={form.title} maxLength={200} disabled={loading} onChange={(e) => onChange("title", e.target.value)} /><span className="character-count">{form.title.length}/200</span></div>
       <div className="editor-field"><label htmlFor="event-description">Description</label><textarea id="event-description" rows={4} value={form.description} disabled={loading} onChange={(e) => onChange("description", e.target.value)} /></div>
+      <div className="editor-field">
+        <label htmlFor="event-image">Event cover image</label>
+        <input id="event-image" type="file" accept="image/jpeg,image/png,image/webp" disabled={loading} onChange={(e) => onImageChange?.(e.target.files?.[0] || null)} />
+        <small className="field-help">Optional · JPG, PNG or WebP · maximum 5 MB. If you skip this, the default event image is used.</small>
+        {imageFile && <span className="selected-file-name">Selected: {imageFile.name}</span>}
+      </div>
       <div className="editor-field"><label htmlFor="event-location">Location *</label><input id="event-location" value={form.location} maxLength={255} disabled={loading} onChange={(e) => onChange("location", e.target.value)} /></div>
       <div className="event-time-grid">
         <div className="editor-field"><label htmlFor="event-start">Start time *</label><input id="event-start" type="datetime-local" value={form.start_time} disabled={loading} onChange={(e) => onChange("start_time", e.target.value)} /></div>

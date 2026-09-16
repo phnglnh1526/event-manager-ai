@@ -201,6 +201,60 @@ def run() -> None:
             )
         ) == 1
 
+        # A successful check-in permanently locks the registration lifecycle.
+        # It cannot be cancelled, registered again, or checked in a second time.
+        checkin_response = expect(
+            client.post(
+                f"/api/events/{valid_event.id}/checkins",
+                headers=headers["staff"],
+                json={"ticket_code": original_ticket_code},
+            ),
+            201,
+        ).json()
+        assert checkin_response["ticket_id"] == original_ticket_id
+        db.rollback()
+        checked_in_registration = db.get(Registration, original_registration_id)
+        assert checked_in_registration.status == "CHECKED_IN"
+
+        cancel_after_checkin = expect(
+            client.delete(
+                f"/api/events/{valid_event.id}/registrations/me",
+                headers=headers["attendee_0"],
+            ),
+            409,
+        )
+        assert cancel_after_checkin.json()["detail"] == "Checked-in registration cannot be cancelled"
+        db.rollback()
+        assert db.get(Registration, original_registration_id).status == "CHECKED_IN"
+        assert db.get(Ticket, original_ticket_id).status == "ACTIVE"
+
+        re_register_after_checkin = expect(
+            client.post(valid_url, headers=headers["attendee_0"]),
+            409,
+        )
+        assert re_register_after_checkin.json()["detail"] == "Already checked in for this event"
+        db.rollback()
+        assert db.get(Registration, original_registration_id).status == "CHECKED_IN"
+
+        duplicate_checkin = expect(
+            client.post(
+                f"/api/events/{valid_event.id}/checkins",
+                headers=headers["staff"],
+                json={"ticket_code": original_ticket_code},
+            ),
+            409,
+        )
+        assert duplicate_checkin.json()["detail"] == "Ticket already checked in"
+
+        # Checked-in tickets can no longer expose a new active QR code.
+        expect(
+            client.get(
+                f"/api/tickets/me/{original_ticket_id}/qr",
+                headers=headers["attendee_0"],
+            ),
+            409,
+        )
+
         # Capacity is enforced by the backend and rejected attempts create no row.
         full_url = f"/api/events/{full_event.id}/registrations"
         expect(client.post(full_url, headers=headers["attendee_0"]), 201)

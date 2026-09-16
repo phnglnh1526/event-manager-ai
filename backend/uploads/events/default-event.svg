@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#10244d"/><stop offset="1" stop-color="#3158d4"/></linearGradient></defs>
+<rect width="1200" height="650" fill="url(#g)"/>
+<circle cx="970" cy="120" r="210" fill="#ffffff" opacity=".08"/>
+<circle cx="180" cy="570" r="260" fill="#ffffff" opacity=".06"/>
+<rect x="90" y="100" width="180" height="12" rx="6" fill="#fff" opacity=".55"/>
+<rect x="90" y="135" width="320" height="22" rx="11" fill="#fff" opacity=".9"/>
+<rect x="90" y="175" width="250" height="12" rx="6" fill="#fff" opacity=".45"/>
+<path d="M760 240h250M885 115v250" stroke="#fff" stroke-width="34" stroke-linecap="round" opacity=".78"/>
+<text x="90" y="570" fill="#fff" font-family="Arial,sans-serif" font-size="48" font-weight="700">EVENT MANAGER AI</text>
+</svg>

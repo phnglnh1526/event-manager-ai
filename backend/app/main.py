@@ -1,9 +1,11 @@
 import logging
 import time
+from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.ai_announcements import router as ai_announcements_router
@@ -61,6 +63,10 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+UPLOAD_ROOT = Path(__file__).resolve().parent.parent / "uploads"
+(UPLOAD_ROOT / "events").mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_ROOT)), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,

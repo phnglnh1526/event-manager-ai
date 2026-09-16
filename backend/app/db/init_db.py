@@ -50,6 +50,25 @@ def ensure_registration_tickets() -> None:
         db.close()
 
 
+
+def ensure_event_image_column() -> None:
+    """Add image_url to existing databases created before event images existed."""
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(engine)
+    columns = {column["name"] for column in inspector.get_columns("events")}
+    if "image_url" not in columns:
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    "ALTER TABLE events ADD COLUMN image_url VARCHAR(500) "
+                    "NOT NULL DEFAULT '/uploads/events/default-event.svg'"
+                )
+            )
+        logger.info("Added events.image_url column")
+
+
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
+    ensure_event_image_column()
     ensure_registration_tickets()

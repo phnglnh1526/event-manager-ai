@@ -12,11 +12,11 @@ from app.core.announcement_status import (
     ANNOUNCEMENT_STATUS_DRAFT,
     ANNOUNCEMENT_STATUS_PUBLISHED,
 )
-from app.core.registration_status import REGISTRATION_STATUS_REGISTERED
+from app.core.registration_status import REGISTRATION_STATUS_CHECKED_IN, REGISTRATION_STATUS_REGISTERED
 from app.core.roles import ROLE_ADMIN, ROLE_ATTENDEE, ROLE_ORGANIZER
 from app.db.database import get_db
-from app.models import Announcement, Registration, User
-from app.schemas import AnnouncementCreate, AnnouncementResponse, AnnouncementUpdate
+from app.models import Announcement, Event, Registration, User
+from app.schemas import AnnouncementCreate, AnnouncementResponse, AnnouncementUpdate, MyAnnouncementResponse
 
 router = APIRouter(tags=["Announcements"])
 logger = logging.getLogger(__name__)
@@ -181,53 +181,87 @@ def delete_event_announcement(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/api/announcements/me", response_model=list[AnnouncementResponse])
+@router.get("/api/announcements/me", response_model=list[MyAnnouncementResponse])
 def list_my_announcements(
     current_user: User = Depends(attendee_only),
     db: Session = Depends(get_db),
-) -> list[Announcement]:
+) -> list[dict]:
     try:
-        return list(
-            db.scalars(
-                select(Announcement)
-                .join(Registration, Registration.event_id == Announcement.event_id)
-                .where(
-                    Registration.user_id == current_user.id,
-                    Registration.status == REGISTRATION_STATUS_REGISTERED,
-                    Announcement.status == ANNOUNCEMENT_STATUS_PUBLISHED,
-                )
-                .order_by(Announcement.published_at.desc(), Announcement.id.desc())
-            ).all()
-        )
+        rows = db.execute(
+            select(
+                Announcement.id,
+                Announcement.event_id,
+                Announcement.created_by_user_id,
+                Announcement.title,
+                Announcement.content,
+                Announcement.status,
+                Announcement.created_at,
+                Announcement.updated_at,
+                Announcement.published_at,
+                Registration.status.label("registration_status"),
+                Event.title.label("event_title"),
+                Event.status.label("event_status"),
+            )
+            .select_from(Announcement)
+            .join(Event, Event.id == Announcement.event_id)
+            .join(
+                Registration,
+                (Registration.event_id == Announcement.event_id)
+                & (Registration.user_id == current_user.id),
+            )
+            .where(Announcement.status == ANNOUNCEMENT_STATUS_PUBLISHED)
+            .order_by(
+                Announcement.published_at.desc(),
+                Announcement.id.desc(),
+            )
+        ).mappings().all()
+        return [dict(row) for row in rows]
     except SQLAlchemyError:
         raise _database_error(db, "list attendee") from None
 
 
 @router.get(
     "/api/announcements/me/{announcement_id}",
-    response_model=AnnouncementResponse,
+    response_model=MyAnnouncementResponse,
 )
 def get_my_announcement(
     announcement_id: int,
     current_user: User = Depends(attendee_only),
     db: Session = Depends(get_db),
-) -> Announcement:
+) -> dict:
     try:
-        announcement = db.scalar(
-            select(Announcement)
-            .join(Registration, Registration.event_id == Announcement.event_id)
+        row = db.execute(
+            select(
+                Announcement.id,
+                Announcement.event_id,
+                Announcement.created_by_user_id,
+                Announcement.title,
+                Announcement.content,
+                Announcement.status,
+                Announcement.created_at,
+                Announcement.updated_at,
+                Announcement.published_at,
+                Registration.status.label("registration_status"),
+                Event.title.label("event_title"),
+                Event.status.label("event_status"),
+            )
+            .select_from(Announcement)
+            .join(Event, Event.id == Announcement.event_id)
+            .join(
+                Registration,
+                (Registration.event_id == Announcement.event_id)
+                & (Registration.user_id == current_user.id),
+            )
             .where(
                 Announcement.id == announcement_id,
                 Announcement.status == ANNOUNCEMENT_STATUS_PUBLISHED,
-                Registration.user_id == current_user.id,
-                Registration.status == REGISTRATION_STATUS_REGISTERED,
             )
-        )
+        ).mappings().first()
     except SQLAlchemyError:
         raise _database_error(db, "load attendee detail") from None
-    if announcement is None:
+    if row is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Announcement not found",
         )
-    return announcement
+    return dict(row)

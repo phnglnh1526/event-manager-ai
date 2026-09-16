@@ -11,13 +11,14 @@ from app.api.event_helpers import get_event_for_management
 from app.core.event_status import EVENT_STATUS_PUBLISHED
 from app.core.registration_status import (
     REGISTRATION_STATUS_CANCELLED,
+    REGISTRATION_STATUS_CHECKED_IN,
     REGISTRATION_STATUS_REGISTERED,
 )
 from app.core.roles import ROLE_ADMIN, ROLE_ATTENDEE, ROLE_ORGANIZER
 from app.core.ticket_status import TICKET_STATUS_ACTIVE, TICKET_STATUS_VOID
 from app.db.database import get_db
 from app.models import CheckIn, Event, Registration, Ticket, User
-from app.schemas import RegistrationResponse
+from app.schemas import MyRegistrationResponse, RegistrationResponse
 from app.services.tickets import create_ticket_with_retry
 
 router = APIRouter(tags=["Registrations"])
@@ -72,14 +73,17 @@ def register_for_event(
             )
             .with_for_update()
         )
-        if (
-            registration is not None
-            and registration.status == REGISTRATION_STATUS_REGISTERED
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Already registered for this event",
-            )
+        if registration is not None:
+            if registration.status == REGISTRATION_STATUS_REGISTERED:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Already registered for this event",
+                )
+            if registration.status == REGISTRATION_STATUS_CHECKED_IN:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="Already checked in for this event",
+                )
 
         active_registration_ids = db.scalars(
             select(Registration.id)
@@ -150,11 +154,20 @@ def cancel_registration(
             .where(
                 Registration.event_id == event_id,
                 Registration.user_id == current_user.id,
-                Registration.status == REGISTRATION_STATUS_REGISTERED,
             )
             .with_for_update()
         )
         if registration is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Registration not found",
+            )
+        if registration.status == REGISTRATION_STATUS_CHECKED_IN:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Checked-in registration cannot be cancelled",
+            )
+        if registration.status != REGISTRATION_STATUS_REGISTERED:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Active registration not found",
@@ -189,20 +202,31 @@ def cancel_registration(
 
 @router.get(
     "/api/registrations/me",
-    response_model=list[RegistrationResponse],
+    response_model=list[MyRegistrationResponse],
 )
 def list_my_registrations(
     current_user: User = Depends(attendee_only),
     db: Session = Depends(get_db),
-) -> list[Registration]:
+) -> list[dict]:
     try:
-        return list(
-            db.scalars(
-                select(Registration)
-                .where(Registration.user_id == current_user.id)
-                .order_by(Registration.created_at.desc(), Registration.id.desc())
-            ).all()
-        )
+        rows = db.execute(
+            select(
+                Registration,
+                Event.title.label("event_title"),
+                Event.status.label("event_status"),
+            )
+            .join(Event, Registration.event_id == Event.id)
+            .where(Registration.user_id == current_user.id)
+            .order_by(Registration.created_at.desc(), Registration.id.desc())
+        ).all()
+        return [
+            {
+                **registration.__dict__,
+                "event_title": event_title,
+                "event_status": event_status,
+            }
+            for registration, event_title, event_status in rows
+        ]
     except SQLAlchemyError:
         raise _database_error(db, "list current user") from None
 

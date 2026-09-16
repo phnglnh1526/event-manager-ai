@@ -57,3 +57,9 @@ class AnnouncementResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     published_at: datetime | None
+
+
+class MyAnnouncementResponse(AnnouncementResponse):
+    event_title: str
+    event_status: str
+    registration_status: str

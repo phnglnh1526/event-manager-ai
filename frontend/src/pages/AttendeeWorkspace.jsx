@@ -3,7 +3,8 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import EventAIChat from "../components/EventAIChat";
 import MyFeedback from "../components/MyFeedback";
 import MyTickets from "../components/MyTickets";
-import WorkspaceHeader from "../components/WorkspaceHeader";
+import AttendeeShell from "../components/attendee/AttendeeShell";
+import ProfilePage from "./ProfilePage";
 import { cancelMyRegistration, getAttendeeEvents, getMyRegistrations, registerForEvent } from "../services/api";
 import MyAnnouncementsPage from "./MyAnnouncementsPage";
 
@@ -12,6 +13,7 @@ const display = (value) => literal(value).replace("T", " ") || "—";
 
 const registrationStatusLabel = (registration, issue = "") => {
   if (issue === "already-registered" || registration?.status === "REGISTERED") return "Đã đăng ký";
+  if (registration?.status === "CHECKED_IN") return "Đã check-in";
   if (registration?.status === "CANCELLED") return "Đã hủy";
   return "Chưa đăng ký";
 };
@@ -21,6 +23,7 @@ const mapRegistrationError = (requestError) => {
   if (requestError?.status === 401) return { issue: "unauthorized", message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại." };
   if (requestError?.status === 403) return { issue: "forbidden", message: "Bạn không có quyền đăng ký sự kiện này." };
   if (requestError?.status === 404) return { issue: "unavailable", message: "Sự kiện không tồn tại hoặc không còn khả dụng." };
+  if (requestError?.status === 409 && detail.includes("already checked in")) return { issue: "already-checked-in", message: "Bạn đã check-in sự kiện này. Bạn không thể đăng ký lại." };
   if (requestError?.status === 409 && detail.includes("already registered")) return { issue: "already-registered", message: "Bạn đã đăng ký sự kiện này." };
   if (requestError?.status === 409 && detail.includes("full")) return { issue: "full", message: "Sự kiện đã đủ số lượng người tham dự." };
   if (requestError?.status === 409 && detail.includes("not open")) return { issue: "unavailable", message: "Sự kiện hiện không mở đăng ký." };
@@ -53,7 +56,7 @@ function RegistrationActionDialog({ mode, event, registration, busy, error, issu
   busyRef.current = busy;
   const isRegistration = mode === "register";
   const effectiveStatus = issue === "already-registered" ? "REGISTERED" : registration?.status;
-  const blockingIssue = ["already-registered", "full", "unavailable", "forbidden"].includes(issue);
+  const blockingIssue = ["already-registered", "already-checked-in", "full", "unavailable", "forbidden"].includes(issue);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -121,7 +124,7 @@ function RegistrationActionDialog({ mode, event, registration, busy, error, issu
         {error && <div id="registration-confirm-error" className="inline-message error-message registration-dialog-error" role="alert">{error}</div>}
         <div className="registration-confirm-actions">
           <button ref={cancelButtonRef} type="button" className="secondary-button" onClick={onClose} disabled={busy}>Hủy</button>
-          <button ref={confirmButtonRef} type="button" className={isRegistration ? "primary-button" : "danger-button"} onClick={onConfirm} disabled={busy || (isRegistration && (blockingIssue || effectiveStatus === "REGISTERED"))}>
+          <button ref={confirmButtonRef} type="button" className={isRegistration ? "primary-button" : "danger-button"} onClick={onConfirm} disabled={busy || (isRegistration && (blockingIssue || effectiveStatus === "REGISTERED" || effectiveStatus === "CHECKED_IN")) || (!isRegistration && effectiveStatus === "CHECKED_IN")}>
             {busy ? (isRegistration ? "Đang đăng ký..." : "Đang hủy...") : (isRegistration ? "Xác nhận đăng ký" : "Xác nhận hủy đăng ký")}
           </button>
         </div>
@@ -130,7 +133,7 @@ function RegistrationActionDialog({ mode, event, registration, busy, error, issu
   );
 }
 
-function AttendeeWorkspace({ token, currentUser, onLogout, onUnauthorized, onProfile }) {
+function AttendeeWorkspace({ token, currentUser, onLogout, onUnauthorized, onProfile, onUserUpdated }) {
   const [view, setView] = useState("events");
   const [events, setEvents] = useState([]);
   const [registrations, setRegistrations] = useState([]);
@@ -234,6 +237,9 @@ function AttendeeWorkspace({ token, currentUser, onLogout, onUnauthorized, onPro
   };
   const registrationAction = (event, registration) => {
     if (currentUser.role !== "ATTENDEE") return null;
+    if (registration?.status === "CHECKED_IN") return (
+      <span className="registration-status status-checked_in">✓ Đã check-in</span>
+    );
     if (registration?.status === "REGISTERED") return (
       <><span className="registration-status status-registered">Đã đăng ký</span><button type="button" className="danger-button" disabled={actionEventId === event.id} onClick={(clickEvent) => openConfirmation("cancel", event, registration, clickEvent.currentTarget)}>{actionEventId === event.id ? "Đang hủy..." : "Hủy đăng ký"}</button></>
     );
@@ -251,39 +257,137 @@ function AttendeeWorkspace({ token, currentUser, onLogout, onUnauthorized, onPro
     max_attendees: null,
   };
 
-  if (view === "tickets") return <div className="dashboard-shell attendee-workspace"><WorkspaceHeader currentUser={currentUser} activeView={view} onNavigate={setView} onProfile={onProfile} onLogout={onLogout} workspaceLabel="Attendee portal" /><main className="dashboard-main attendee-portal-main"><MyTickets token={token} events={events} registrations={registrations} onUnauthorized={onUnauthorized} onBrowseEvents={() => setView("events")}/></main></div>;
-  if (view === "feedback") return <div className="dashboard-shell attendee-workspace"><WorkspaceHeader currentUser={currentUser} activeView={view} onNavigate={setView} onProfile={onProfile} onLogout={onLogout} workspaceLabel="Attendee portal" /><main className="dashboard-main attendee-portal-main"><MyFeedback token={token} events={events} registrations={registrations} onUnauthorized={onUnauthorized}/></main></div>;
+  const [searchValue, setSearchValue] = useState("");
 
-  return (
-    <div className="dashboard-shell attendee-workspace">
-      <WorkspaceHeader currentUser={currentUser} activeView={view} onNavigate={setView} onProfile={onProfile} onLogout={onLogout} workspaceLabel="Attendee portal" />
-      {view === "announcements" ? (
+  const filteredEvents = !searchValue.trim()
+    ? events
+    : events.filter((event) => {
+        const query = searchValue.trim().toLowerCase();
+        return [event.title, event.description, event.location]
+          .filter(Boolean)
+          .some((value) => String(value).toLowerCase().includes(query));
+      });
+
+  const shellContent = (
+    <>
+      {view === "home" && (
+        <section>
+          <div className="attendee-welcome">
+            <div>
+              <p className="attendee-eyebrow">ATTENDEE PORTAL</p>
+              <h1>Xin chào, {currentUser.full_name} 👋</h1>
+              <p>Theo dõi sự kiện, vé, thông báo và trải nghiệm tham dự của bạn.</p>
+            </div>
+            <button type="button" className="attendee-primary-btn" onClick={() => setView("events")}>Khám phá sự kiện</button>
+          </div>
+          <div className="attendee-stat-grid">
+            <article className="attendee-stat-card"><span className="attendee-stat-icon blue">◎</span><div><strong>{registrations.filter((r) => r.status === "REGISTERED").length}</strong><span>Upcoming registrations</span></div></article>
+            <article className="attendee-stat-card"><span className="attendee-stat-icon green">✓</span><div><strong>{registrations.filter((r) => r.status === "CHECKED_IN").length}</strong><span>Checked in</span></div></article>
+            <article className="attendee-stat-card"><span className="attendee-stat-icon purple">▤</span><div><strong>{registrations.length}</strong><span>Total registrations</span></div></article>
+          </div>
+          <div className="attendee-panel attendee-home-callout" style={{ padding: "24px" }}>
+            <div className="panel-heading"><div><p className="attendee-eyebrow">YOUR JOURNEY</p><h2>Event journey</h2></div></div>
+            <div className="registration-card-list">
+              {registrations.slice(0, 4).map((item) => {
+                const event = eventMap.get(item.event_id);
+                return (
+                  <article className="registration-card" key={item.id}>
+                    <div className="registration-card-copy">
+                      <div className="registration-card-title"><h3>{event?.title || item.event_title || `Event #${item.event_id}`}</h3><span className={`attendee-pill attendee-pill-${String(item.status).toLowerCase()}`}>{registrationStatusLabel(item)}</span></div>
+                      <small>{event?.location || "Event location unavailable"}</small>
+                    </div>
+                    {item.status === "CHECKED_IN" && <span className="locked-note">✓ Feedback available</span>}
+                  </article>
+                );
+              })}
+              {registrations.length === 0 && <div className="attendee-empty"><h3>Chưa có sự kiện</h3><p>Khám phá và đăng ký sự kiện đầu tiên của bạn.</p><button type="button" className="attendee-primary-btn" onClick={() => setView("events")}>Discover Events</button></div>}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {view === "tickets" && (
+        <MyTickets token={token} events={events} registrations={registrations} onUnauthorized={onUnauthorized} onBrowseEvents={() => setView("events")}/>
+      )}
+
+      {view === "feedback" && (
+        <MyFeedback token={token} events={events} registrations={registrations} onUnauthorized={onUnauthorized}/>
+      )}
+
+      {view === "announcements" && (
         <MyAnnouncementsPage embedded token={token} currentUser={currentUser} onLogout={onLogout} onUnauthorized={onUnauthorized}/>
-      ) : (
-        <main className="dashboard-main attendee-portal-main">
+      )}
+
+      {view === "profile" && (
+        <ProfilePage
+          token={token}
+          currentUser={currentUser}
+          onUserUpdated={onUserUpdated}
+          onBack={() => setView("home")}
+          onLogout={onLogout}
+          onUnauthorized={onUnauthorized}
+        />
+      )}
+
+      {view === "events" && (
+        <>
           {error && <div className="inline-message error-message" role="alert">{error}</div>}
           {success && <div className="inline-message success-message attendee-success-toast" role="status" aria-live="polite"><span>{success}</span>{ticketReady && <button type="button" className="text-button" onClick={() => { setSuccess(""); setView("tickets"); }}>Xem vé của tôi</button>}</div>}
-          {view === "events" ? (
-            <>
-              <section className="dashboard-title-row"><div><p className="eyebrow">DISCOVER EVENTS</p><h1>Events</h1><p>Published events currently open for registration.</p></div></section>
-              {eventsLoading || registrationsLoading ? <div className="state-panel"><div className="app-loader"/><p>Loading events...</p></div> : events.length === 0 ? <div className="state-panel"><strong>No published events available.</strong></div> : (
-                <div className="attendee-event-grid">
-                  {events.map((event) => <article className={`attendee-event-card ${chatEvent?.id === event.id ? "selected" : ""}`} key={event.id}><span className="status-badge status-published">PUBLISHED</span><h2>{event.title}</h2><p>{event.description || "No description provided."}</p><dl><div><dt>Location</dt><dd>{event.location}</dd></div><div><dt>Schedule</dt><dd>{display(event.start_time)} – {display(event.end_time)}</dd></div><div><dt>Capacity</dt><dd>{event.max_attendees}</dd></div></dl><div className="attendee-event-actions"><button type="button" className="secondary-button" onClick={() => setChatEvent(event)}>Ask AI</button>{registrationAction(event, registrationMap.get(event.id))}</div></article>)}
-                  {chatEvent && <div className="attendee-ai-panel"><EventAIChat key={`attendee-ai-${chatEvent.id}`} event={chatEvent} token={token} onUnauthorized={onUnauthorized} onClose={() => setChatEvent(null)}/></div>}
+          <section className="attendee-section-header">
+            <div>
+              <p className="attendee-eyebrow">DISCOVER EVENTS</p>
+              <h1>Events</h1>
+              <p>Published events currently open for registration.</p>
+            </div>
+          </section>
+          {eventsLoading || registrationsLoading ? <div className="state-panel"><div className="app-loader"/><p>Loading events...</p></div> : filteredEvents.length === 0 ? <div className="attendee-panel attendee-empty"><h3>Không tìm thấy sự kiện</h3><p>Thử tìm kiếm bằng tên sự kiện, mô tả hoặc địa điểm khác.</p></div> : (
+            <div className="event-discovery-grid">
+              {filteredEvents.map((event) => <article className={`event-discovery-card ${chatEvent?.id === event.id ? "selected" : ""}`} key={event.id} onClick={() => setChatEvent(event)}>
+                <div className="event-card-media">
+                  <div className="event-art art-navy"><div className="event-art-grid" aria-hidden="true"/><span className="event-art-mark">EM</span></div>
                 </div>
-              )}
-            </>
-          ) : (
-            <>
-              <section className="dashboard-title-row"><div><p className="eyebrow">MY EVENTS</p><h1>My Registrations</h1></div></section>
-              {registrationsLoading ? <div className="state-panel"><div className="app-loader"/><p>Loading registrations...</p></div> : registrations.length === 0 ? <div className="state-panel"><strong>You have not registered for any events yet.</strong><button className="primary-button" onClick={() => setView("events")}>Browse Events</button></div> : <div className="my-registration-list">{registrations.map((item) => { const event = eventMap.get(item.event_id); const actionEvent = eventForRegistration(item, event); return <article key={item.id}><div><h2>{actionEvent.title}</h2><span className={`registration-status status-${item.status.toLowerCase()}`}>{registrationStatusLabel(item)}</span><p>Registered: {display(item.created_at)}</p></div>{currentUser.role !== "ATTENDEE" ? null : item.status === "REGISTERED" ? <button type="button" className="danger-button" disabled={actionEventId === item.event_id} onClick={(clickEvent) => openConfirmation("cancel", actionEvent, item, clickEvent.currentTarget)}>{actionEventId === item.event_id ? "Đang hủy..." : "Hủy đăng ký"}</button> : event ? <button type="button" className="primary-button" disabled={actionEventId === item.event_id} onClick={(clickEvent) => openConfirmation("register", event, item, clickEvent.currentTarget)}>{actionEventId === item.event_id ? "Đang đăng ký..." : "Đăng ký lại"}</button> : <span>Registration is currently closed.</span>}</article>; })}</div>}
-            </>
+                <div className="event-card-body">
+                  <div className="event-card-meta"><span>{display(event.start_time)}</span><span className="attendee-pill attendee-pill-published">PUBLISHED</span></div>
+                  <h3>{event.title}</h3>
+                  <p>{event.description || "No description provided."}</p>
+                  <div className="event-card-location"><span>⌖</span><span>{event.location || "Location unavailable"}</span></div>
+                  <div className="event-discovery-actions">
+                    {registrationAction(event, registrationMap.get(event.id))}
+                    <button type="button" className="attendee-outline-btn" onClick={(e) => { e.stopPropagation(); setChatEvent(event); }}>Ask AI</button>
+                  </div>
+                </div>
+              </article>)}
+              {chatEvent && <div className="attendee-ai-modal"><div className="attendee-ai-modal-inner"><button type="button" className="attendee-ai-close" onClick={() => setChatEvent(null)}>×</button><EventAIChat key={`attendee-ai-${chatEvent.id}`} event={chatEvent} token={token} onUnauthorized={onUnauthorized} onClose={() => setChatEvent(null)}/></div></div>}
+            </div>
           )}
-        </main>
+        </>
       )}
+
+      {view === "registrations" && (
+        <>
+          {error && <div className="inline-message error-message" role="alert">{error}</div>}
+          {success && <div className="inline-message success-message attendee-success-toast" role="status" aria-live="polite"><span>{success}</span>{ticketReady && <button type="button" className="text-button" onClick={() => { setSuccess(""); setView("tickets"); }}>Xem vé của tôi</button>}</div>}
+          <section className="attendee-section-header"><div><p className="attendee-eyebrow">MY EVENTS</p><h1>My Registrations</h1><p>The events you registered for, with their current status.</p></div></section>
+          {registrationsLoading ? <div className="state-panel"><div className="app-loader"/><p>Loading registrations...</p></div> : registrations.length === 0 ? <div className="attendee-panel attendee-empty"><h3>You have not registered for any events yet.</h3><button className="attendee-primary-btn" onClick={() => setView("events")}>Browse Events</button></div> : <div className="registration-card-list">{registrations.map((item) => { const event = eventMap.get(item.event_id); const actionEvent = eventForRegistration(item, event); return <article className="registration-card" key={item.id}><div className="registration-card-copy"><div className="registration-card-title"><h3>{actionEvent.title}</h3><span className={`attendee-pill attendee-pill-${String(item.status).toLowerCase()}`}>{registrationStatusLabel(item)}</span></div><p>Registered: {display(item.created_at)}</p></div>{item.status === "CHECKED_IN" ? <span className="locked-note">✓ Đã check-in · Không thể hủy hoặc đăng ký lại</span> : item.status === "REGISTERED" ? <button type="button" className="attendee-danger-outline" disabled={actionEventId === item.event_id} onClick={(e) => openConfirmation("cancel", actionEvent, item, e.currentTarget)}>{actionEventId === item.event_id ? "Đang hủy..." : "Hủy đăng ký"}</button> : event ? <button type="button" className="attendee-primary-btn" disabled={actionEventId === item.event_id} onClick={(e) => openConfirmation("register", event, item, e.currentTarget)}>{actionEventId === item.event_id ? "Đang đăng ký..." : "Đăng ký lại"}</button> : <span>Registration is currently closed.</span>}</article>; })}</div>}
+        </>
+      )}
+    </>
+  );
+
+  return (
+    <AttendeeShell
+      currentUser={currentUser}
+      activeView={view}
+      onNavigate={setView}
+      onLogout={onLogout}
+      searchValue={searchValue}
+      onSearchChange={setSearchValue}
+    >
+      {shellContent}
       {confirmation && <RegistrationActionDialog key={`${confirmation.mode}-${confirmation.event.id}`} mode={confirmation.mode} event={confirmation.event} registration={confirmationRegistration} busy={actionEventId === confirmation.event.id} error={confirmationError} issue={confirmationIssue} returnFocus={returnFocusRef.current} onClose={closeConfirmation} onConfirm={confirmRegistrationAction} />}
-    </div>
+    </AttendeeShell>
   );
 }
+
 
 export default AttendeeWorkspace;

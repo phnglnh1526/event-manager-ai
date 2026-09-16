@@ -299,6 +299,10 @@ export function getMyTicketQr(ticketId, token, signal) {
   return apiBlobRequest(`/api/tickets/me/${encodeURIComponent(ticketId)}/qr`, { token, signal });
 }
 
+export function getMyFeedbacks(token, signal) {
+  return apiRequest("/api/feedbacks/me", { token, signal });
+}
+
 export function getMyEventFeedback(eventId, token, signal) {
   return apiRequest(`/api/events/${encodeURIComponent(eventId)}/feedbacks/me`, { token, signal });
 }
@@ -325,4 +329,45 @@ export function checkBackendHealth() {
 
 export function checkDatabaseHealth() {
   return apiRequest("/api/health/database");
+}
+
+
+export async function apiFileUpload(path, { token, file, signal } = {}) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+      signal,
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") throw error;
+    throw new ApiError("Unable to connect to the server.");
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json") ? await response.json() : null;
+  if (!response.ok) {
+    const detail = typeof data?.detail === "string" ? data.detail : "Request failed.";
+    throw new ApiError(detail, response.status, data?.detail ?? null);
+  }
+  return data;
+}
+
+export function uploadEventImage(eventId, file, token, signal) {
+  return apiFileUpload(`/api/events/${encodeURIComponent(eventId)}/image`, {
+    token,
+    file,
+    signal,
+  });
+}
+
+export function getAssetUrl(path) {
+  if (!path) return `${API_BASE_URL}/uploads/events/default-event.svg`;
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }

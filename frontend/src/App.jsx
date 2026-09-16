@@ -91,12 +91,12 @@ function App() {
     return <LoginPage onLogin={handleLogin} onRegister={() => { setAuthView("register"); setAuthError(""); }} loading={authLoading} error={authError} />;
   }
 
-  if (activeView === "profile") {
+  if (activeView === "profile" && currentUser.role !== "ATTENDEE") {
     return <ProfilePage token={token} currentUser={currentUser} onUserUpdated={setCurrentUser} onBack={() => setActiveView("analytics")} onLogout={clearAuth} onUnauthorized={clearAuth}/>;
   }
 
   if (currentUser.role === "ATTENDEE") {
-    return <AttendeeWorkspace token={token} currentUser={currentUser} onLogout={clearAuth} onUnauthorized={clearAuth} onProfile={() => setActiveView("profile")} />;
+    return <AttendeeWorkspace token={token} currentUser={currentUser} onLogout={clearAuth} onUnauthorized={clearAuth} onProfile={() => setActiveView("profile")} onUserUpdated={setCurrentUser} />;
   }
 
   if (currentUser.role === "STAFF") {

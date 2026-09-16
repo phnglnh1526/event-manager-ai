@@ -8,7 +8,7 @@ and never overwrites existing user passwords.
 import logging
 import os
 from collections import Counter
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Callable
 
 from sqlalchemy import delete, func, inspect, select, text
@@ -99,6 +99,19 @@ EVENTS = (
         "PUBLISHED",
         120,
     ),
+)
+
+
+RICH_DEMO_EVENTS = (
+    ("Admin Demo Event 01", "admin-demo@example.com", "Demo event created by Admin. AI, analytics and feedback showcase.", "ICTU - Admin Hall 01", datetime(2026, 11, 2, 9), datetime(2026, 11, 2, 12), "PUBLISHED", 150),
+    ("Admin Demo Event 02", "admin-demo@example.com", "Demo event created by Admin for management dashboard.", "ICTU - Admin Hall 02", datetime(2026, 11, 4, 13), datetime(2026, 11, 4, 17), "PUBLISHED", 150),
+    ("Admin Demo Event 03", "admin-demo@example.com", "Demo event created by Admin with a full feedback dataset.", "ICTU - Admin Hall 03", datetime(2026, 11, 6, 8, 30), datetime(2026, 11, 6, 12, 30), "PUBLISHED", 150),
+    ("Organizer A Demo Event 01", "organizer-a-demo@example.com", "Demo event owned by Organizer A.", "ICTU - Organizer A Hall 01", datetime(2026, 11, 9, 9), datetime(2026, 11, 9, 12), "PUBLISHED", 150),
+    ("Organizer A Demo Event 02", "organizer-a-demo@example.com", "Demo event owned by Organizer A.", "ICTU - Organizer A Hall 02", datetime(2026, 11, 11, 13), datetime(2026, 11, 11, 17), "PUBLISHED", 150),
+    ("Organizer A Demo Event 03", "organizer-a-demo@example.com", "Demo event owned by Organizer A.", "ICTU - Organizer A Hall 03", datetime(2026, 11, 13, 8, 30), datetime(2026, 11, 13, 12, 30), "PUBLISHED", 150),
+    ("Organizer B Demo Event 01", "organizer-b-demo@example.com", "Demo event owned by Organizer B.", "ICTU - Organizer B Hall 01", datetime(2026, 11, 16, 9), datetime(2026, 11, 16, 12), "PUBLISHED", 150),
+    ("Organizer B Demo Event 02", "organizer-b-demo@example.com", "Demo event owned by Organizer B.", "ICTU - Organizer B Hall 02", datetime(2026, 11, 18, 13), datetime(2026, 11, 18, 17), "PUBLISHED", 150),
+    ("Organizer B Demo Event 03", "organizer-b-demo@example.com", "Demo event owned by Organizer B.", "ICTU - Organizer B Hall 03", datetime(2026, 11, 20, 8, 30), datetime(2026, 11, 20, 12, 30), "PUBLISHED", 150),
 )
 
 MAIN_SPEAKERS = (
@@ -394,6 +407,102 @@ def verify_reregistration(db, second_event, attendee):
     return original
 
 
+def ensure_bulk_feedback_users(db, users, password_resolver: Callable[[str, str], str]):
+    """Ensure 100 reusable demo attendees exist for the rich feedback dataset."""
+    for index in range(1, 101):
+        email = f"attendee-{index:03d}-demo@example.com"
+        user = one_or_none(db, User, User.email == email)
+        if user is None:
+            password = password_resolver("ATTENDEE", email)
+            if not password or len(password) < 8 or len(password.encode("utf-8")) > 72:
+                raise RuntimeError(
+                    "A valid demo attendee password is required to create the 100-feedback dataset"
+                )
+            user = User(
+                email=email,
+                full_name=f"Attendee {index:03d} Demo",
+                role="ATTENDEE",
+                is_active=True,
+                password_hash=hash_password(password),
+            )
+            db.add(user)
+            db.flush()
+        users[email] = user
+
+
+def reconcile_rich_demo_feedback(db, events, users):
+    """Create ~100 checked-in attendees and one feedback per attendee/event."""
+    attendees = [
+        users[f"attendee-{index:03d}-demo@example.com"]
+        for index in range(1, 101)
+    ]
+    staff = users["staff-a-demo@example.com"]
+    rating_pattern = (5, 5, 4, 4, 4, 3, 3, 5, 4, 5)
+    comments = (
+        "Nội dung rất hữu ích và được tổ chức tốt.",
+        "Diễn giả trình bày rõ ràng, trải nghiệm tốt.",
+        "Không gian ổn, lịch trình hợp lý.",
+        "Phần thực hành thực tế và dễ theo dõi.",
+        "Tổ chức chuyên nghiệp, check-in nhanh.",
+        "Nội dung ổn nhưng phần hỏi đáp nên dài hơn.",
+        "Một vài phiên hơi dày nhưng nhìn chung tốt.",
+        "Chủ đề sát với nhu cầu học tập và công việc.",
+        "Trải nghiệm tốt, sẽ tham gia các sự kiện tiếp theo.",
+        "Sự kiện được chuẩn bị chu đáo.",
+    )
+    created = 0
+    for event in events:
+        for index, attendee in enumerate(attendees, start=1):
+            registration = one_or_none(
+                db, Registration,
+                Registration.event_id == event.id,
+                Registration.user_id == attendee.id,
+            )
+            if registration is None:
+                registration = Registration(
+                    event_id=event.id, user_id=attendee.id, status="CHECKED_IN"
+                )
+                db.add(registration)
+                db.flush()
+            else:
+                registration.status = "CHECKED_IN"
+
+            ticket = one_or_none(db, Ticket, Ticket.registration_id == registration.id)
+            if ticket is None:
+                ticket = create_ticket_with_retry(db, registration.id, "ACTIVE")
+                db.flush()
+            else:
+                ticket.status = "ACTIVE"
+
+            checkin = one_or_none(db, CheckIn, CheckIn.ticket_id == ticket.id)
+            if checkin is None:
+                db.add(CheckIn(ticket_id=ticket.id, checked_in_by_user_id=staff.id))
+                db.flush()
+            else:
+                checkin.checked_in_by_user_id = staff.id
+
+            feedback = one_or_none(
+                db, Feedback,
+                Feedback.event_id == event.id,
+                Feedback.user_id == attendee.id,
+            )
+            rating = rating_pattern[(index - 1) % len(rating_pattern)]
+            comment = comments[(index - 1) % len(comments)]
+            if feedback is None:
+                feedback = Feedback(
+                    event_id=event.id,
+                    user_id=attendee.id,
+                    rating=rating,
+                    comment=comment,
+                )
+                db.add(feedback)
+                created += 1
+            else:
+                feedback.rating = rating
+                feedback.comment = comment
+    return created
+
+
 def reconcile_announcements(db, event, creator):
     desired = {item[0] for item in ANNOUNCEMENTS}
     for title, content, status in ANNOUNCEMENTS:
@@ -524,11 +633,41 @@ def run_seed(
         users = get_or_create_users(
             db, password_resolver, refresh_demo_passwords=refresh_demo_passwords
         )
+        ensure_bulk_feedback_users(db, users, password_resolver)
         if "organizer-a-demo@example.com" not in users:
             logger.warning("Organizer A demo user not available; skipping event seeding")
             db.commit()
             return {"users": users}
         events = upsert_events(db, users)
+        rich_events = {}
+        for title, owner_email, description, location, start, end, event_status, capacity in RICH_DEMO_EVENTS:
+            if owner_email not in users:
+                continue
+            event = one_or_none(db, Event, Event.title == title)
+            if event is None:
+                event = Event(
+                    title=title,
+                    owner_id=users[owner_email].id,
+                    description=description,
+                    location=location,
+                    start_time=start,
+                    end_time=end,
+                    status=event_status,
+                    max_attendees=capacity,
+                )
+                db.add(event)
+                db.flush()
+            else:
+                event.owner_id = users[owner_email].id
+                event.description = description
+                event.location = location
+                event.start_time = start
+                event.end_time = end
+                event.status = event_status
+                event.max_attendees = capacity
+            rich_events[title] = event
+        reconcile_rich_demo_feedback(db, list(rich_events.values()), users)
+        events.update(rich_events)
         main = events[MAIN_EVENT_TITLE]
         second = events["AI Technology Conference 2026"]
         main_speakers = reconcile_speakers(db, main, MAIN_SPEAKERS)

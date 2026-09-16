@@ -7,12 +7,11 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import require_roles
 from app.api.event_helpers import get_event_for_management
-from app.core.event_status import EVENT_STATUS_COMPLETED, EVENT_STATUS_PUBLISHED
-from app.core.registration_status import REGISTRATION_STATUS_REGISTERED
+from app.core.registration_status import REGISTRATION_STATUS_CHECKED_IN
 from app.core.roles import ROLE_ADMIN, ROLE_ATTENDEE, ROLE_ORGANIZER
 from app.db.database import get_db
 from app.models import CheckIn, Event, Feedback, Registration, Ticket, User
-from app.schemas import FeedbackCreate, FeedbackResponse, FeedbackUpdate
+from app.schemas import FeedbackCreate, FeedbackResponse, FeedbackUpdate, MyFeedbackResponse
 
 router = APIRouter(tags=["Feedbacks"])
 logger = logging.getLogger(__name__)
@@ -49,7 +48,7 @@ def _require_feedback_eligibility(
         .where(
             Registration.event_id == event_id,
             Registration.user_id == user_id,
-            Registration.status == REGISTRATION_STATUS_REGISTERED,
+            Registration.status == REGISTRATION_STATUS_CHECKED_IN,
         )
     )
     if eligible is None:
@@ -87,12 +86,7 @@ def create_feedback(
     current_user: User = Depends(attendee_only),
     db: Session = Depends(get_db),
 ) -> Feedback:
-    event = _get_event(event_id, db)
-    if event.status not in {EVENT_STATUS_PUBLISHED, EVENT_STATUS_COMPLETED}:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Event is not available for feedback",
-        )
+    _get_event(event_id, db)
     try:
         _require_feedback_eligibility(event_id, current_user.id, db)
         if db.scalar(
@@ -180,6 +174,44 @@ def delete_own_feedback(
     except SQLAlchemyError:
         raise _database_error(db, "delete") from None
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get(
+    "/api/feedbacks/me",
+    response_model=list[MyFeedbackResponse],
+)
+def list_my_feedbacks(
+    current_user: User = Depends(attendee_only),
+    db: Session = Depends(get_db),
+) -> list[dict]:
+    try:
+        rows = db.execute(
+            select(
+                Feedback,
+                Event.title.label("event_title"),
+                Event.status.label("event_status"),
+                Registration.status.label("registration_status"),
+            )
+            .join(Event, Feedback.event_id == Event.id)
+            .join(
+                Registration,
+                (Registration.event_id == Feedback.event_id)
+                & (Registration.user_id == current_user.id),
+            )
+            .where(Feedback.user_id == current_user.id)
+            .order_by(Feedback.updated_at.desc(), Feedback.id.desc())
+        ).all()
+        return [
+            {
+                **feedback.__dict__,
+                "event_title": event_title,
+                "event_status": event_status,
+                "registration_status": registration_status,
+            }
+            for feedback, event_title, event_status, registration_status in rows
+        ]
+    except SQLAlchemyError:
+        raise _database_error(db, "list attendee feedback history") from None
 
 
 @router.get(

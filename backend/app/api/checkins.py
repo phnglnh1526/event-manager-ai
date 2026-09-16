@@ -8,7 +8,10 @@ from sqlalchemy.orm import Session
 from app.api.dependencies import require_roles
 from app.api.event_helpers import get_event_for_management
 from app.core.event_status import EVENT_STATUS_PUBLISHED
-from app.core.registration_status import REGISTRATION_STATUS_REGISTERED
+from app.core.registration_status import (
+    REGISTRATION_STATUS_CHECKED_IN,
+    REGISTRATION_STATUS_REGISTERED,
+)
 from app.core.roles import ROLE_ADMIN, ROLE_ORGANIZER, ROLE_STAFF
 from app.core.ticket_status import TICKET_STATUS_ACTIVE
 from app.db.database import get_db
@@ -91,6 +94,11 @@ def create_checkin(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Ticket not found"
             )
+        if db.scalar(select(CheckIn.id).where(CheckIn.ticket_id == ticket.id)):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Ticket already checked in",
+            )
         if registration.status != REGISTRATION_STATUS_REGISTERED:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -101,16 +109,12 @@ def create_checkin(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Ticket is not active",
             )
-        if db.scalar(select(CheckIn.id).where(CheckIn.ticket_id == ticket.id)):
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Ticket already checked in",
-            )
 
         checkin = CheckIn(
             ticket_id=ticket.id,
             checked_in_by_user_id=current_user.id,
         )
+        registration.status = REGISTRATION_STATUS_CHECKED_IN
         db.add(checkin)
         db.commit()
         db.refresh(checkin)
