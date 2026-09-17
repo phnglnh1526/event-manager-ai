@@ -16,6 +16,7 @@ from app.models import (  # noqa: F401
     Schedule,
     Speaker,
     Ticket,
+    UploadedFile,
     User,
 )
 from app.services.tickets import create_ticket_with_retry

@@ -6,6 +6,19 @@ from app.models.registration import Registration
 from app.models.schedule import Schedule
 from app.models.speaker import Speaker
 from app.models.ticket import Ticket
+from app.models.uploaded_file import UploadedFile
 from app.models.user import User
 
-__all__ = ["Announcement", "CheckIn", "Event", "Feedback", "Registration", "Schedule", "Speaker", "Ticket", "User"]
+__all__ = [
+    "Announcement",
+    "CheckIn",
+    "Event",
+    "Feedback",
+    "Registration",
+    "Schedule",
+    "Speaker",
+    "Ticket",
+    "UploadedFile",
+    "User",
+]
+

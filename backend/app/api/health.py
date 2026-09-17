@@ -15,7 +15,7 @@ def health_check() -> dict[str, str]:
     return {
         "status": "ok",
         "service": settings.app_name,
-        "version": "v2-catbox-1",
+        "version": "v2-db-storage-1",
     }
 
 
