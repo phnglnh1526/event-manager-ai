@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import AnnouncementForm from "../components/AnnouncementForm";
 import EventSelector from "../components/EventSelector";
 import WorkspaceHeader from "../components/WorkspaceHeader";
+import { ANNOUNCEMENT_STATUS_LABELS } from "../locales/vi";
 import {
   createAnnouncement,
   deleteAnnouncement,
@@ -13,16 +14,24 @@ import {
 } from "../services/api";
 
 const EMPTY_FORM = { title: "", content: "" };
-const EMPTY_AI = { expanded: false, purpose: "", keyPoints: "", tone: "PROFESSIONAL", loading: false, error: "", source: "" };
-const dateFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
-const formatDate = (value) => value ? dateFormatter.format(new Date(value)) : "—";
+const EMPTY_AI = {
+  expanded: false,
+  purpose: "",
+  keyPoints: "",
+  tone: "PROFESSIONAL",
+  loading: false,
+  error: "",
+  source: "",
+};
+const dateFormatter = new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" });
+const formatDate = (value) => (value ? dateFormatter.format(new Date(value)) : "—");
 
 const aiErrorMessage = (error) => {
-  if (error.status === 403) return "You do not have permission to generate an AI draft.";
-  if (error.status === 502) return "AI draft could not be generated. Please try again.";
-  if (error.status === 503) return "AI service is currently unavailable.";
-  if (error.status === 0) return "Unable to connect to the AI service.";
-  return "Unable to generate an AI draft.";
+  if (error.status === 403) return "Bạn không có quyền tạo bản nháp bằng AI.";
+  if (error.status === 502) return "Không thể phân tích dữ liệu. Vui lòng thử lại.";
+  if (error.status === 503) return "Dịch vụ AI hiện không khả dụng.";
+  if (error.status === 0) return "Không thể kết nối đến dịch vụ AI.";
+  return "Không thể phân tích dữ liệu.";
 };
 
 function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activeView, onViewChange }) {
@@ -34,6 +43,7 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
   const [eventsError, setEventsError] = useState("");
   const [listError, setListError] = useState("");
   const [reload, setReload] = useState(0);
+
   const [editor, setEditor] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [formDirty, setFormDirty] = useState(false);
@@ -41,54 +51,86 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState("");
   const [ai, setAi] = useState(EMPTY_AI);
+
   const aiSequence = useRef(0);
   const aiInFlight = useRef(false);
 
-  const handleError = useCallback((error, setter, fallback) => {
-    if (error.status === 401) { onUnauthorized(); return; }
-    setter(error.status === 403 ? "You do not have permission to manage this resource." : fallback);
-  }, [onUnauthorized]);
+  const handleError = useCallback(
+    (error, setter, fallback) => {
+      if (error.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      setter(error.status === 403 ? "Bạn không có quyền quản lý tài nguyên này." : fallback);
+    },
+    [onUnauthorized]
+  );
 
+  // Load events
   useEffect(() => {
     const controller = new AbortController();
-    setEventsLoading(true); setEventsError("");
+    setEventsLoading(true);
+    setEventsError("");
     getEvents(token, controller.signal)
       .then((data) => {
         setEvents(data);
-        setSelectedEventId((current) => data.some((item) => item.id === current) ? current : (data[0]?.id || ""));
+        setSelectedEventId((current) =>
+          data.some((item) => item.id === current) ? current : data[0]?.id || ""
+        );
       })
-      .catch((error) => { if (error.name !== "AbortError") handleError(error, setEventsError, "Unable to load events."); })
-      .finally(() => { if (!controller.signal.aborted) setEventsLoading(false); });
+      .catch((error) => {
+        if (error.name !== "AbortError") handleError(error, setEventsError, "Không thể tải danh sách sự kiện.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setEventsLoading(false);
+      });
     return () => controller.abort();
   }, [token, handleError]);
 
+  // Load announcements for selected event
   useEffect(() => {
-    setAnnouncements([]); setListError("");
-    if (!selectedEventId) { setListLoading(false); return undefined; }
+    setAnnouncements([]);
+    setListError("");
+    if (!selectedEventId) {
+      setListLoading(false);
+      return undefined;
+    }
     const controller = new AbortController();
     setListLoading(true);
     getAnnouncements(selectedEventId, token, controller.signal)
       .then(setAnnouncements)
-      .catch((error) => { if (error.name !== "AbortError") handleError(error, setListError, "Unable to load announcements."); })
-      .finally(() => { if (!controller.signal.aborted) setListLoading(false); });
+      .catch((error) => {
+        if (error.name !== "AbortError") handleError(error, setListError, "Không thể tải danh sách thông báo.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setListLoading(false);
+      });
     return () => controller.abort();
   }, [selectedEventId, token, reload, handleError]);
 
   const resetEditor = () => {
-    aiSequence.current += 1; aiInFlight.current = false;
-    setEditor(null); setForm(EMPTY_FORM); setFormDirty(false); setFormError(""); setAi(EMPTY_AI);
+    aiSequence.current += 1;
+    aiInFlight.current = false;
+    setEditor(null);
+    setForm(EMPTY_FORM);
+    setFormDirty(false);
+    setFormError("");
+    setAi(EMPTY_AI);
   };
 
-  const confirmDiscard = () => !formDirty || window.confirm("Discard unsaved changes?");
+  const confirmDiscard = () => !formDirty || window.confirm("Hủy các thay đổi chưa lưu?");
 
   const handleEventChange = (eventId) => {
     if (!confirmDiscard()) return;
-    resetEditor(); setSuccess(""); setSelectedEventId(eventId);
+    resetEditor();
+    setSuccess("");
+    setSelectedEventId(eventId);
   };
 
   const openNew = () => {
     if (!selectedEventId || !confirmDiscard()) return;
-    resetEditor(); setEditor({ id: null, status: "DRAFT" });
+    resetEditor();
+    setEditor({ id: null, status: "DRAFT" });
   };
 
   const openEdit = (announcement) => {
@@ -98,101 +140,377 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
     setForm({ title: announcement.title, content: announcement.content });
   };
 
-  const closeEditor = () => { if (confirmDiscard()) resetEditor(); };
+  const closeEditor = () => {
+    if (confirmDiscard()) resetEditor();
+  };
+
   const handleViewChange = (view) => {
     if (!confirmDiscard()) return;
     resetEditor();
     onViewChange(view);
   };
-  const changeForm = (field, value) => { setForm((current) => ({ ...current, [field]: value })); setFormDirty(true); setFormError(""); };
-  const changeAi = (field, value) => setAi((current) => ({ ...current, [field]: value, error: field === "error" ? value : "" }));
+
+  const changeForm = (field, value) => {
+    setForm((current) => ({ ...current, [field]: value }));
+    setFormDirty(true);
+    setFormError("");
+  };
+
+  const changeAi = (field, value) =>
+    setAi((current) => ({ ...current, [field]: value, error: field === "error" ? value : "" }));
 
   const validateForm = () => {
-    const title = form.title.trim(); const content = form.content.trim();
-    if (title.length < 3 || title.length > 200) return "Title must contain 3 to 200 characters.";
-    if (!content || content.length > 5000) return "Content is required and must not exceed 5000 characters.";
+    const title = form.title.trim();
+    const content = form.content.trim();
+    if (title.length < 3 || title.length > 200) return "Tiêu đề thông báo phải từ 3 đến 200 ký tự.";
+    if (!content || content.length > 5000) return "Nội dung là bắt buộc và không được vượt quá 5.000 ký tự.";
     return "";
   };
 
   const save = async (targetStatus) => {
     if (!editor || saving) return;
     const validation = validateForm();
-    if (validation) { setFormError(validation); return; }
+    if (validation) {
+      setFormError(validation);
+      return;
+    }
     const payload = { title: form.title.trim(), content: form.content.trim() };
     if (targetStatus) payload.status = targetStatus;
-    setSaving(true); setFormError(""); setSuccess("");
+    setSaving(true);
+    setFormError("");
+    setSuccess("");
     try {
-      const result = editor.id == null
-        ? await createAnnouncement(selectedEventId, { ...payload, status: targetStatus || "DRAFT" }, token)
-        : await updateAnnouncement(selectedEventId, editor.id, payload, token);
-      setSuccess(result.status === "PUBLISHED" ? "Announcement published." : editor.id == null ? "Announcement saved as draft." : targetStatus === "DRAFT" ? "Announcement unpublished." : "Announcement updated.");
-      resetEditor(); setReload((value) => value + 1);
+      const result =
+        editor.id == null
+          ? await createAnnouncement(selectedEventId, { ...payload, status: targetStatus || "DRAFT" }, token)
+          : await updateAnnouncement(selectedEventId, editor.id, payload, token);
+      setSuccess(
+        result.status === "PUBLISHED"
+          ? "Đã đăng thông báo thành công tới người tham dự."
+          : editor.id == null
+          ? "Đã lưu bản nháp thông báo thành công."
+          : targetStatus === "DRAFT"
+          ? "Đã hủy đăng thông báo (chuyển về Bản nháp)."
+          : "Cập nhật thông báo thành công."
+      );
+      resetEditor();
+      setReload((value) => value + 1);
     } catch (error) {
-      if (error.status === 401) { onUnauthorized(); return; }
-      setFormError(editor.id == null ? "Unable to save announcement." : "Unable to update announcement.");
-    } finally { setSaving(false); }
+      if (error.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      setFormError(editor.id == null ? "Không thể lưu thông báo." : "Không thể cập nhật thông báo.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const remove = async () => {
-    if (!editor?.id || saving || !window.confirm("Delete this announcement?")) return;
-    setSaving(true); setFormError("");
+    if (!editor?.id || saving || !window.confirm("Xóa thông báo này? Thao tác này không thể hoàn tác.")) return;
+    setSaving(true);
+    setFormError("");
     try {
       await deleteAnnouncement(selectedEventId, editor.id, token);
-      setSuccess("Announcement deleted."); resetEditor(); setReload((value) => value + 1);
+      setSuccess("Đã xóa thông báo thành công.");
+      resetEditor();
+      setReload((value) => value + 1);
     } catch (error) {
-      if (error.status === 401) { onUnauthorized(); return; }
-      setFormError("Unable to delete announcement.");
-    } finally { setSaving(false); }
+      if (error.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      setFormError("Không thể xóa thông báo.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const generateDraft = async () => {
     if (!selectedEventId || aiInFlight.current) return;
     const purpose = ai.purpose.trim();
-    const keyPoints = ai.keyPoints.split("\n").map((item) => item.trim()).filter(Boolean);
-    if (purpose.length < 5 || purpose.length > 500) { setAi((current) => ({ ...current, error: "Purpose must contain 5 to 500 characters." })); return; }
-    if (keyPoints.length > 10 || keyPoints.some((item) => item.length > 300)) { setAi((current) => ({ ...current, error: "Use at most 10 key points, each up to 300 characters." })); return; }
-    if (formDirty && (form.title.trim() || form.content.trim()) && !window.confirm("Generate a new AI draft? Current form content will be replaced.")) return;
+    const keyPoints = ai.keyPoints
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean);
+    if (purpose.length < 5 || purpose.length > 500) {
+      setAi((current) => ({ ...current, error: "Mục đích phải từ 5 đến 500 ký tự." }));
+      return;
+    }
+    if (keyPoints.length > 10 || keyPoints.some((item) => item.length > 300)) {
+      setAi((current) => ({ ...current, error: "Nhập tối đa 10 ý chính, mỗi ý không quá 300 ký tự." }));
+      return;
+    }
+    if (formDirty && (form.title.trim() || form.content.trim()) && !window.confirm("Tạo bản nháp AI mới? Nội dung hiện tại sẽ được cập nhật.")) {
+      return;
+    }
     aiInFlight.current = true;
-    const sequence = aiSequence.current + 1; aiSequence.current = sequence;
+    const sequence = aiSequence.current + 1;
+    aiSequence.current = sequence;
     const requestedEventId = selectedEventId;
     setAi((current) => ({ ...current, loading: true, error: "" }));
     try {
-      const draft = await generateAnnouncementDraft(requestedEventId, { purpose, key_points: keyPoints, tone: ai.tone }, token);
+      const draft = await generateAnnouncementDraft(
+        requestedEventId,
+        { purpose, key_points: keyPoints, tone: ai.tone },
+        token
+      );
       if (sequence !== aiSequence.current || requestedEventId !== selectedEventId) return;
-      if (!draft || typeof draft.title !== "string" || typeof draft.content !== "string" || !["mock", "openai"].includes(draft.source)) {
-        setAi((current) => ({ ...current, error: "AI response could not be displayed." })); return;
+      if (
+        !draft ||
+        typeof draft.title !== "string" ||
+        typeof draft.content !== "string" ||
+        !["mock", "openai"].includes(draft.source)
+      ) {
+        setAi((current) => ({ ...current, error: "Không thể hiển thị kết quả từ AI." }));
+        return;
       }
-      setForm({ title: draft.title, content: draft.content }); setFormDirty(true);
+      // Populate fields for user to review and edit
+      setForm({ title: draft.title, content: draft.content });
+      setFormDirty(true);
       setAi((current) => ({ ...current, source: draft.source, error: "" }));
     } catch (error) {
       if (sequence !== aiSequence.current) return;
-      if (error.status === 401) { onUnauthorized(); return; }
+      if (error.status === 401) {
+        onUnauthorized();
+        return;
+      }
       setAi((current) => ({ ...current, error: aiErrorMessage(error) }));
     } finally {
-      if (sequence === aiSequence.current) { aiInFlight.current = false; setAi((current) => ({ ...current, loading: false })); }
+      if (sequence === aiSequence.current) {
+        aiInFlight.current = false;
+        setAi((current) => ({ ...current, loading: false }));
+      }
     }
   };
 
+  const selectedEvent = events.find((e) => e.id === selectedEventId) || null;
+
   return (
     <div className="dashboard-shell">
-      <WorkspaceHeader currentUser={currentUser} activeView={activeView} onNavigate={handleViewChange} onLogout={onLogout} workspaceLabel="Event management workspace" />
+      <WorkspaceHeader
+        currentUser={currentUser}
+        activeView={activeView}
+        onNavigate={handleViewChange}
+        onLogout={onLogout}
+        workspaceLabel="Truyền thông & Thông báo sự kiện"
+      />
+
       <main className="dashboard-main announcements-page">
-        <section className="dashboard-title-row"><div><p className="eyebrow">EVENT COMMUNICATIONS</p><h1>Announcements</h1><p>Create, publish, and manage plain-text updates for event attendees.</p></div>{!eventsLoading && !eventsError && <EventSelector events={events} selectedEventId={selectedEventId} onChange={handleEventChange} disabled={eventsLoading || saving || ai.loading} />}</section>
-        <div className="announcement-toolbar"><div>{success && <div className="inline-message success-message" role="status">{success}</div>}</div><button type="button" className="primary-button" onClick={openNew} disabled={!selectedEventId || eventsLoading}>+ New Announcement</button></div>
-        {eventsLoading && <div className="state-panel"><div className="app-loader" /><p>Loading events...</p></div>}
-        {eventsError && <div className="state-panel error-panel"><strong>Unable to load events</strong><p>{eventsError}</p></div>}
-        {!eventsLoading && !eventsError && events.length === 0 && <div className="state-panel"><strong>No events available.</strong><p>Create an event before adding announcements.</p></div>}
-        {selectedEventId && !eventsLoading && !eventsError && <div className={`announcement-workspace ${editor ? "editor-open" : ""}`}>
-          <section className="announcement-list-panel"><div className="panel-heading"><div><p className="eyebrow">EVENT MESSAGES</p><h3>Announcement list</h3></div><strong>{announcements.length}</strong></div>
-            {listLoading && <div className="compact-state"><div className="app-loader" /><span>Loading announcements...</span></div>}
-            {listError && <div className="inline-message error-message" role="alert">{listError}<button type="button" className="text-button" onClick={() => setReload((value) => value + 1)}>Retry</button></div>}
-            {!listLoading && !listError && announcements.length === 0 && <div className="compact-state"><strong>No announcements yet.</strong><span>Create a draft or publish an update for this event.</span></div>}
-            {!listLoading && announcements.length > 0 && <div className="announcement-list">{announcements.map((item) => <article className={`announcement-list-item ${editor?.id === item.id ? "selected" : ""}`} key={item.id}><div className="announcement-item-heading"><span className={`status-badge status-${item.status.toLowerCase()}`}>{item.status}</span><button type="button" className="text-button" onClick={() => openEdit(item)}>Edit</button></div><h4>{item.title}</h4><p className="content-preview">{item.content}</p><div className="announcement-dates"><span>Updated {formatDate(item.updated_at)}</span>{item.published_at && <span>Published {formatDate(item.published_at)}</span>}</div></article>)}</div>}
-          </section>
-          {editor && <AnnouncementForm editor={editor} form={form} onFormChange={changeForm} onClose={closeEditor} onSave={save} onDelete={remove} saving={saving} formError={formError} ai={ai} onAiChange={changeAi} onGenerate={generateDraft} />}
-        </div>}
+        {/* Banner with Event Selector */}
+        <section className="dashboard-hero-banner" style={{ padding: "1.25rem 1.5rem" }}>
+          <div className="hero-banner-content">
+            <div className="hero-banner-headings">
+              <p className="hero-eyebrow">TRUYỀN THÔNG SỰ KIỆN</p>
+              <h1 style={{ fontSize: "1.5rem", margin: "0.2rem 0" }}>Thông báo sự kiện</h1>
+              <p className="hero-banner-desc">
+                Soạn thảo, cập nhật và phát hành thông báo tức thì đến người tham dự với sự hỗ trợ của AI.
+              </p>
+            </div>
+
+            <div className="hero-event-selector">
+              {!eventsLoading && !eventsError && (
+                <EventSelector
+                  events={events}
+                  selectedEventId={selectedEventId}
+                  onChange={handleEventChange}
+                  disabled={eventsLoading || saving || ai.loading}
+                />
+              )}
+            </div>
+          </div>
+        </section>
+
+        {success && <div className="inline-message success-message page-message" role="status">{success}</div>}
+
+        {/* Toolbar */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "1.25rem",
+            flexWrap: "wrap",
+            gap: "1rem",
+          }}
+        >
+          <div>
+            {selectedEvent && (
+              <span style={{ fontSize: "0.85rem", color: "#a5b4fc" }}>
+                Đang xem thông báo của: <strong style={{ color: "#ffffff" }}>{selectedEvent.title}</strong>
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            className="primary-button"
+            onClick={openNew}
+            disabled={!selectedEventId || eventsLoading}
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Tạo thông báo mới
+          </button>
+        </div>
+
+        {eventsLoading && (
+          <div className="state-panel">
+            <div className="app-loader" />
+            <p>Đang tải danh sách sự kiện...</p>
+          </div>
+        )}
+
+        {eventsError && (
+          <div className="state-panel error-panel">
+            <strong>Không thể tải sự kiện</strong>
+            <p>{eventsError}</p>
+          </div>
+        )}
+
+        {!eventsLoading && !eventsError && events.length === 0 && (
+          <div className="state-panel">
+            <strong>Không có sự kiện nào khả dụng.</strong>
+            <p>Hãy tạo sự kiện trước khi soạn thông báo.</p>
+          </div>
+        )}
+
+        {/* Announcements Main Workspace (List + Editor) */}
+        {selectedEventId && !eventsLoading && !eventsError && (
+          <div className="announcement-workspace-grid">
+            {/* Left Column: Announcements Cards List */}
+            <div className="announcements-cards-column">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingBottom: "0.5rem",
+                  borderBottom: "1px solid #1a203f",
+                }}
+              >
+                <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#ffffff", margin: 0 }}>
+                  Danh sách thông báo ({announcements.length})
+                </h3>
+              </div>
+
+              {listLoading && (
+                <div className="compact-state">
+                  <div className="app-loader" />
+                  <span>Đang tải thông báo...</span>
+                </div>
+              )}
+
+              {listError && (
+                <div className="inline-message error-message" role="alert">
+                  {listError}
+                  <button type="button" className="text-button" onClick={() => setReload((v) => v + 1)}>
+                    Thử lại
+                  </button>
+                </div>
+              )}
+
+              {!listLoading && !listError && announcements.length === 0 && (
+                <div className="compact-state">
+                  <strong>Chưa có thông báo nào cho sự kiện này.</strong>
+                  <p>Nhấp vào "+ Tạo thông báo mới" để gửi bản tin đầu tiên đến người tham dự.</p>
+                </div>
+              )}
+
+              {!listLoading && announcements.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {announcements.map((item) => {
+                    const isSelected = editor?.id === item.id;
+                    const statusClass = `status-badge-${item.status.toLowerCase()}`;
+
+                    return (
+                      <article
+                        key={item.id}
+                        className={`announcement-modern-card ${isSelected ? "selected" : ""}`}
+                      >
+                        <div className="announcement-card-head">
+                          <span className={`mgmt-card-status-badge ${statusClass}`} style={{ position: "static" }}>
+                            {ANNOUNCEMENT_STATUS_LABELS[item.status] || item.status}
+                          </span>
+                          <button
+                            type="button"
+                            className="speaker-btn-edit"
+                            onClick={() => openEdit(item)}
+                          >
+                            Chỉnh sửa
+                          </button>
+                        </div>
+
+                        <h4 className="announcement-card-title">{item.title}</h4>
+                        <p className="announcement-card-preview">{item.content}</p>
+
+                        <div className="announcement-card-meta">
+                          <span>Khởi tạo: {formatDate(item.created_at || item.updated_at)}</span>
+                          {item.published_at && (
+                            <span style={{ color: "#4ade80", fontWeight: 600 }}>
+                              ✓ Đã đăng: {formatDate(item.published_at)}
+                            </span>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Right Column: Announcement Editor (With AI Assistant) */}
+            <div>
+              {editor ? (
+                <AnnouncementForm
+                  editor={editor}
+                  form={form}
+                  onFormChange={changeForm}
+                  onClose={closeEditor}
+                  onSave={save}
+                  onDelete={remove}
+                  saving={saving}
+                  formError={formError}
+                  ai={ai}
+                  onAiChange={changeAi}
+                  onGenerate={generateDraft}
+                />
+              ) : (
+                <div
+                  className="form-section-card"
+                  style={{
+                    textAlign: "center",
+                    padding: "3rem 1.5rem",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <div className="ai-sparkle-icon" style={{ width: 48, height: 48, margin: "0 auto 1rem" }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                    </svg>
+                  </div>
+                  <h4 style={{ color: "#ffffff", margin: "0 0 0.5rem" }}>Trình biên tập thông báo</h4>
+                  <p style={{ color: "#94a3b8", fontSize: "0.85rem", maxWidth: 360, margin: "0 0 1.25rem" }}>
+                    Chọn một thông báo từ danh sách bên trái để xem và sửa, hoặc bấm nút tạo thông báo mới với sự hỗ trợ của AI.
+                  </p>
+                  <button type="button" className="primary-button" onClick={openNew} disabled={!selectedEventId}>
+                    + Soạn thông báo mới
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </main>
-      <footer>Event Manager AI · Announcements are delivered through the attendee workspace.</footer>
+
+      <footer className="dashboard-footer">
+        Event Manager AI · Thông báo được bảo mật và truyền tải tức thời tới tài khoản người tham dự.
+      </footer>
     </div>
   );
 }

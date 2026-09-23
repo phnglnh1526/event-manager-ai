@@ -13,7 +13,15 @@ from app.schemas.announcement import (
 )
 from app.schemas.auth import ChangePasswordRequest, LoginRequest, ProfileUpdateRequest, TokenResponse
 from app.schemas.checkin import CheckInEventResponse, CheckInRequest, CheckInResponse
-from app.schemas.event import AttendeeEventResponse, EventCreate, EventResponse, EventUpdate
+from app.schemas.event import (
+    AttendeeEventDetailResponse,
+    AttendeeEventResponse,
+    AttendeeScheduleItem,
+    AttendeeSpeakerItem,
+    EventCreate,
+    EventResponse,
+    EventUpdate,
+)
 from app.schemas.feedback import FeedbackCreate, FeedbackResponse, FeedbackUpdate
 from app.schemas.registration import RegistrationResponse
 from app.schemas.schedule import ScheduleCreate, ScheduleResponse, ScheduleUpdate

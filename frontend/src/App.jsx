@@ -47,7 +47,7 @@ function App() {
         sessionStorage.removeItem(TOKEN_STORAGE_KEY);
         setToken(null);
         setCurrentUser(null);
-        setAuthError(error.status === 0 ? error.message : "Your session has expired. Please sign in again.");
+        setAuthError(error.status === 0 ? error.message : "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
       })
       .finally(() => setAuthLoading(false));
 
@@ -60,7 +60,7 @@ function App() {
     try {
       const auth = await login(email, password);
       sessionStorage.setItem(TOKEN_STORAGE_KEY, auth.access_token);
-      const user = await getCurrentUser(auth.access_token);
+      const user = auth.user || (await getCurrentUser(auth.access_token));
       setToken(auth.access_token);
       setCurrentUser(user);
       return true;
@@ -68,21 +68,21 @@ function App() {
       sessionStorage.removeItem(TOKEN_STORAGE_KEY);
       setToken(null);
       setCurrentUser(null);
-      let message = "Unable to sign in.";
+      let message = "Không thể đăng nhập.";
       if (error.status === 400) {
-        message = error.message || "Invalid request.";
+        message = error.message || "Yêu cầu không hợp lệ.";
       } else if (error.status === 401) {
-        message = "Invalid email or password.";
+        message = "Email hoặc mật khẩu không chính xác.";
       } else if (error.status === 403) {
-        message = "Account is inactive or access is forbidden.";
+        message = "Tài khoản đã bị vô hiệu hóa hoặc không có quyền truy cập.";
       } else if (error.status === 422) {
-        message = error.message || "Invalid email format or missing login fields.";
+        message = error.message || "Định dạng email không hợp lệ hoặc thiếu thông tin.";
       } else if (error.status >= 500) {
-        message = "Server error. Please try again later.";
+        message = "Lỗi máy chủ. Vui lòng thử lại sau.";
       } else if (error.status === 0 || !error.status) {
-        message = "Unable to connect to the server.";
+        message = "Không thể kết nối tới máy chủ.";
       } else {
-        message = error.message || "Unable to sign in.";
+        message = error.message || "Không thể đăng nhập.";
       }
       setAuthError(message);
       return false;
@@ -95,7 +95,7 @@ function App() {
     return (
       <main className="centered-page" aria-live="polite">
         <div className="app-loader" />
-        <p>Restoring your session...</p>
+        <p>Đang khôi phục phiên đăng nhập...</p>
       </main>
     );
   }
@@ -122,10 +122,10 @@ function App() {
       <main className="centered-page">
         <section className="access-card">
           <span className="access-icon" aria-hidden="true">!</span>
-          <p className="eyebrow">ACCESS RESTRICTED</p>
-          <h1>Access denied</h1>
-          <p>You do not have permission to view analytics.</p>
-          <button type="button" className="primary-button" onClick={clearAuth}>Logout</button>
+          <p className="eyebrow">TRUY CẬP BỊ HẠN CHẾ</p>
+          <h1>Truy cập bị từ chối</h1>
+          <p>Bạn không có quyền truy cập vào không gian làm việc này.</p>
+          <button type="button" className="primary-button" onClick={clearAuth}>Đăng xuất</button>
         </section>
       </main>
     );

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.announcement_status import ANNOUNCEMENT_STATUS_DRAFT
@@ -9,6 +9,9 @@ from app.db.base import Base
 
 class Announcement(Base):
     __tablename__ = "announcements"
+    __table_args__ = (
+        Index("ix_announcements_event_id_status", "event_id", "status"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     event_id: Mapped[int] = mapped_column(
@@ -24,6 +27,7 @@ class Announcement(Base):
         nullable=False,
         default=ANNOUNCEMENT_STATUS_DRAFT,
         server_default=ANNOUNCEMENT_STATUS_DRAFT,
+        index=True,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.now()

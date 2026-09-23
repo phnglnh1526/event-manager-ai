@@ -31,13 +31,13 @@ export async function apiRequest(path, { token, body, headers, ...options } = {}
     });
   } catch (error) {
     if (error?.name === "AbortError") throw error;
-    throw new ApiError("Unable to connect to the server.");
+    throw new ApiError("Không thể kết nối đến máy chủ.");
   }
 
   const contentType = response.headers.get("content-type") || "";
   const data = contentType.includes("application/json") ? await response.json() : null;
   if (!response.ok) {
-    let detail = "Request failed.";
+    let detail = "Yêu cầu thất bại.";
     if (typeof data?.detail === "string") {
       detail = data.detail;
     } else if (Array.isArray(data?.detail) && data.detail.length > 0) {
@@ -58,14 +58,14 @@ export async function apiBlobRequest(path, { token, signal } = {}) {
     response = await fetch(`${API_BASE_URL}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {}, signal });
   } catch (error) {
     if (error?.name === "AbortError") throw error;
-    throw new ApiError("Unable to connect to the server.");
+    throw new ApiError("Không thể kết nối đến máy chủ.");
   }
   if (!response.ok) {
     const contentType = response.headers.get("content-type") || "";
     const data = contentType.includes("application/json") ? await response.json() : null;
-    throw new ApiError(typeof data?.detail === "string" ? data.detail : "Request failed.", response.status);
+    throw new ApiError(typeof data?.detail === "string" ? data.detail : "Yêu cầu thất bại.", response.status);
   }
-  if (!(response.headers.get("content-type") || "").includes("image/png")) throw new ApiError("Invalid QR image response.", 502);
+  if (!(response.headers.get("content-type") || "").includes("image/png")) throw new ApiError("Phản hồi hình ảnh mã QR không hợp lệ.", 502);
   return response.blob();
 }
 
@@ -136,13 +136,13 @@ export async function uploadEventImage(file, token) {
     });
   } catch (error) {
     if (error?.name === "AbortError") throw error;
-    throw new ApiError("Unable to connect to the server.");
+    throw new ApiError("Không thể kết nối đến máy chủ.");
   }
 
   const contentType = response.headers.get("content-type") || "";
   const data = contentType.includes("application/json") ? await response.json() : null;
   if (!response.ok) {
-    const detail = typeof data?.detail === "string" ? data.detail : "Upload failed.";
+    const detail = typeof data?.detail === "string" ? data.detail : "Tải ảnh lên thất bại.";
     throw new ApiError(detail, response.status, data?.detail ?? null);
   }
   return data;
@@ -312,6 +312,11 @@ export function getMyAnnouncements(token, signal) {
 export function getAttendeeEvents(token, signal) {
   return apiRequest("/api/attendee/events", { token, signal });
 }
+
+export function getAttendeeEventDetail(eventId, token, signal) {
+  return apiRequest(`/api/attendee/events/${encodeURIComponent(eventId)}`, { token, signal });
+}
+
 
 export function getMyRegistrations(token, signal) {
   return apiRequest("/api/registrations/me", { token, signal });

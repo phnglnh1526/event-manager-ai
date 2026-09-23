@@ -1,0 +1,486 @@
+/* ==========================================================================
+   EVENT MANAGER AI V2 — STANDARDIZED COMPONENT STYLES
+   Theme: Dark Event Technology & AI Intelligence SaaS
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. BUTTONS
+   -------------------------------------------------------------------------- */
+.primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 42px;
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: #ffffff;
+  background: var(--gradient-accent);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+  box-shadow: 0 2px 10px rgba(217, 70, 239, 0.28);
+}
+
+.primary-button:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: var(--glow-accent), 0 4px 14px rgba(217, 70, 239, 0.35);
+}
+
+.primary-button:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 42px;
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  background: var(--surface-muted);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.secondary-button:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
+  color: var(--danger);
+  background: var(--danger-soft);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.danger-button:hover:not(:disabled) {
+  background: rgba(244, 63, 94, 0.22);
+  border-color: var(--danger);
+  box-shadow: 0 0 14px rgba(244, 63, 94, 0.25);
+}
+
+.warning-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-md);
+  color: var(--warning);
+  background: var(--warning-soft);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.warning-button:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: var(--warning);
+}
+
+.text-button {
+  border: 0;
+  padding: var(--space-1) var(--space-2);
+  color: var(--accent);
+  background: transparent;
+  font-size: 0.825rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.text-button:hover:not(:disabled) {
+  color: var(--accent-pink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.compact-button {
+  min-height: 34px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. FORM CONTROLS: INPUT, SELECT, TEXTAREA
+   -------------------------------------------------------------------------- */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="datetime-local"],
+select,
+textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  background: var(--surface-muted);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--border-focus);
+  background: var(--surface-raised);
+  box-shadow: var(--focus-ring);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--bg-secondary);
+}
+
+select option {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   3. CARDS & SURFACES
+   -------------------------------------------------------------------------- */
+.panel-card,
+.summary-panel,
+.profile-card,
+.access-card,
+.staff-checkin-card,
+.login-card,
+.register-card,
+.speaker-card,
+.schedule-card,
+.feedback-card,
+.ticket-card,
+.ticket-detail-panel,
+.event-ai-chat {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--card-shadow);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+/* Subtle glow card on interactive state */
+.panel-card:hover,
+.speaker-card:hover,
+.schedule-card:hover,
+.ticket-card:hover:not(.selected) {
+  border-color: rgba(217, 70, 239, 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   4. BADGES & CHIPS
+   -------------------------------------------------------------------------- */
+.status-badge,
+.user-role-badge,
+.user-status-badge,
+.ticket-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.status-badge.status-published,
+.ticket-status.status-active,
+.user-status-badge.active {
+  color: var(--success);
+  background: var(--success-soft);
+  border: 1px solid var(--success-border);
+}
+
+.status-badge.status-draft,
+.user-status-badge.pending {
+  color: var(--warning);
+  background: var(--warning-soft);
+  border: 1px solid var(--warning-border);
+}
+
+.status-badge.status-cancelled,
+.ticket-status.status-void,
+.user-status-badge.inactive {
+  color: var(--danger);
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+}
+
+.status-badge.status-completed {
+  color: var(--accent-purple);
+  background: rgba(139, 92, 246, 0.14);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+}
+
+.user-role-badge.role-admin {
+  color: var(--accent-pink);
+  background: rgba(236, 72, 153, 0.14);
+  border: 1px solid rgba(236, 72, 153, 0.35);
+}
+
+.user-role-badge.role-staff {
+  color: var(--accent-cyan);
+  background: rgba(6, 182, 212, 0.14);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+}
+
+.user-role-badge.role-attendee {
+  color: var(--text-secondary);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+}
+
+.you-badge {
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  color: #ffffff;
+  background: var(--accent-magenta);
+  font-size: 0.65rem;
+  font-weight: 800;
+  box-shadow: 0 0 10px rgba(217, 70, 239, 0.4);
+}
+
+/* --------------------------------------------------------------------------
+   5. MODALS & DIALOGS
+   -------------------------------------------------------------------------- */
+.drawer-backdrop,
+.dialog-backdrop,
+.qr-scanner-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(5, 8, 22, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.confirm-dialog,
+.password-reset-dialog,
+.qr-scanner-modal,
+.registration-confirm-dialog {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg), 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.user-drawer {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  box-shadow: -16px 0 48px rgba(0, 0, 0, 0.65);
+}
+
+/* --------------------------------------------------------------------------
+   6. DROPDOWNS & POPOVERS
+   -------------------------------------------------------------------------- */
+.workspace-popover,
+.workspace-mobile-menu {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-lg), 0 0 24px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(16px);
+}
+
+.workspace-popover button:hover,
+.workspace-mobile-menu-links button:hover:not(.active),
+.workspace-mobile-menu-footer button:hover {
+  background: var(--surface-hover);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   7. TABLES
+   -------------------------------------------------------------------------- */
+.users-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  background: var(--surface);
+}
+
+.users-table th {
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.users-table td {
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.users-table tbody tr {
+  transition: background-color var(--transition-fast);
+}
+
+.users-table tbody tr:hover {
+  background: var(--surface-hover);
+}
+
+/* --------------------------------------------------------------------------
+   8. TOOLTIPS & FEEDBACK MESSAGES
+   -------------------------------------------------------------------------- */
+.inline-message {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  line-height: 1.45;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.error-message,
+.form-error {
+  border: 1px solid var(--danger-border);
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.success-message {
+  border: 1px solid var(--success-border);
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.field-help {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.field-error {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.72rem;
+  color: var(--danger);
+  font-weight: 650;
+}
+
+/* --------------------------------------------------------------------------
+   9. SKELETONS & LOADERS
+   -------------------------------------------------------------------------- */
+.app-loader {
+  width: 30px;
+  height: 30px;
+  margin: 0 auto var(--space-3);
+  border: 3px solid var(--border);
+  border-top-color: var(--accent-magenta);
+  border-radius: 50%;
+  animation: app-spin 0.8s linear infinite;
+  box-shadow: 0 0 14px rgba(217, 70, 239, 0.3);
+}
+
+@keyframes app-spin {
+  to { transform: rotate(360deg); }
+}
+
+.user-skeleton span {
+  background: linear-gradient(90deg, var(--surface-muted) 25%, var(--surface-hover) 50%, var(--surface-muted) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s infinite ease-in-out;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* --------------------------------------------------------------------------
+   10. EMPTY STATES
+   -------------------------------------------------------------------------- */
+.state-panel,
+.compact-state,
+.users-empty {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: clamp(32px, 5vw, 48px);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.state-panel strong,
+.compact-state strong,
+.users-empty strong {
+  color: var(--text-primary);
+  font-size: 1.05rem;
+}
+
+.state-panel p,
+.users-empty p {
+  color: var(--text-muted);
+  max-width: 440px;
+  margin: 0;
+  font-size: 0.88rem;
+}

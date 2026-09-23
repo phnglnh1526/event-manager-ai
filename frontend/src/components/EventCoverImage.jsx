@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-export function EventCoverImage({ src, alt = "Event cover", className = "", fallbackClassName = "" }) {
+export function EventCoverImage({ src, alt = "Ảnh sự kiện", className = "", fallbackClassName = "" }) {
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {

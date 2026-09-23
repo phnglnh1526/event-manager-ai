@@ -57,12 +57,15 @@ async def lifespan(_: FastAPI):
     yield
 
 
+from app.core.middleware import PerformanceTimingMiddleware
+
 app = FastAPI(
     title="Event Manager AI V2 API",
     version="0.1.0",
     lifespan=lifespan,
 )
 
+app.add_middleware(PerformanceTimingMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=list(settings.cors_origins),

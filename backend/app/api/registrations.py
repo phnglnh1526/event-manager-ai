@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -81,15 +81,18 @@ def register_for_event(
                 detail="Already registered for this event",
             )
 
-        active_registration_ids = db.scalars(
-            select(Registration.id)
-            .where(
-                Registration.event_id == event_id,
-                Registration.status == REGISTRATION_STATUS_REGISTERED,
+        active_registration_count = (
+            db.scalar(
+                select(func.count(Registration.id))
+                .where(
+                    Registration.event_id == event_id,
+                    Registration.status == REGISTRATION_STATUS_REGISTERED,
+                )
+                .with_for_update()
             )
-            .with_for_update()
-        ).all()
-        if len(active_registration_ids) >= event.max_attendees:
+            or 0
+        )
+        if active_registration_count >= event.max_attendees:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Event is full",

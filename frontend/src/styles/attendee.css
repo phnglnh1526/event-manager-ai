@@ -1,0 +1,1129 @@
+/* ==========================================================================
+   EVENT MANAGER AI V2 — ATTENDEE EXPERIENCE STYLES
+   Theme: Modern Dark Tech SaaS, Mobile-First, AI Event Assistant
+   ========================================================================== */
+
+/* --- 1. ATTENDEE HERO & OVERVIEW --- */
+.attendee-hero {
+  position: relative;
+  background: linear-gradient(135deg, rgba(16, 20, 41, 0.95), rgba(13, 16, 36, 0.98));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  margin-bottom: 1.75rem;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.attendee-hero::before {
+  content: "";
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(217, 70, 239, 0.16) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 70%);
+  pointer-events: none;
+  filter: blur(40px);
+}
+
+.attendee-hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+  z-index: 1;
+}
+
+.attendee-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  background: rgba(217, 70, 239, 0.12);
+  border: 1px solid rgba(217, 70, 239, 0.3);
+  color: #f0abfc;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.attendee-hero-badge::before {
+  content: "✨";
+  font-size: 0.8rem;
+}
+
+.attendee-hero h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 0.4rem 0;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.attendee-hero p {
+  color: var(--text-secondary);
+  font-size: 0.925rem;
+  margin: 0;
+  max-width: 580px;
+  line-height: 1.5;
+}
+
+/* Quick Stat Pills */
+.attendee-quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.attendee-stat-card {
+  background: rgba(13, 16, 36, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-lg);
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.attendee-stat-card:hover {
+  background: rgba(21, 25, 50, 0.8);
+  border-color: rgba(217, 70, 239, 0.3);
+  transform: translateY(-2px);
+}
+
+.attendee-stat-card.active {
+  border-color: var(--accent-magenta);
+  background: rgba(217, 70, 239, 0.1);
+}
+
+.attendee-stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(217, 70, 239, 0.14);
+  color: #f0abfc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.attendee-stat-meta span {
+  display: block;
+  font-size: 0.725rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.attendee-stat-meta strong {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+/* --- 2. SEARCH & FILTER TOOLBAR --- */
+.attendee-search-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.attendee-search-input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+}
+
+.attendee-search-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.attendee-search-input {
+  width: 100%;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem 0.65rem 2.4rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.attendee-search-input:focus {
+  outline: none;
+  border-color: var(--accent-magenta);
+  box-shadow: 0 0 0 3px rgba(217, 70, 239, 0.18);
+}
+
+.attendee-filter-chips {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.attendee-chip {
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.attendee-chip:hover {
+  background: var(--surface-hover);
+  color: var(--text-primary);
+}
+
+.attendee-chip.active {
+  background: var(--accent-magenta);
+  border-color: var(--accent-magenta);
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(217, 70, 239, 0.35);
+}
+
+/* --- 3. SECTION HEADINGS --- */
+.attendee-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 1.75rem 0 1rem 0;
+}
+
+.attendee-section-heading h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.attendee-section-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* --- 4. FEATURED EVENT CARD --- */
+.attendee-featured-card {
+  position: relative;
+  background: linear-gradient(145deg, #101429 0%, #151936 100%);
+  border: 1px solid rgba(217, 70, 239, 0.35);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  margin-bottom: 2rem;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 20px rgba(217, 70, 239, 0.12);
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  transition: all 0.25s ease;
+}
+
+@media (max-width: 768px) {
+  .attendee-featured-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+.attendee-featured-media {
+  position: relative;
+  min-height: 220px;
+  overflow: hidden;
+  background: #080b1a;
+}
+
+.attendee-featured-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.attendee-featured-card:hover .attendee-featured-media img {
+  transform: scale(1.03);
+}
+
+.attendee-featured-overlay-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(5, 8, 22, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(217, 70, 239, 0.4);
+  color: #f0abfc;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.attendee-featured-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.attendee-featured-body h3 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+}
+
+.attendee-featured-desc {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0 0 1rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.attendee-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.825rem;
+  color: var(--text-muted);
+}
+
+.attendee-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.attendee-meta-item strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.attendee-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* --- 5. EVENT DISCOVERY GRID --- */
+.attendee-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.attendee-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.attendee-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(217, 70, 239, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 16px rgba(217, 70, 239, 0.1);
+}
+
+.attendee-card-media {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #080b1a;
+  overflow: hidden;
+}
+
+.attendee-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.attendee-card:hover .attendee-card-media img {
+  transform: scale(1.03);
+}
+
+.attendee-card-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  backdrop-filter: blur(6px);
+  background: rgba(8, 11, 26, 0.85);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.attendee-card-badge.status-registered {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.5);
+  color: #86efac;
+}
+
+.attendee-card-badge.status-open {
+  background: rgba(217, 70, 239, 0.2);
+  border-color: rgba(217, 70, 239, 0.4);
+  color: #f0abfc;
+}
+
+.attendee-card-body {
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.attendee-card-body h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.attendee-card-desc {
+  color: var(--text-secondary);
+  font-size: 0.825rem;
+  line-height: 1.45;
+  margin: 0 0 1rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.attendee-card-meta {
+  margin-top: auto;
+  border-top: 1px solid var(--border-muted);
+  padding-top: 0.75rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.775rem;
+  color: var(--text-muted);
+}
+
+.attendee-card-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-secondary);
+}
+
+.attendee-card-meta-item strong {
+  color: var(--text-primary);
+}
+
+.attendee-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+/* --- 6. EVENT DETAIL MODAL --- */
+.attendee-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 22, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.attendee-detail-modal {
+  background: #0d1024;
+  border: 1px solid #1e2548;
+  border-radius: var(--radius-xl);
+  max-width: 740px;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 30px rgba(217, 70, 239, 0.15);
+  animation: modalSlideUp 0.25s ease-out;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.attendee-detail-hero {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  background: #080b1a;
+  overflow: hidden;
+}
+
+.attendee-detail-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.attendee-detail-hero-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(5, 8, 22, 0.2) 0%, rgba(13, 16, 36, 0.95) 90%, #0d1024 100%);
+}
+
+.attendee-detail-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(5, 8, 22, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.attendee-detail-close:hover {
+  background: var(--accent-magenta);
+  border-color: var(--accent-magenta);
+  transform: rotate(90deg);
+}
+
+.attendee-detail-body {
+  padding: 1.5rem;
+}
+
+.attendee-detail-title-group {
+  margin-bottom: 1.25rem;
+}
+
+.attendee-detail-title-group h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0.35rem 0 0.5rem 0;
+  line-height: 1.25;
+}
+
+.attendee-detail-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  background: #11152e;
+  border: 1px solid #1e2548;
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.attendee-detail-meta-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.attendee-detail-meta-item svg {
+  color: var(--accent-magenta);
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.attendee-detail-meta-item span {
+  display: block;
+  font-size: 0.725rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.attendee-detail-meta-item strong {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.attendee-detail-section {
+  margin-bottom: 1.75rem;
+}
+
+.attendee-detail-section-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.75rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid #1e2548;
+  padding-bottom: 0.5rem;
+}
+
+.attendee-detail-desc-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Speakers in detail */
+.attendee-speakers-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.attendee-speaker-item {
+  background: #11152e;
+  border: 1px solid #1e2548;
+  border-radius: var(--radius-md);
+  padding: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.attendee-speaker-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-magenta), var(--accent-purple));
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.attendee-speaker-info strong {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.attendee-speaker-info span {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Schedule timeline in detail */
+.attendee-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.attendee-timeline::before {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: #1e2548;
+}
+
+.attendee-timeline-item {
+  position: relative;
+  background: #11152e;
+  border: 1px solid #1e2548;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+}
+
+.attendee-timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -1.25rem;
+  top: 1rem;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-magenta);
+  border: 2px solid #0d1024;
+  box-shadow: 0 0 6px rgba(217, 70, 239, 0.6);
+}
+
+.attendee-timeline-time {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #f0abfc;
+  margin-bottom: 0.2rem;
+}
+
+.attendee-timeline-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.attendee-timeline-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  display: flex;
+  gap: 0.75rem;
+}
+
+.attendee-detail-footer {
+  position: sticky;
+  bottom: 0;
+  background: rgba(13, 16, 36, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #1e2548;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  z-index: 10;
+}
+
+/* --- 7. MY REGISTRATIONS LIST --- */
+.my-registrations-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.my-registration-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.my-registration-card:hover {
+  border-color: rgba(217, 70, 239, 0.3);
+  background: var(--surface-raised);
+}
+
+.my-registration-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 240px;
+}
+
+.my-registration-info h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.my-registration-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.my-registration-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* --- 8. AI CHATBOT (TRỢ LÝ SỰ KIỆN AI) --- */
+.event-ai-chat {
+  background: #0d1024;
+  border: 1px solid #1e2548;
+  border-radius: var(--radius-xl);
+  display: flex;
+  flex-direction: column;
+  height: 540px;
+  max-height: 80vh;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.12);
+  overflow: hidden;
+}
+
+.event-ai-heading {
+  background: #11152e;
+  border-bottom: 1px solid #1e2548;
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.event-ai-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.event-ai-bot-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 1.1rem;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
+
+.event-ai-status-indicator {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  margin-right: 0.35rem;
+}
+
+.event-ai-conversation {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  scroll-behavior: smooth;
+}
+
+.event-ai-message {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 85%;
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.event-ai-message.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.event-ai-message.ai {
+  align-self: flex-start;
+}
+
+.event-ai-avatar-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 0.725rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.event-ai-message.user .event-ai-avatar-badge {
+  background: linear-gradient(135deg, var(--accent-magenta), var(--accent-pink));
+  color: #ffffff;
+}
+
+.event-ai-message.ai .event-ai-avatar-badge {
+  background: #1e2448;
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.event-ai-bubble {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.event-ai-message.user .event-ai-bubble {
+  background: linear-gradient(135deg, #9333ea, #c026d3);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.event-ai-message.ai .event-ai-bubble {
+  background: #151936;
+  border: 1px solid #1e2548;
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+.event-ai-bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Typing State */
+.event-ai-typing {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1rem;
+  background: #151936;
+  border: 1px solid #1e2548;
+  border-radius: var(--radius-lg);
+  align-self: flex-start;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c084fc;
+  animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+.typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1.1); opacity: 1; }
+}
+
+/* Suggestions */
+.event-ai-suggestions {
+  padding: 0.6rem 1.25rem;
+  background: #080b1a;
+  border-top: 1px solid #161b36;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  overflow-x: auto;
+}
+
+.event-ai-suggestions p {
+  font-size: 0.725rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.event-ai-suggestion-btn {
+  background: #11152e;
+  border: 1px solid #1e2548;
+  color: var(--text-secondary);
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.event-ai-suggestion-btn:hover {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: #a855f7;
+  color: #ffffff;
+}
+
+/* Form */
+.event-ai-form {
+  padding: 0.85rem 1.25rem;
+  background: #11152e;
+  border-top: 1px solid #1e2548;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.event-ai-form input {
+  flex: 1;
+  background: #080b1a;
+  border: 1px solid #1e2548;
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.event-ai-form input:focus {
+  outline: none;
+  border-color: #a855f7;
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+}
+
+/* --- 9. MOBILE FIRST OPTIMIZATIONS (375px, 390px, 430px) --- */
+@media (max-width: 480px) {
+  .attendee-hero {
+    padding: 1rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .attendee-hero h1 {
+    font-size: 1.35rem;
+  }
+
+  .attendee-hero p {
+    font-size: 0.825rem;
+  }
+
+  .attendee-quick-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .attendee-stat-card {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .attendee-stat-meta strong {
+    font-size: 1.05rem;
+  }
+
+  .attendee-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .attendee-card-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .attendee-card-footer button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .attendee-detail-modal {
+    max-height: 95vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    margin-top: auto;
+  }
+
+  .attendee-detail-hero {
+    height: 180px;
+  }
+
+  .attendee-detail-body {
+    padding: 1rem;
+  }
+
+  .attendee-detail-footer {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+  }
+
+  .attendee-detail-footer button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .my-registration-card {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .my-registration-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: stretch;
+  }
+
+  .my-registration-actions button {
+    flex: 1;
+    min-width: 120px;
+    min-height: 40px;
+  }
+
+  .attendee-card-body h3,
+  .attendee-featured-body h3 {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  .event-ai-chat {
+    height: 90vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+}

@@ -1,23 +1,23 @@
 import React, { useEffect, useRef, useState } from "react";
-
+import { AIBadge, AIError, AIIcon, AILoading } from "./AIComponents";
 import { askEventAI } from "../services/api";
 
 const SUGGESTIONS = [
   "Thời gian bắt đầu sự kiện là bao giờ?",
   "Sự kiện được tổ chức ở đâu?",
-  "Có những diễn giả nào?",
-  "Lịch trình sự kiện gồm những gì?",
+  "Có những diễn giả nào tham gia?",
+  "Lịch trình chi tiết sự kiện gồm những gì?",
 ];
 
 function friendlyError(error) {
-  if (error.status === 401) return "Your session has expired. Please sign in again.";
-  if (error.status === 403) return "You are not allowed to ask about this event.";
-  if (error.status === 404) return "This event is no longer available.";
-  if (error.status === 422) return "Please enter a valid question of up to 500 characters.";
-  if (error.status === 502) return "The AI service is temporarily unavailable. Please try again.";
-  if (error.status === 503) return "AI is not configured for this environment.";
-  if (error.status === 0) return "Unable to connect to the server.";
-  return "Unable to answer this question right now.";
+  if (error.status === 401) return "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.";
+  if (error.status === 403) return "Bạn không có quyền hỏi về sự kiện này.";
+  if (error.status === 404) return "Sự kiện này không còn khả dụng.";
+  if (error.status === 422) return "Vui lòng nhập câu hỏi hợp lệ không quá 500 ký tự.";
+  if (error.status === 502) return "Dịch vụ AI tạm thời không phản hồi. Vui lòng thử lại.";
+  if (error.status === 503) return "Dịch vụ AI chưa được cấu hình cho môi trường này.";
+  if (error.status === 0) return "Không thể kết nối đến máy chủ.";
+  return "Không thể phân tích dữ liệu.";
 }
 
 function EventAIChat({ event, token, onUnauthorized, onClose }) {
@@ -25,19 +25,33 @@ function EventAIChat({ event, token, onUnauthorized, onClose }) {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [lastQuestion, setLastQuestion] = useState("");
   const controllerRef = useRef(null);
   const inFlightRef = useRef(false);
+  const chatBottomRef = useRef(null);
 
   useEffect(() => {
     controllerRef.current?.abort();
     controllerRef.current = null;
     inFlightRef.current = false;
     setQuestion("");
-    setMessages([]);
+    setMessages([
+      {
+        id: "initial-ai",
+        role: "ai",
+        text: `Xin chào! Tôi là Trợ lý sự kiện AI. Tôi có thể giải đáp cho bạn về thời gian, địa điểm, các diễn giả và toàn bộ lịch trình của sự kiện "${event.title}". Bạn muốn tìm hiểu thông tin gì?`,
+        source: "system",
+      },
+    ]);
     setLoading(false);
     setError("");
+    setLastQuestion("");
     return () => controllerRef.current?.abort();
-  }, [event.id]);
+  }, [event.id, event.title]);
+
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading, error]);
 
   const sendQuestion = async (candidate) => {
     const cleanQuestion = candidate.trim();
@@ -49,11 +63,13 @@ function EventAIChat({ event, token, onUnauthorized, onClose }) {
     inFlightRef.current = true;
     setLoading(true);
     setError("");
+    setLastQuestion(cleanQuestion);
     setQuestion("");
     setMessages((current) => [
       ...current,
       { id: `${Date.now()}-user`, role: "user", text: cleanQuestion },
     ]);
+
     try {
       const response = await askEventAI(
         requestedEventId,
@@ -84,68 +100,132 @@ function EventAIChat({ event, token, onUnauthorized, onClose }) {
     }
   };
 
+  const handleRetry = () => {
+    if (lastQuestion && !inFlightRef.current) {
+      setError("");
+      void sendQuestion(lastQuestion);
+    }
+  };
+
   const submit = (submitEvent) => {
     submitEvent.preventDefault();
     void sendQuestion(question);
   };
 
   return (
-    <section className="event-ai-chat" aria-labelledby={`event-ai-title-${event.id}`}>
+    <section className="event-ai-chat ai-card" aria-labelledby={`event-ai-title-${event.id}`}>
+      {/* Header */}
       <div className="event-ai-heading">
-        <div>
-          <p className="eyebrow">EVENT AI ASSISTANT</p>
-          <h3 id={`event-ai-title-${event.id}`}>Ask AI about this event</h3>
-          <div className="event-ai-context">
-            <span>ASK AI ABOUT</span>
-            <strong>{event.title}</strong>
+        <div className="event-ai-title-wrap">
+          <AIIcon size="default" />
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <h3 id={`event-ai-title-${event.id}`} style={{ margin: 0, fontSize: "0.95rem", color: "#ffffff", fontWeight: 700 }}>
+                Trợ lý sự kiện AI
+              </h3>
+              <AIBadge label="Online" />
+            </div>
+            <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+              Hỏi về: <strong style={{ color: "#f0abfc" }}>{event.title}</strong>
+            </span>
           </div>
         </div>
-        {onClose && <button type="button" className="text-button" onClick={onClose} disabled={loading}>Close</button>}
+        {onClose && (
+          <button
+            type="button"
+            className="attendee-detail-close"
+            style={{ position: "static", width: 32, height: 32 }}
+            onClick={onClose}
+            disabled={loading}
+            aria-label="Đóng Trợ lý AI"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
+      {/* Conversation Area */}
       <div className="event-ai-conversation" aria-live="polite" aria-busy={loading}>
-        <article className="event-ai-message ai">
-          <span>AI</span>
-          <p>Bạn có thể hỏi tôi về thời gian, địa điểm, diễn giả và lịch trình của sự kiện này.</p>
-        </article>
         {messages.map((message) => (
           <article className={`event-ai-message ${message.role}`} key={message.id}>
-            <span>{message.role === "user" ? "You" : "AI"}</span>
-            <p>{message.text}</p>
-            {message.source && (
-              <small className={`event-ai-source source-${message.source}`} title={`Answer source: ${message.source}`}>
-                {message.source === "openai" ? "OpenAI" : "Mock Mode"}
-              </small>
-            )}
+            <div className="event-ai-avatar-badge" aria-hidden="true">
+              {message.role === "user" ? "Bạn" : "AI"}
+            </div>
+            <div className="event-ai-bubble">
+              <p>{message.text}</p>
+              {message.source && message.source !== "system" && (
+                <div style={{ marginTop: "0.45rem", display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                  <span style={{ fontSize: "0.7rem", color: "#94a3b8" }}>Nguồn:</span>
+                  <AIBadge source={message.source} />
+                </div>
+              )}
+            </div>
           </article>
         ))}
-        {loading && <div className="event-ai-thinking"><span className="app-loader" />AI is thinking...</div>}
+
+        {/* Standardized Typing State */}
+        {loading && (
+          <AILoading text="Đang phân tích dữ liệu sự kiện..." />
+        )}
+
+        {/* Standardized Error State with Retry */}
+        {error && (
+          <AIError
+            message={error}
+            onRetry={lastQuestion ? handleRetry : undefined}
+          />
+        )}
+
+        <div ref={chatBottomRef} />
       </div>
 
-      <div className="event-ai-suggestions" aria-label="Suggested questions">
-        <p>Try a suggested question</p>
+      {/* Suggestion Chips */}
+      <div className="event-ai-suggestions" aria-label="Gợi ý câu hỏi">
+        <p>Gợi ý:</p>
         {SUGGESTIONS.map((suggestion) => (
-          <button type="button" key={suggestion} onClick={() => void sendQuestion(suggestion)} disabled={loading}>
+          <button
+            type="button"
+            key={suggestion}
+            className="event-ai-suggestion-btn"
+            onClick={() => void sendQuestion(suggestion)}
+            disabled={loading || inFlightRef.current}
+          >
             {suggestion}
           </button>
         ))}
       </div>
 
-      {error && <div className="inline-message error-message event-ai-error" role="alert">{error}</div>}
-
+      {/* Input Form with Anti-double-click protection */}
       <form className="event-ai-form" onSubmit={submit}>
-        <label className="sr-only" htmlFor={`event-ai-question-${event.id}`}>Ask a question about {event.title}</label>
+        <label className="sr-only" htmlFor={`event-ai-question-${event.id}`}>
+          Đặt câu hỏi về {event.title}
+        </label>
         <input
           id={`event-ai-question-${event.id}`}
           type="text"
           value={question}
-          onChange={(inputEvent) => { setQuestion(inputEvent.target.value); setError(""); }}
-          placeholder="Ask a question..."
+          onChange={(inputEvent) => {
+            setQuestion(inputEvent.target.value);
+            setError("");
+          }}
+          placeholder="Nhập câu hỏi về lịch trình, diễn giả, địa điểm..."
           maxLength={500}
           disabled={loading}
         />
-        <button type="submit" className="primary-button" disabled={loading || !question.trim()}>
-          {loading ? "Sending..." : "Send"}
+        <button
+          type="submit"
+          className="ai-button-primary"
+          disabled={loading || inFlightRef.current || !question.trim()}
+          style={{ minWidth: 64, padding: "0.6rem 1rem", justifyContent: "center" }}
+        >
+          {loading ? (
+            <span className="app-loader" style={{ width: 14, height: 14, margin: 0 }} />
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13" />
+              <polygon points="22 2 15 22 11 13 2 9 22 2" />
+            </svg>
+          )}
         </button>
       </form>
     </section>

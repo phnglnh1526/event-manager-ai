@@ -28,14 +28,7 @@ def get_event_statistics(db: Session, event: Event) -> EventStatisticsResponse:
     registration_counts = {row.status: int(row[1]) for row in registration_rows}
     registered = registration_counts.get(REGISTRATION_STATUS_REGISTERED, 0)
     cancelled = registration_counts.get(REGISTRATION_STATUS_CANCELLED, 0)
-    total_registrations = int(
-        db.scalar(
-            select(func.count(Registration.id)).where(
-                Registration.event_id == event.id
-            )
-        )
-        or 0
-    )
+    total_registrations = sum(registration_counts.values())
 
     checked_in = int(
         db.scalar(

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, Text, UniqueConstraint, func
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, Integer, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -11,6 +11,7 @@ class Feedback(Base):
     __table_args__ = (
         UniqueConstraint("event_id", "user_id", name="uq_feedbacks_event_user"),
         CheckConstraint("rating >= 1 AND rating <= 5", name="ck_feedbacks_rating"),
+        Index("ix_feedbacks_event_id_rating", "event_id", "rating"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

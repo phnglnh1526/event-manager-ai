@@ -6,15 +6,15 @@ function cameraMessage(error) {
   const name = error?.name || "";
   const message = String(error?.message || error || "");
   if (name === "NotAllowedError" || /permission|denied|notallowed/i.test(message)) {
-    return "Camera access was denied. Allow camera permission or use manual ticket entry.";
+    return "Quyền truy cập camera đã bị từ chối. Vui lòng cấp quyền camera hoặc nhập mã vé thủ công.";
   }
   if (name === "NotFoundError" || /not found|no camera|devicesnotfound/i.test(message)) {
-    return "No camera is available on this device. Use manual ticket entry.";
+    return "Không tìm thấy camera trên thiết bị này. Vui lòng nhập mã vé thủ công.";
   }
   if (!window.isSecureContext) {
-    return "Camera access requires HTTPS. Use localhost for development or use manual ticket entry.";
+    return "Quyền truy cập camera yêu cầu kết nối HTTPS bảo mật hoặc localhost. Vui lòng nhập mã vé thủ công.";
   }
-  return "Unable to start the camera. Please use manual ticket entry.";
+  return "Không thể khởi động camera. Vui lòng nhập mã vé thủ công.";
 }
 
 function QRScanner({ onScan, onClose }) {
@@ -73,7 +73,7 @@ function QRScanner({ onScan, onClose }) {
 
   const close = async () => { scanLocked.current = true; await stop(); onCloseRef.current(); };
 
-  return <div className="qr-scanner-overlay" role="dialog" aria-modal="true" aria-labelledby="qr-scanner-title"><section className="qr-scanner-modal"><div className="editor-heading"><div><p className="eyebrow">STAFF CHECK-IN</p><h2 id="qr-scanner-title">Scan attendee ticket</h2></div><button type="button" className="secondary-button" onClick={close}>Close</button></div><div className="qr-reader-frame"><div id={READER_ID}/>{starting && !error && <div className="scanner-loading"><div className="app-loader"/><p>Starting camera...</p></div>}</div>{error ? <div className="inline-message error-message" role="alert">{error}</div> : <p className="scanner-help">Point the camera at the attendee QR code. Production camera access requires HTTPS; localhost is supported for development.</p>}<button type="button" className="secondary-button scanner-close-button" onClick={close}>Close scanner</button></section></div>;
+  return <div className="qr-scanner-overlay" role="dialog" aria-modal="true" aria-labelledby="qr-scanner-title"><section className="qr-scanner-modal"><div className="editor-heading"><div><p className="eyebrow">CHECK-IN NHÂN VIÊN</p><h2 id="qr-scanner-title">Quét vé người tham dự</h2></div><button type="button" className="secondary-button" onClick={close}>Đóng</button></div><div className="qr-reader-frame"><div id={READER_ID}/>{starting && !error && <div className="scanner-loading"><div className="app-loader"/><p>Đang khởi động camera...</p></div>}</div>{error ? <div className="inline-message error-message" role="alert">{error}</div> : <p className="scanner-help">Hướng camera về phía mã QR trên vé của người tham dự. Truy cập camera yêu cầu kết nối HTTPS bảo mật (hoặc localhost khi phát triển).</p>}<button type="button" className="secondary-button scanner-close-button" onClick={close}>Đóng trình quét</button></section></div>;
 }
 
 export default QRScanner;

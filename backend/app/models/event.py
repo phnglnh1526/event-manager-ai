@@ -15,11 +15,11 @@ class Event(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     cover_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     location: Mapped[str] = mapped_column(String(255), nullable=False)
-    start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
     end_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[str] = mapped_column(
         String(30), nullable=False, default=EVENT_STATUS_DRAFT,
-        server_default=EVENT_STATUS_DRAFT
+        server_default=EVENT_STATUS_DRAFT, index=True
     )
     max_attendees: Mapped[int] = mapped_column(
         Integer, nullable=False, default=100, server_default="100"

@@ -93,3 +93,40 @@ class AttendeeEventResponse(BaseModel):
     end_time: datetime
     status: str
     max_attendees: int
+
+
+class AttendeeSpeakerItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    full_name: str
+    title: str | None = None
+    organization: str | None = None
+    bio: str | None = None
+
+
+class AttendeeScheduleItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    title: str
+    description: str | None = None
+    start_time: datetime
+    end_time: datetime
+    location: str | None = None
+    speaker_id: int | None = None
+    speaker_name: str | None = None
+
+
+class AttendeeEventDetailResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    title: str
+    description: str | None = None
+    cover_image_url: str | None = None
+    location: str
+    start_time: datetime
+    end_time: datetime
+    status: str
+    max_attendees: int
+    speakers: list[AttendeeSpeakerItem] = []
+    schedules: list[AttendeeScheduleItem] = []
+
