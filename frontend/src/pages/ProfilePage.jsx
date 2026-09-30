@@ -122,7 +122,7 @@ function ProfilePage({ token, currentUser, onUserUpdated, onBack, onLogout, onUn
         onBack={onBack}
         onLogout={onLogout}
         backLabel="Quay lại"
-        workspaceLabel="Personal account"
+        workspaceLabel="Tài khoản cá nhân"
       />
       <main className="dashboard-main profile-page">
         <section className="profile-heading">
@@ -133,8 +133,7 @@ function ProfilePage({ token, currentUser, onUserUpdated, onBack, onLogout, onUn
               <h1>Thông tin cá nhân</h1>
               <p>Quản lý thông tin tài khoản và bảo mật của bạn.</p>
               <div className="profile-role-chip">
-                <span>{currentUser.role}</span>
-                <small>{ROLE_LABELS[currentUser.role] || currentUser.role}</small>
+                <span>{ROLE_LABELS[currentUser.role] || currentUser.role}</span>
               </div>
             </div>
           </div>

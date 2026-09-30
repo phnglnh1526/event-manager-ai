@@ -1,6 +1,6 @@
 import logging
 
-from sqlalchemy import select
+from sqlalchemy import inspect, select, text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.registration_status import REGISTRATION_STATUS_REGISTERED
@@ -16,6 +16,7 @@ from app.models import (  # noqa: F401
     Schedule,
     Speaker,
     Ticket,
+    UploadedFile,
     User,
 )
 from app.services.tickets import create_ticket_with_retry
@@ -50,25 +51,59 @@ def ensure_registration_tickets() -> None:
         db.close()
 
 
+def ensure_schema_migrations() -> None:
+    """Safely apply schema additions and indexes without data loss or dropping tables."""
+    try:
+        inspector = inspect(engine)
+        table_names = inspector.get_table_names()
 
-def ensure_event_image_column() -> None:
-    """Add image_url to existing databases created before event images existed."""
-    from sqlalchemy import inspect, text
+        if "events" in table_names:
+            columns = [c["name"] for c in inspector.get_columns("events")]
+            if "cover_image_url" not in columns:
+                logger.info("Applying safe migration: adding cover_image_url to events table")
+                with engine.begin() as conn:
+                    conn.execute(text("ALTER TABLE events ADD COLUMN cover_image_url VARCHAR(500) NULL"))
+                logger.info("Migration successful: cover_image_url column added to events")
 
-    inspector = inspect(engine)
-    columns = {column["name"] for column in inspector.get_columns("events")}
-    if "image_url" not in columns:
-        with engine.begin() as connection:
-            connection.execute(
-                text(
-                    "ALTER TABLE events ADD COLUMN image_url VARCHAR(500) "
-                    "NOT NULL DEFAULT '/uploads/events/default-event.svg'"
-                )
-            )
-        logger.info("Added events.image_url column")
+            existing_indexes = {idx["name"] for idx in inspector.get_indexes("events")}
+            with engine.begin() as conn:
+                if "ix_events_status" not in existing_indexes:
+                    conn.execute(text("CREATE INDEX ix_events_status ON events (status)"))
+                    logger.info("Created index ix_events_status")
+                if "ix_events_start_time" not in existing_indexes:
+                    conn.execute(text("CREATE INDEX ix_events_start_time ON events (start_time)"))
+                    logger.info("Created index ix_events_start_time")
+
+        if "registrations" in table_names:
+            existing_indexes = {idx["name"] for idx in inspector.get_indexes("registrations")}
+            if "ix_registrations_event_id_status" not in existing_indexes:
+                with engine.begin() as conn:
+                    conn.execute(text("CREATE INDEX ix_registrations_event_id_status ON registrations (event_id, status)"))
+                    logger.info("Created index ix_registrations_event_id_status")
+
+        if "announcements" in table_names:
+            existing_indexes = {idx["name"] for idx in inspector.get_indexes("announcements")}
+            with engine.begin() as conn:
+                if "ix_announcements_status" not in existing_indexes:
+                    conn.execute(text("CREATE INDEX ix_announcements_status ON announcements (status)"))
+                    logger.info("Created index ix_announcements_status")
+                if "ix_announcements_event_id_status" not in existing_indexes:
+                    conn.execute(text("CREATE INDEX ix_announcements_event_id_status ON announcements (event_id, status)"))
+                    logger.info("Created index ix_announcements_event_id_status")
+
+        if "feedbacks" in table_names:
+            existing_indexes = {idx["name"] for idx in inspector.get_indexes("feedbacks")}
+            if "ix_feedbacks_event_id_rating" not in existing_indexes:
+                with engine.begin() as conn:
+                    conn.execute(text("CREATE INDEX ix_feedbacks_event_id_rating ON feedbacks (event_id, rating)"))
+                    logger.info("Created index ix_feedbacks_event_id_rating")
+    except Exception:
+        logger.exception("Schema migration check/execution failed")
 
 
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
-    ensure_event_image_column()
+    ensure_schema_migrations()
     ensure_registration_tickets()
+
+

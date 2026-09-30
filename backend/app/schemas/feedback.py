@@ -38,9 +38,3 @@ class FeedbackResponse(BaseModel):
     comment: str | None
     created_at: datetime
     updated_at: datetime
-
-
-class MyFeedbackResponse(FeedbackResponse):
-    event_title: str
-    event_status: str
-    registration_status: str

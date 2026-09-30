@@ -97,7 +97,10 @@ def login_user(
             detail="Could not log in",
         ) from None
 
-    if user is None or not verify_password(payload.password, user.password_hash):
+    if user is None:
+        raise _invalid_credentials_error()
+
+    if not verify_password(payload.password, user.password_hash):
         raise _invalid_credentials_error()
 
     if not user.is_active:

@@ -1,0 +1,305 @@
+/* ==========================================================================
+   EVENT MANAGER AI V2 — UNIFIED AI EXPERIENCE SYSTEM (STEP 10)
+   Visual Identity: Dark Tech SaaS, Pink / Purple Gradient Accent, Glowing AI
+   ========================================================================== */
+
+/* --- 1. ACCENTS & GRADIENTS --- */
+:root {
+  --ai-gradient-primary: linear-gradient(135deg, #ec4899 0%, #a855f7 50%, #8b5cf6 100%);
+  --ai-gradient-glow: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(168, 85, 247, 0.25));
+  --ai-gradient-border: linear-gradient(135deg, rgba(236, 72, 153, 0.4), rgba(139, 92, 246, 0.4));
+  --ai-text-gradient: linear-gradient(135deg, #f472b6 0%, #c084fc 100%);
+}
+
+.ai-gradient-text {
+  background: var(--ai-text-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  font-weight: 700;
+}
+
+/* --- 2. STANDARDIZED AI ICON --- */
+.ai-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--ai-gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.35);
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ai-icon-box.compact {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.ai-icon-box.large {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+}
+
+/* --- 3. STANDARDIZED AI BADGE --- */
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(236, 72, 153, 0.35);
+  color: #f0abfc;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
+}
+
+.ai-badge::before {
+  content: "✦";
+  font-size: 0.8rem;
+  color: #ec4899;
+}
+
+.ai-badge.source-openai {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
+}
+
+.ai-badge.source-openai::before {
+  color: #10b981;
+}
+
+.ai-badge.source-mock {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fcd34d;
+}
+
+.ai-badge.source-mock::before {
+  color: #f59e0b;
+}
+
+/* --- 4. STANDARDIZED AI CARD --- */
+.ai-card {
+  position: relative;
+  background: linear-gradient(145deg, #0d1024 0%, #131735 100%);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 24px rgba(168, 85, 247, 0.08);
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+.ai-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--ai-gradient-primary);
+  opacity: 0.8;
+}
+
+.ai-card:hover {
+  border-color: rgba(236, 72, 153, 0.45);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 32px rgba(168, 85, 247, 0.16);
+}
+
+/* --- 5. STANDARDIZED AI LOADING STATE --- */
+.ai-loading-container {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.25rem;
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 12px;
+  color: #f0abfc;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: aiGlowPulse 2s infinite alternate ease-in-out;
+}
+
+@keyframes aiGlowPulse {
+  0% {
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.25);
+    border-color: rgba(236, 72, 153, 0.45);
+  }
+}
+
+.ai-dots-bounce {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ai-dots-bounce span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  animation: aiBounce 1.4s infinite ease-in-out both;
+  box-shadow: 0 0 8px rgba(236, 72, 153, 0.5);
+}
+
+.ai-dots-bounce span:nth-child(1) { animation-delay: -0.32s; }
+.ai-dots-bounce span:nth-child(2) { animation-delay: -0.16s; }
+.ai-dots-bounce span:nth-child(3) { animation-delay: 0s; }
+
+@keyframes aiBounce {
+  0%, 80%, 100% { transform: scale(0.5); opacity: 0.4; }
+  40% { transform: scale(1.2); opacity: 1; }
+}
+
+/* --- 6. STANDARDIZED AI ERROR STATE --- */
+.ai-error-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 12px;
+  color: #fca5a5;
+  font-size: 0.875rem;
+  margin: 0.75rem 0;
+}
+
+.ai-error-content {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.ai-error-content span {
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.ai-error-icon {
+  font-size: 1.1rem;
+  color: #ef4444;
+}
+
+.ai-error-retry-btn {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #ffffff;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ai-error-retry-btn:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+/* --- 7. STANDARDIZED AI EMPTY STATE --- */
+.ai-empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.25rem 1.5rem;
+  background: rgba(13, 16, 36, 0.6);
+  border: 1px dashed rgba(168, 85, 247, 0.3);
+  border-radius: 14px;
+  margin: 0.75rem 0;
+}
+
+.ai-empty-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c084fc;
+  font-size: 1.35rem;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.15);
+}
+
+.ai-empty-container strong {
+  display: block;
+  font-size: 1rem;
+  color: #ffffff;
+  margin-bottom: 0.35rem;
+}
+
+.ai-empty-container p {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  max-width: 460px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* --- 8. STANDARDIZED AI BUTTON --- */
+.ai-button-primary {
+  background: var(--ai-gradient-primary);
+  border: none;
+  border-radius: 10px;
+  padding: 0.65rem 1.25rem;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.35);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.ai-button-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(236, 72, 153, 0.5);
+  filter: brightness(1.08);
+}
+
+.ai-button-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.ai-button-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}

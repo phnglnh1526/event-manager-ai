@@ -25,6 +25,9 @@ elif settings.mysql_ssl:
 
 engine: Engine = create_engine(
     database_url,
+    pool_size=5,
+    max_overflow=5,
+    pool_timeout=30,
     pool_pre_ping=True,
     pool_recycle=1800,
     connect_args=_connect_args,

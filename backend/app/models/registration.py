@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, UniqueConstraint, func
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.registration_status import REGISTRATION_STATUS_REGISTERED
@@ -14,6 +14,11 @@ class Registration(Base):
             "event_id",
             "user_id",
             name="uq_registrations_event_user",
+        ),
+        Index(
+            "ix_registrations_event_id_status",
+            "event_id",
+            "status",
         ),
     )
 

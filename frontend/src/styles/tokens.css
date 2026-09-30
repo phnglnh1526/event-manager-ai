@@ -1,0 +1,136 @@
+/* ==========================================================================
+   EVENT MANAGER AI V2 — DESIGN SYSTEM TOKENS
+   Theme: Dark Event Technology & AI Intelligence SaaS
+   ========================================================================== */
+
+:root {
+  /* --- 1. CORE PALETTE: DARK NAVY / VOID BLACK --- */
+  --bg-deep: #050816;              /* Background deepest layer */
+  --bg-primary: #080b1a;           /* Main background canvas */
+  --bg-secondary: #0d1024;         /* Section & shell background */
+  --bg-elevated: #11152e;          /* Higher elevation surface */
+
+  /* Aliases for backwards compatibility */
+  --bg: var(--bg-primary);
+
+  /* --- 2. SURFACES (Cards, Panels, Modals, Popovers) --- */
+  --surface: #101429;              /* Base card & panel container */
+  --surface-raised: #151932;       /* Elevated cards & hover layers */
+  --surface-muted: #181d3b;        /* Sub-panels, input background */
+  --surface-hover: #1e2448;        /* Interactive hover state */
+  --surface-glass: rgba(16, 20, 41, 0.82); /* Glassmorphism background */
+  --surface-glass-border: rgba(255, 255, 255, 0.08);
+
+  /* --- 3. BORDERS --- */
+  --border: #1e2548;               /* Default subtle border */
+  --border-muted: #161b36;         /* Secondary border */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-highlight: rgba(217, 70, 239, 0.45); /* Magenta accent border */
+  --border-focus: #d946ef;
+
+  /* --- 4. TYPOGRAPHY & TEXT COLORS --- */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --text-primary: #f8fafc;         /* Near white (main titles, values) */
+  --text-secondary: #94a3b8;       /* Gray-blue (body, subtitles) */
+  --text-muted: #64748b;           /* Muted gray (meta, helper, timestamps) */
+  --text-inverse: #050816;         /* On top of bright accents */
+
+  /* Legacy alias */
+  --text: var(--text-primary);
+
+  /* --- 5. ACCENTS: MAGENTA / PINK / PURPLE / AI --- */
+  --accent-magenta: #d946ef;       /* Vibrant Magenta */
+  --accent-pink: #ec4899;          /* Tech Pink */
+  --accent-purple: #8b5cf6;        /* High-tech Purple / Violet */
+  --accent-indigo: #6366f1;        /* Electric Indigo */
+  --accent-cyan: #06b6d4;          /* Modern Cyan */
+
+  /* Primary Brand Tokens */
+  --accent: var(--accent-magenta);
+  --accent-hover: #c026d3;
+  --accent-soft: rgba(217, 70, 239, 0.12);
+  --accent-soft-hover: rgba(217, 70, 239, 0.22);
+  --primary: var(--accent);
+
+  /* AI Intelligence Tokens */
+  --ai-accent: #a855f7;            /* AI Vibrant Purple */
+  --ai-accent-hover: #9333ea;
+  --ai-accent-soft: rgba(168, 85, 247, 0.14);
+  --ai-accent-glow: 0 0 20px rgba(168, 85, 247, 0.28);
+
+  /* --- 6. MODERN GRADIENTS --- */
+  --gradient-accent: linear-gradient(135deg, #ec4899 0%, #d946ef 50%, #8b5cf6 100%);
+  --gradient-ai: linear-gradient(135deg, #d946ef 0%, #8b5cf6 50%, #6366f1 100%);
+  --gradient-surface: linear-gradient(180deg, #151932 0%, #101429 100%);
+  --gradient-glow: radial-gradient(circle at 50% 0%, rgba(217, 70, 239, 0.12) 0%, transparent 70%);
+
+  /* --- 7. FUNCTIONAL STATUS TOKENS --- */
+  --success: #10b981;              /* Modern Emerald */
+  --success-hover: #059669;
+  --success-soft: rgba(16, 185, 129, 0.14);
+  --success-border: rgba(16, 185, 129, 0.35);
+
+  --warning: #f59e0b;              /* Modern Amber / Orange */
+  --warning-hover: #d97706;
+  --warning-soft: rgba(245, 158, 11, 0.14);
+  --warning-border: rgba(245, 158, 11, 0.35);
+
+  --danger: #f43f5e;               /* Modern Rose / Red */
+  --danger-hover: #e11d48;
+  --danger-soft: rgba(244, 63, 94, 0.14);
+  --danger-border: rgba(244, 63, 94, 0.35);
+
+  --rating: #fbbf24;               /* Golden Star Amber */
+
+  /* --- 8. SHADOWS & CONTROLLED GLOWS --- */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.7);
+  --shadow: var(--shadow-md);
+  --card-shadow: var(--shadow-md);
+
+  /* Subtle, purposeful neon glow (NOT gaming) */
+  --glow-accent: 0 0 20px rgba(217, 70, 239, 0.25);
+  --glow-pink: 0 0 20px rgba(236, 72, 153, 0.25);
+  --glow-purple: 0 0 24px rgba(139, 92, 246, 0.28);
+  --glow-cyan: 0 0 20px rgba(6, 182, 212, 0.25);
+  --glow-subtle: 0 0 14px rgba(217, 70, 239, 0.15);
+
+  --focus-ring: 0 0 0 3px rgba(217, 70, 239, 0.32);
+
+  /* --- 9. BORDER RADIUS --- */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+  --card-radius: var(--radius-lg);
+
+  /* --- 10. SPACING SCALE --- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --card-padding: clamp(20px, 2.25vw, 28px);
+
+  /* --- 11. TRANSITIONS & TIMING --- */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* --- 12. BREAKPOINTS (Reference) --- */
+  --breakpoint-xs: 375px;
+  --breakpoint-sm: 520px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+}

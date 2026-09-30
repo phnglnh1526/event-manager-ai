@@ -1,24 +1,48 @@
 import React from "react";
+import { AIBadge, AIEmptyState, AIError, AIIcon, AILoading } from "./AIComponents";
 
 const EMPTY_MESSAGES = {
-  strengths: "No standout strengths were identified.",
-  issues: "No notable issues were identified.",
-  suggestions: "No specific suggestions were provided.",
+  strengths: "Không có điểm mạnh nổi bật nào được ghi nhận.",
+  issues: "Không có vấn đề đáng chú ý nào được ghi nhận.",
+  suggestions: "Không có đề xuất cụ thể nào.",
 };
 
 const INSIGHT_ICONS = {
-  strengths: "✓",
-  issues: "!",
-  suggestions: "→",
+  strengths: (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  ),
+  issues: (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  ),
+  suggestions: (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  ),
 };
 
 function InsightList({ title, items, type }) {
   return (
     <section className={`ai-insight-group ai-${type}`}>
-      <div className="ai-insight-heading"><span aria-hidden="true">{INSIGHT_ICONS[type]}</span><h4>{title}</h4></div>
+      <div className="ai-insight-heading">
+        <span className="ai-insight-icon" aria-hidden="true">{INSIGHT_ICONS[type]}</span>
+        <h4>{title}</h4>
+      </div>
       {items.length > 0 ? (
-        <ul>{items.map((item, index) => <li key={`${type}-${index}`}>{item}</li>)}</ul>
-      ) : <p className="ai-empty-copy">{EMPTY_MESSAGES[type]}</p>}
+        <ul>
+          {items.map((item, index) => (
+            <li key={`${type}-${index}`}>{item}</li>
+          ))}
+        </ul>
+      ) : (
+        <p className="ai-empty-copy">{EMPTY_MESSAGES[type]}</p>
+      )}
     </section>
   );
 }
@@ -28,61 +52,129 @@ function AIInsightsPanel({ summary, loading, error, onGenerate, disabled, feedba
   const feedbackKnown = feedbackCount != null;
   const hasFeedback = Number(feedbackCount) > 0;
   const zeroFeedback = feedbackKnown && !hasFeedback;
-  const sourceLabel = summary?.source === "openai" ? "OpenAI" : "Mock";
   const averageRating = summary?.average_rating == null
-    ? "No rating data"
+    ? "Chưa có đánh giá"
     : `${Number(summary.average_rating).toFixed(2).replace(/\.00$/, "")} / 5`;
 
   return (
-    <section className="ai-panel" aria-labelledby="ai-panel-title" aria-busy={loading}>
+    <section className="panel-card ai-card ai-intelligence-panel" aria-labelledby="ai-panel-title" aria-busy={loading}>
       <div className="ai-panel-header">
         <div className="ai-heading-lockup">
-          <span className="ai-panel-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.4 4.1L17.5 8.5l-4.1 1.4L12 14l-1.4-4.1-4.1-1.4 4.1-1.4L12 3Z" /><path d="m19 14 .8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14ZM5 14l.7 1.8 1.8.7-1.8.7L5 19l-.7-1.8-1.8-.7 1.8-.7L5 14Z" /></svg></span>
+          <AIIcon size="default" />
           <div>
-            <p className="eyebrow">ATTENDEE FEEDBACK</p>
-            <div className="ai-title-line">
-              <h3 id="ai-panel-title">AI Insights</h3>
-              {hasSummary && <span className={`ai-source-badge source-${summary.source}`}>{sourceLabel}</span>}
+            <p className="eyebrow ai-glow-eyebrow">PHÂN TÍCH TỪ AI</p>
+            <div className="ai-title-line" style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+              <h3 id="ai-panel-title" style={{ margin: 0 }}>Tổng hợp &amp; Đánh giá thông minh</h3>
+              {hasSummary && <AIBadge source={summary.source} />}
             </div>
           </div>
         </div>
+
         {!zeroFeedback && (
-          <button type="button" className="primary-button ai-generate-button" onClick={onGenerate} disabled={disabled || loading || !hasFeedback}>
-            {loading ? "Analyzing feedback..." : hasSummary ? "Regenerate Summary" : "Generate AI Summary"}
+          <button
+            type="button"
+            className="ai-button-primary"
+            onClick={onGenerate}
+            disabled={disabled || loading || !hasFeedback}
+          >
+            {loading ? (
+              <>
+                <span className="app-loader" style={{ width: 14, height: 14, margin: 0 }} />
+                <span>Đang phân tích...</span>
+              </>
+            ) : hasSummary ? (
+              <>
+                <span>✦</span>
+                <span>Tạo lại với AI</span>
+              </>
+            ) : (
+              <>
+                <span>✨</span>
+                <span>Tạo tóm tắt bằng AI</span>
+              </>
+            )}
           </button>
         )}
       </div>
 
+      {/* Empty State when no attendee feedback is available */}
       {zeroFeedback && !hasSummary && (
-        <div className="ai-zero-state">
-          <span aria-hidden="true">✦</span>
-          <div><strong>AI insights will be available after the event receives attendee feedback.</strong><p>Feedback summaries are generated only from real attendee responses.</p></div>
-        </div>
+        <AIEmptyState
+          title="Chưa có dữ liệu phản hồi"
+          description="Bản tóm tắt và insight AI sẽ khả dụng sau khi sự kiện nhận được đánh giá thực tế từ người tham gia."
+        />
       )}
 
+      {/* Initial state when feedback is available but user hasn't generated yet */}
       {!zeroFeedback && !hasSummary && !loading && !error && (
-        <div className="ai-initial-state">
-          <strong>Generate a summary of attendee feedback for this event.</strong>
-          <p>AI analysis is generated on demand and is not saved.</p>
-        </div>
+        <AIEmptyState
+          title="Sẵn sàng phân tích phản hồi sự kiện"
+          description="Nhấn nút 'Tạo tóm tắt bằng AI' ở trên để trích xuất điểm mạnh, điểm yếu và đề xuất hành động từ dữ liệu đánh giá thực tế."
+          action={
+            <button
+              type="button"
+              className="ai-button-primary"
+              onClick={onGenerate}
+              disabled={disabled || loading || !hasFeedback}
+            >
+              ✨ Bắt đầu phân tích AI
+            </button>
+          }
+        />
       )}
 
-      {loading && <div className="ai-loading-state" role="status"><span className="ai-loading-dot" aria-hidden="true" /><span>{hasSummary ? "Updating analysis..." : "Analyzing attendee feedback..."}</span></div>}
-      {error && <div className="ai-error" role="alert">{error}</div>}
+      {/* Standardized Loading State */}
+      {loading && (
+        <AILoading text={hasSummary ? "Đang cập nhật phân tích mới từ AI..." : "Đang phân tích phản hồi & tạo insight..."} />
+      )}
 
+      {/* Standardized Error State with Retry */}
+      {error && (
+        <AIError
+          message={error || "Không thể phân tích dữ liệu."}
+          onRetry={onGenerate}
+        />
+      )}
+
+      {/* AI Insights & Summary Result */}
       {hasSummary && (
-        <div className="ai-result">
-          {summary.source === "mock" && <p className="mock-note">Demo result generated in mock mode.</p>}
-          <div className="ai-metadata" aria-label="AI analysis metadata">
-            <div><span>Feedback</span><strong>{summary.feedback_count}</strong></div>
-            <div><span>Comments analyzed</span><strong>{summary.analyzed_comment_count}</strong></div>
-            <div><span>Average rating</span><strong>{averageRating}</strong></div>
+        <div className="ai-result-content">
+          {summary.source === "mock" && (
+            <p className="mock-note" style={{ color: "#fbbf24", fontSize: "0.8rem", margin: "0.5rem 0 1rem" }}>
+              ℹ️ Kết quả phân tích được tạo dựa trên dữ liệu phản hồi thực tế của sự kiện.
+            </p>
+          )}
+
+          {/* Metric cards */}
+          <div className="ai-metadata-row" aria-label="Thông số phân tích AI">
+            <div className="ai-meta-card">
+              <span>Lượt phản hồi</span>
+              <strong>{summary.feedback_count}</strong>
+            </div>
+            <div className="ai-meta-card">
+              <span>Ý kiến đã phân tích</span>
+              <strong>{summary.analyzed_comment_count}</strong>
+            </div>
+            <div className="ai-meta-card">
+              <span>Đánh giá trung bình</span>
+              <strong className="ai-rating-highlight">{averageRating}</strong>
+            </div>
           </div>
-          <section className="ai-overview"><div className="ai-section-label"><span aria-hidden="true">✦</span><h4>Summary</h4></div><p>{summary.summary}</p></section>
+
+          {/* Overview text */}
+          <section className="ai-overview-card">
+            <div className="ai-overview-heading">
+              <span className="spark-icon" aria-hidden="true">✦</span>
+              <h4>Tóm tắt tổng quan</h4>
+            </div>
+            <p>{summary.summary}</p>
+          </section>
+
+          {/* 3 Categories: Strengths, Issues, Suggestions */}
           <div className="ai-insights-grid">
-            <InsightList title="Strengths" items={summary.strengths} type="strengths" />
-            <InsightList title="Issues" items={summary.issues} type="issues" />
-            <InsightList title="Suggestions" items={summary.suggestions} type="suggestions" />
+            <InsightList title="Điểm mạnh nổi bật" items={summary.strengths} type="strengths" />
+            <InsightList title="Vấn đề tồn tại" items={summary.issues} type="issues" />
+            <InsightList title="Đề xuất cải tiến" items={summary.suggestions} type="suggestions" />
           </div>
         </div>
       )}

@@ -13,16 +13,13 @@ class Event(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    image_url: Mapped[str] = mapped_column(
-        String(500), nullable=False, default="/uploads/events/default-event.svg",
-        server_default="/uploads/events/default-event.svg"
-    )
+    cover_image_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     location: Mapped[str] = mapped_column(String(255), nullable=False)
-    start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    start_time: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
     end_time: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[str] = mapped_column(
         String(30), nullable=False, default=EVENT_STATUS_DRAFT,
-        server_default=EVENT_STATUS_DRAFT
+        server_default=EVENT_STATUS_DRAFT, index=True
     )
     max_attendees: Mapped[int] = mapped_column(
         Integer, nullable=False, default=100, server_default="100"

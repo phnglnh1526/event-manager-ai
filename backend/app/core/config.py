@@ -58,21 +58,11 @@ class Settings:
     frontend_url: str = os.getenv("FRONTEND_URL", "").strip()
     cors_origins: tuple[str, ...] = tuple(
         _unique_values(
-            *_split_csv(
-                os.getenv(
-                    "CORS_ORIGINS",
-                    ",".join(
-                        value
-                        for value in (
-                            os.getenv("FRONTEND_URL", "").strip(),
-                            "http://localhost:3000",
-                            "http://localhost:5173",
-                            "http://127.0.0.1:5173",
-                        )
-                        if value
-                    ),
-                )
-            )
+            *_split_csv(os.getenv("CORS_ORIGINS", "")),
+            os.getenv("FRONTEND_URL", "").strip(),
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
         )
     )
     ai_mode: str = os.getenv("AI_MODE", "mock").strip().lower()
@@ -84,6 +74,9 @@ class Settings:
     demo_organizer_password: str = os.getenv("DEMO_ORGANIZER_PASSWORD", "").strip()
     demo_staff_password: str = os.getenv("DEMO_STAFF_PASSWORD", "").strip()
     demo_attendee_password: str = os.getenv("DEMO_ATTENDEE_PASSWORD", "").strip()
+    cloudinary_cloud_name: str = os.getenv("CLOUDINARY_CLOUD_NAME", "").strip()
+    cloudinary_api_key: str = os.getenv("CLOUDINARY_API_KEY", "").strip()
+    cloudinary_api_secret: str = os.getenv("CLOUDINARY_API_SECRET", "").strip()
 
 
 @lru_cache

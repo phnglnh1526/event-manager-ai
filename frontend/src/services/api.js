@@ -1,11 +1,12 @@
-const API_BASE_URL = (
-  import.meta.env.VITE_API_BASE_URL
-  || import.meta.env.VITE_API_URL
-  || "http://localhost:8000"
-).replace(
-  /\/$/,
-  "",
-);
+const rawBaseUrl = (
+  import.meta.env.DEV
+    ? (import.meta.env.VITE_USE_DIRECT_API ? (import.meta.env.VITE_API_BASE_URL || "http://localhost:8000") : "")
+    : (import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || "http://localhost:8000")
+).trim().replace(/\/+$/, "");
+
+export const API_BASE_URL = rawBaseUrl.endsWith("/api")
+  ? rawBaseUrl.slice(0, -4)
+  : rawBaseUrl;
 
 export class ApiError extends Error {
   constructor(message, status = 0, details = null) {
@@ -30,13 +31,22 @@ export async function apiRequest(path, { token, body, headers, ...options } = {}
     });
   } catch (error) {
     if (error?.name === "AbortError") throw error;
-    throw new ApiError("Unable to connect to the server.");
+    throw new ApiError("Không thể kết nối đến máy chủ.");
   }
 
   const contentType = response.headers.get("content-type") || "";
   const data = contentType.includes("application/json") ? await response.json() : null;
   if (!response.ok) {
-    const detail = typeof data?.detail === "string" ? data.detail : "Request failed.";
+    let detail = "Yêu cầu thất bại.";
+    if (typeof data?.detail === "string") {
+      detail = data.detail;
+    } else if (Array.isArray(data?.detail) && data.detail.length > 0) {
+      const first = data.detail[0];
+      const field = Array.isArray(first?.loc) ? first.loc[first.loc.length - 1] : "";
+      if (first?.msg) {
+        detail = field ? `${field}: ${first.msg}` : first.msg;
+      }
+    }
     throw new ApiError(detail, response.status, data?.detail ?? null);
   }
   return data;
@@ -48,14 +58,14 @@ export async function apiBlobRequest(path, { token, signal } = {}) {
     response = await fetch(`${API_BASE_URL}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {}, signal });
   } catch (error) {
     if (error?.name === "AbortError") throw error;
-    throw new ApiError("Unable to connect to the server.");
+    throw new ApiError("Không thể kết nối đến máy chủ.");
   }
   if (!response.ok) {
     const contentType = response.headers.get("content-type") || "";
     const data = contentType.includes("application/json") ? await response.json() : null;
-    throw new ApiError(typeof data?.detail === "string" ? data.detail : "Request failed.", response.status);
+    throw new ApiError(typeof data?.detail === "string" ? data.detail : "Yêu cầu thất bại.", response.status);
   }
-  if (!(response.headers.get("content-type") || "").includes("image/png")) throw new ApiError("Invalid QR image response.", 502);
+  if (!(response.headers.get("content-type") || "").includes("image/png")) throw new ApiError("Phản hồi hình ảnh mã QR không hợp lệ.", 502);
   return response.blob();
 }
 
@@ -108,6 +118,34 @@ export function getEvent(eventId, token, signal) {
 
 export function createEvent(payload, token) {
   return apiRequest("/api/events", { method: "POST", token, body: payload });
+}
+
+export async function uploadEventImage(file, token) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const requestHeaders = {};
+  if (token) requestHeaders.Authorization = `Bearer ${token}`;
+
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}/api/uploads/event-image`, {
+      method: "POST",
+      headers: requestHeaders,
+      body: formData,
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") throw error;
+    throw new ApiError("Không thể kết nối đến máy chủ.");
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json") ? await response.json() : null;
+  if (!response.ok) {
+    const detail = typeof data?.detail === "string" ? data.detail : "Tải ảnh lên thất bại.";
+    throw new ApiError(detail, response.status, data?.detail ?? null);
+  }
+  return data;
 }
 
 export function updateEvent(eventId, payload, token) {
@@ -275,6 +313,11 @@ export function getAttendeeEvents(token, signal) {
   return apiRequest("/api/attendee/events", { token, signal });
 }
 
+export function getAttendeeEventDetail(eventId, token, signal) {
+  return apiRequest(`/api/attendee/events/${encodeURIComponent(eventId)}`, { token, signal });
+}
+
+
 export function getMyRegistrations(token, signal) {
   return apiRequest("/api/registrations/me", { token, signal });
 }
@@ -297,10 +340,6 @@ export function getMyTicket(ticketId, token, signal) {
 
 export function getMyTicketQr(ticketId, token, signal) {
   return apiBlobRequest(`/api/tickets/me/${encodeURIComponent(ticketId)}/qr`, { token, signal });
-}
-
-export function getMyFeedbacks(token, signal) {
-  return apiRequest("/api/feedbacks/me", { token, signal });
 }
 
 export function getMyEventFeedback(eventId, token, signal) {
@@ -329,45 +368,4 @@ export function checkBackendHealth() {
 
 export function checkDatabaseHealth() {
   return apiRequest("/api/health/database");
-}
-
-
-export async function apiFileUpload(path, { token, file, signal } = {}) {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  let response;
-  try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
-      method: "POST",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData,
-      signal,
-    });
-  } catch (error) {
-    if (error?.name === "AbortError") throw error;
-    throw new ApiError("Unable to connect to the server.");
-  }
-
-  const contentType = response.headers.get("content-type") || "";
-  const data = contentType.includes("application/json") ? await response.json() : null;
-  if (!response.ok) {
-    const detail = typeof data?.detail === "string" ? data.detail : "Request failed.";
-    throw new ApiError(detail, response.status, data?.detail ?? null);
-  }
-  return data;
-}
-
-export function uploadEventImage(eventId, file, token, signal) {
-  return apiFileUpload(`/api/events/${encodeURIComponent(eventId)}/image`, {
-    token,
-    file,
-    signal,
-  });
-}
-
-export function getAssetUrl(path) {
-  if (!path) return `${API_BASE_URL}/uploads/events/default-event.svg`;
-  if (/^https?:\/\//i.test(path)) return path;
-  return `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }

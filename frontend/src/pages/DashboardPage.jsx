@@ -8,29 +8,34 @@ import RatingDistribution from "../components/RatingDistribution";
 import WorkspaceHeader from "../components/WorkspaceHeader";
 import { generateFeedbackSummary, getEvents, getEventStatistics } from "../services/api";
 
-const friendlyError = (error, fallback) => error.status === 403 ? "You do not have permission to access this resource." : error.message || fallback;
-const formatRate = (value) => `${Number(value || 0).toFixed(2).replace(/\.00$/, "")}%`;
+const friendlyError = (error, fallback) =>
+  error.status === 403 ? "Bạn không có quyền truy cập vào tài nguyên này." : error.message || fallback;
+
+const formatRate = (value) => `${Number(value || 0).toFixed(1).replace(/\.0$/, "")}%`;
 
 const aiErrorMessage = (error) => {
-  if (error.status === 409 && error.message === "No feedback available for AI summary") return "No feedback is available for AI analysis yet.";
-  if (error.status === 409 && error.message === "No written feedback available for AI summary") return "No written feedback is available to summarize.";
-  if (error.status === 403) return "You do not have permission to generate AI analysis for this event.";
-  if (error.status === 404) return "Event not found.";
-  if (error.status === 502) return "AI analysis could not be generated. Please try again.";
-  if (error.status === 503) return "AI service is currently unavailable.";
-  if (error.status === 0) return "Unable to connect to the AI service.";
-  return "AI analysis could not be generated. Please try again.";
+  if (error.status === 409 && error.message === "No feedback available for AI summary")
+    return "Chưa có phản hồi nào để AI phân tích.";
+  if (error.status === 409 && error.message === "No written feedback available for AI summary")
+    return "Chưa có nhận xét văn bản nào để tổng hợp.";
+  if (error.status === 403) return "Bạn không có quyền tạo phân tích AI cho sự kiện này.";
+  if (error.status === 404) return "Không tìm thấy sự kiện.";
+  if (error.status === 502) return "Không thể phân tích dữ liệu. Vui lòng thử lại.";
+  if (error.status === 503) return "Dịch vụ AI hiện không khả dụng.";
+  if (error.status === 0) return "Không thể kết nối tới dịch vụ AI.";
+  return "Không thể phân tích dữ liệu.";
 };
 
 const normalizeAiSummary = (data) => {
   if (
-    !data
-    || typeof data.summary !== "string"
-    || !Array.isArray(data.strengths)
-    || !Array.isArray(data.issues)
-    || !Array.isArray(data.suggestions)
-    || !["mock", "openai"].includes(data.source)
-  ) return null;
+    !data ||
+    typeof data.summary !== "string" ||
+    !Array.isArray(data.strengths) ||
+    !Array.isArray(data.issues) ||
+    !Array.isArray(data.suggestions) ||
+    !["mock", "openai"].includes(data.source)
+  )
+    return null;
   return {
     ...data,
     strengths: data.strengths.filter((item) => typeof item === "string"),
@@ -55,24 +60,37 @@ function DashboardPage({ token, currentUser, onLogout, onUnauthorized, activeVie
   const aiRequestSequence = useRef(0);
   const aiInFlight = useRef(false);
 
-  const handleApiError = useCallback((error, setter, fallback) => {
-    if (error.status === 401) { onUnauthorized(); return; }
-    setter(friendlyError(error, fallback));
-  }, [onUnauthorized]);
+  const handleApiError = useCallback(
+    (error, setter, fallback) => {
+      if (error.status === 401) {
+        onUnauthorized();
+        return;
+      }
+      setter(friendlyError(error, fallback));
+    },
+    [onUnauthorized],
+  );
 
+  // Load events list
   useEffect(() => {
     const controller = new AbortController();
-    setEventsLoading(true); setEventsError("");
+    setEventsLoading(true);
+    setEventsError("");
     getEvents(token, controller.signal)
       .then((data) => {
         setEvents(data);
-        setSelectedEventId((current) => data.some((event) => event.id === current) ? current : (data[0]?.id || ""));
+        setSelectedEventId((current) => (data.some((event) => event.id === current) ? current : data[0]?.id || ""));
       })
-      .catch((error) => { if (error.name !== "AbortError") handleApiError(error, setEventsError, "Unable to load events."); })
-      .finally(() => { if (!controller.signal.aborted) setEventsLoading(false); });
+      .catch((error) => {
+        if (error.name !== "AbortError") handleApiError(error, setEventsError, "Không thể tải danh sách sự kiện.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setEventsLoading(false);
+      });
     return () => controller.abort();
   }, [token, eventsReload, handleApiError]);
 
+  // Load statistics when selected event changes
   useEffect(() => {
     setStatistics(null);
     setStatisticsError("");
@@ -90,7 +108,7 @@ function DashboardPage({ token, currentUser, onLogout, onUnauthorized, activeVie
       })
       .catch((error) => {
         if (error.name !== "AbortError" && !controller.signal.aborted) {
-          handleApiError(error, setStatisticsError, "Unable to load analytics.");
+          handleApiError(error, setStatisticsError, "Không thể tải số liệu phân tích.");
         }
       })
       .finally(() => {
@@ -101,6 +119,7 @@ function DashboardPage({ token, currentUser, onLogout, onUnauthorized, activeVie
     return () => controller.abort();
   }, [selectedEventId, token, statisticsReload, handleApiError]);
 
+  // Reset AI state when selected event changes
   useEffect(() => {
     aiRequestSequence.current += 1;
     aiInFlight.current = false;
@@ -133,7 +152,7 @@ function DashboardPage({ token, currentUser, onLogout, onUnauthorized, activeVie
       if (aiRequestSequence.current !== requestSequence) return;
       const normalized = normalizeAiSummary(data);
       if (!normalized) {
-        setAiError("AI response could not be displayed.");
+        setAiError("Không thể hiển thị kết quả từ AI.");
         return;
       }
       setAiSummary(normalized);
@@ -154,46 +173,196 @@ function DashboardPage({ token, currentUser, onLogout, onUnauthorized, activeVie
 
   const selectedEvent = events.find((event) => event.id === selectedEventId);
 
+  // Safe capacity calculations (handle capacity = 0 without NaN)
+  const maxCapacity = Math.max(0, Number(statistics?.capacity?.max_attendees) || 0);
+  const registeredCount = Math.max(0, Number(statistics?.capacity?.registered) || 0);
+  const remainingSlots = Math.max(0, maxCapacity - registeredCount);
+  const usagePercentage = maxCapacity > 0 ? Math.min(100, (registeredCount / maxCapacity) * 100) : 0;
+  const formattedCapacityRate = Number(usagePercentage.toFixed(1)).toString().replace(/\.0$/, "") + "%";
+
   return (
     <div className="dashboard-shell">
       <WorkspaceHeader currentUser={currentUser} activeView={activeView} onNavigate={onViewChange} onLogout={onLogout} />
 
-      <main className="dashboard-main">
-        <section className="dashboard-title-row">
-          <div><p className="eyebrow">EVENT INTELLIGENCE</p><h1>Analytics Dashboard</h1><p>Monitor event performance from registrations through attendee feedback.</p></div>
-          {!eventsLoading && !eventsError && <EventSelector events={events} selectedEventId={selectedEventId} onChange={handleEventChange} disabled={eventsLoading} />}
+      <main className="dashboard-main analytics-dashboard-main">
+        {/* =========================================================================
+            1. HERO ANALYTICS / BANNER + EVENT SELECTOR
+            ========================================================================= */}
+        <section className="dashboard-hero-banner">
+          <div className="hero-banner-content">
+            <div className="hero-banner-headings">
+              <span className="hero-eyebrow">
+                <span className="eyebrow-spark" aria-hidden="true">✦</span>
+                PHÂN TÍCH SỰ KIỆN
+              </span>
+              <h1>Tổng quan phân tích</h1>
+              <p>Theo dõi hiệu quả sự kiện từ đăng ký, tham dự đến phản hồi của người tham gia.</p>
+            </div>
+            {!eventsLoading && !eventsError && (
+              <div className="hero-event-selector">
+                <EventSelector
+                  events={events}
+                  selectedEventId={selectedEventId}
+                  onChange={handleEventChange}
+                  disabled={eventsLoading}
+                />
+              </div>
+            )}
+          </div>
         </section>
 
-        {eventsLoading && <div className="state-panel"><div className="app-loader" /><p>Loading events...</p></div>}
-        {eventsError && <div className="state-panel error-panel"><strong>Unable to load events</strong><p>{eventsError}</p><button type="button" className="secondary-button" onClick={() => setEventsReload((x) => x + 1)}>Retry</button></div>}
-        {!eventsLoading && !eventsError && events.length === 0 && <div className="state-panel"><strong>No events available.</strong><p>Create an event through the API to begin tracking analytics.</p></div>}
+        {/* Loading / Error States for Events */}
+        {eventsLoading && (
+          <div className="state-panel">
+            <div className="app-loader" />
+            <p>Đang tải danh sách sự kiện...</p>
+          </div>
+        )}
+        {eventsError && (
+          <div className="state-panel error-panel">
+            <strong>Không thể tải sự kiện</strong>
+            <p>{eventsError}</p>
+            <button type="button" className="secondary-button" onClick={() => setEventsReload((x) => x + 1)}>
+              Thử lại
+            </button>
+          </div>
+        )}
+        {!eventsLoading && !eventsError && events.length === 0 && (
+          <div className="state-panel">
+            <strong>Chưa có sự kiện nào.</strong>
+            <p>Hãy tạo một sự kiện để bắt đầu theo dõi số liệu phân tích.</p>
+          </div>
+        )}
 
-        {selectedEvent && !eventsLoading && !eventsError && <SelectedEventCard event={selectedEvent} />}
-        {statisticsLoading && <div className="state-panel"><div className="app-loader" /><p>Loading analytics...</p></div>}
-        {statisticsError && <div className="state-panel error-panel"><strong>Unable to load analytics</strong><p>{statisticsError}</p><button type="button" className="secondary-button" onClick={() => setStatisticsReload((x) => x + 1)}>Retry</button></div>}
+        {/* =========================================================================
+            2. EVENT HERO CARD (Real Event Details & Cover)
+            ========================================================================= */}
+        {selectedEvent && !eventsLoading && !eventsError && (
+          <SelectedEventCard event={selectedEvent} />
+        )}
 
+        {/* Statistics Loading / Error */}
+        {statisticsLoading && (
+          <div className="state-panel">
+            <div className="app-loader" />
+            <p>Đang tải số liệu phân tích...</p>
+          </div>
+        )}
+        {statisticsError && (
+          <div className="state-panel error-panel">
+            <strong>Không thể tải số liệu phân tích</strong>
+            <p>{statisticsError}</p>
+            <button type="button" className="secondary-button" onClick={() => setStatisticsReload((x) => x + 1)}>
+              Thử lại
+            </button>
+          </div>
+        )}
+
+        {/* =========================================================================
+            3. ANALYTICS METRICS CONTENT (KPIs, Charts, Capacity, AI)
+            ========================================================================= */}
         {statistics && !statisticsLoading && (
-          <div className="analytics-content">
-            <section className="kpi-grid" aria-label="Event key performance indicators">
-              <KpiCard label="Active Registrations" value={statistics.registrations.registered} detail={`${statistics.registrations.total} total registrations`} icon="registrations" />
-              <KpiCard label="Checked In" value={statistics.attendance.checked_in} detail={`of ${statistics.registrations.registered} active registrations`} tone="success" icon="checkIn" />
-              <KpiCard label="Attendance Rate" value={formatRate(statistics.attendance.attendance_rate)} detail={`${statistics.attendance.not_checked_in} still expected`} tone="warning" icon="attendance" />
-              <KpiCard label="Average Rating" value={statistics.feedback.average_rating == null ? "—" : `${statistics.feedback.average_rating} / 5`} detail={`${statistics.feedback.total} feedback responses`} tone="rating" icon="rating" />
+          <div className="analytics-content-grid">
+            {/* 4 KPI CARDS */}
+            <section className="analytics-kpi-grid" aria-label="Chỉ số hiệu quả sự kiện">
+              <KpiCard
+                label="ĐĂNG KÝ NGƯỜI THAM DỰ"
+                value={statistics.registrations.registered}
+                detail={`${statistics.registrations.total} tổng lượt đăng ký`}
+                icon="registrations"
+                tone="accent"
+              />
+              <KpiCard
+                label="ĐÃ CHECK-IN"
+                value={statistics.attendance.checked_in}
+                detail={`trên tổng số ${statistics.registrations.registered} đăng ký`}
+                icon="checkIn"
+                tone="success"
+              />
+              <KpiCard
+                label="TỶ LỆ THAM DỰ"
+                value={formatRate(statistics.attendance.attendance_rate)}
+                detail={`còn ${statistics.attendance.not_checked_in} người chưa check-in`}
+                icon="attendance"
+                tone="warning"
+              />
+              <KpiCard
+                label="ĐÁNH GIÁ TRUNG BÌNH"
+                value={statistics.feedback.average_rating == null ? "—" : `${statistics.feedback.average_rating} / 5`}
+                detail={`${statistics.feedback.total} lượt phản hồi`}
+                icon="rating"
+                tone="rating"
+              />
             </section>
 
-            <section className="visual-grid"><AttendanceOverview attendance={statistics.attendance} /><RatingDistribution distribution={statistics.feedback.rating_distribution} feedbackCount={statistics.feedback.total} /></section>
+            {/* VISUAL CHARTS ROW (Donut + Rating Distribution) */}
+            <section className="analytics-charts-grid">
+              <AttendanceOverview attendance={statistics.attendance} />
+              <RatingDistribution
+                distribution={statistics.feedback.rating_distribution}
+                feedbackCount={statistics.feedback.total}
+              />
+            </section>
 
-            <section className="summary-panel">
-              <div className="summary-heading"><div><p className="eyebrow">EVENT HEALTH</p><h3>Capacity &amp; registrations</h3></div><span className="capacity-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 21v-8m16 8v-8M2 21h20M6 13V5h12v8M9 5V2h6v3" /></svg></span></div>
-              <div className="capacity-progress-heading"><span>Capacity used</span><strong>{formatRate(statistics.capacity.usage_rate)}</strong></div>
-              <div className="capacity-track" role="progressbar" aria-label="Capacity used" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.max(0, Math.min(Number(statistics.capacity.usage_rate) || 0, 100))}><span style={{ width: `${Math.max(0, Math.min(Number(statistics.capacity.usage_rate) || 0, 100))}%` }} /></div>
-              <div className="summary-grid capacity-summary-grid">
-                <div><span>Maximum capacity</span><strong>{statistics.capacity.max_attendees}</strong></div><div><span>Registered</span><strong>{statistics.capacity.registered}</strong></div><div><span>Available</span><strong>{statistics.capacity.available}</strong></div><div><span>Usage</span><strong>{formatRate(statistics.capacity.usage_rate)}</strong></div>
+            {/* CAPACITY & REGISTRATION PANEL */}
+            <section className="panel-card capacity-panel" aria-labelledby="capacity-panel-title">
+              <div className="capacity-panel-header">
+                <div>
+                  <p className="eyebrow">SỨC CHỨA SỰ KIỆN</p>
+                  <h3 id="capacity-panel-title">Sức chứa &amp; Đăng ký</h3>
+                </div>
+                <div className="capacity-badge">
+                  <span>Tỷ lệ lấp đầy: <strong>{maxCapacity > 0 ? formattedCapacityRate : "Không giới hạn"}</strong></span>
+                </div>
+              </div>
+
+              {/* Progress bar */}
+              <div
+                className="capacity-track"
+                role="progressbar"
+                aria-label="Tỷ lệ sức chứa đã dùng"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-valuenow={maxCapacity > 0 ? usagePercentage : 0}
+              >
+                <span
+                  className="capacity-bar-fill"
+                  style={{ width: `${maxCapacity > 0 ? usagePercentage : 0}%` }}
+                />
+              </div>
+
+              {/* 4 Capacity Metrics Grid */}
+              <div className="capacity-metrics-grid">
+                <div className="capacity-metric-item">
+                  <span className="metric-label">Sức chứa tối đa</span>
+                  <strong className="metric-val">
+                    {maxCapacity > 0 ? `${maxCapacity} người` : "Không giới hạn"}
+                  </strong>
+                </div>
+                <div className="capacity-metric-item">
+                  <span className="metric-label">Đã đăng ký</span>
+                  <strong className="metric-val">{registeredCount} người</strong>
+                </div>
+                <div className="capacity-metric-item">
+                  <span className="metric-label">Còn trống</span>
+                  <strong className="metric-val">
+                    {maxCapacity > 0 ? `${remainingSlots} chỗ` : "Còn chỗ"}
+                  </strong>
+                </div>
+                <div className="capacity-metric-item">
+                  <span className="metric-label">Tỷ lệ đăng ký</span>
+                  <strong className="metric-val highlight">
+                    {maxCapacity > 0 ? formattedCapacityRate : "—"}
+                  </strong>
+                </div>
               </div>
             </section>
           </div>
         )}
 
+        {/* =========================================================================
+            4. AI INSIGHTS PANEL (Real API Integration)
+            ========================================================================= */}
         {selectedEvent && !eventsLoading && !eventsError && (
           <AIInsightsPanel
             summary={aiSummary}
@@ -205,7 +374,10 @@ function DashboardPage({ token, currentUser, onLogout, onUnauthorized, activeVie
           />
         )}
       </main>
-      <footer>Event Manager AI · Analytics data is provided live by the backend.</footer>
+
+      <footer className="dashboard-footer">
+        Event Manager AI · Dữ liệu phân tích được cập nhật trực tiếp theo thời gian thực.
+      </footer>
     </div>
   );
 }

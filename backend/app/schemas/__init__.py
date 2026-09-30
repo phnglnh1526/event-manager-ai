@@ -1,9 +1,3 @@
-from app.schemas.announcement import (
-    AnnouncementCreate,
-    AnnouncementResponse,
-    AnnouncementUpdate,
-    MyAnnouncementResponse,
-)
 from app.schemas.ai_announcement import (
     AIAnnouncementContent,
     AIAnnouncementDraftRequest,
@@ -11,17 +5,38 @@ from app.schemas.ai_announcement import (
     AIAnnouncementTone,
 )
 from app.schemas.ai_chat import EventChatContent, EventChatRequest, EventChatResponse
-from app.schemas.auth import ChangePasswordRequest, LoginRequest, ProfileUpdateRequest, TokenResponse
 from app.schemas.ai_feedback import AIFeedbackSummaryResponse, AIInsightContent
+from app.schemas.announcement import (
+    AnnouncementCreate,
+    AnnouncementResponse,
+    AnnouncementUpdate,
+)
+from app.schemas.auth import ChangePasswordRequest, LoginRequest, ProfileUpdateRequest, TokenResponse
 from app.schemas.checkin import CheckInEventResponse, CheckInRequest, CheckInResponse
-from app.schemas.event import AttendeeEventResponse, EventCreate, EventResponse, EventUpdate
-from app.schemas.feedback import FeedbackCreate, FeedbackResponse, FeedbackUpdate, MyFeedbackResponse
-from app.schemas.registration import MyRegistrationResponse, RegistrationResponse
+from app.schemas.event import (
+    AttendeeEventDetailResponse,
+    AttendeeEventResponse,
+    AttendeeScheduleItem,
+    AttendeeSpeakerItem,
+    EventCreate,
+    EventResponse,
+    EventUpdate,
+)
+from app.schemas.feedback import FeedbackCreate, FeedbackResponse, FeedbackUpdate
+from app.schemas.registration import RegistrationResponse
 from app.schemas.schedule import ScheduleCreate, ScheduleResponse, ScheduleUpdate
 from app.schemas.speaker import SpeakerCreate, SpeakerResponse, SpeakerUpdate
 from app.schemas.statistics import EventStatisticsResponse
 from app.schemas.ticket import TicketResponse
-from app.schemas.user import AdminPasswordReset, AdminUserCreate, AdminUserUpdate, PasswordResetResponse, UserRegisterRequest, UserResponse
+from app.schemas.upload import UploadImageResponse
+from app.schemas.user import (
+    AdminPasswordReset,
+    AdminUserCreate,
+    AdminUserUpdate,
+    PasswordResetResponse,
+    UserRegisterRequest,
+    UserResponse,
+)
 
 __all__ = [
     "AIAnnouncementContent",
@@ -34,7 +49,6 @@ __all__ = [
     "AnnouncementCreate",
     "AnnouncementResponse",
     "AnnouncementUpdate",
-    "MyAnnouncementResponse",
     "AIFeedbackSummaryResponse",
     "AIInsightContent",
     "LoginRequest",
@@ -50,9 +64,7 @@ __all__ = [
     "EventUpdate",
     "FeedbackCreate",
     "FeedbackResponse",
-    "MyFeedbackResponse",
     "FeedbackUpdate",
-    "MyRegistrationResponse",
     "RegistrationResponse",
     "ScheduleCreate",
     "ScheduleResponse",
@@ -62,6 +74,7 @@ __all__ = [
     "SpeakerUpdate",
     "EventStatisticsResponse",
     "TicketResponse",
+    "UploadImageResponse",
     "AdminPasswordReset",
     "AdminUserCreate",
     "AdminUserUpdate",
