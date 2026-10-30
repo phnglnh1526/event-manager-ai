@@ -150,9 +150,9 @@ function MyTickets({ token, events, registrations, onUnauthorized, onBrowseEvent
 
   return (
     <section className="my-tickets" aria-label="Vé sự kiện của tôi">
-      <div className="dashboard-title-row">
-        <div>
-          <p className="hero-eyebrow">QUYỀN TRUY CẬP SỰ KIỆN</p>
+      <div className="attendee-page-header">
+        <div className="attendee-page-header-content">
+          <span className="eyebrow">QUYỀN TRUY CẬP SỰ KIỆN</span>
           <h1>Vé của tôi</h1>
           <p>Xem vé điện tử và xuất trình mã QR hợp lệ cho nhân viên soát vé tại sự kiện.</p>
         </div>
@@ -264,15 +264,15 @@ function MyTickets({ token, events, registrations, onUnauthorized, onBrowseEvent
 
           {/* Ticket Detail / QR Preview Drawer / Panel */}
           {(detail || detailLoading || detailError || qrTicketId) && (
-            <aside className="ticket-detail-panel" style={{ background: "#0d1024", border: "1px solid #1e2548", borderRadius: 16, padding: "1.4rem" }}>
+            <aside className="ticket-detail-panel" style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "1.4rem", boxShadow: "var(--shadow-md)" }}>
               {detailLoading ? (
                 <div className="compact-state"><div className="app-loader" /><p>Đang tải thông tin vé...</p></div>
               ) : detail ? (
                 <>
-                  <div className="editor-heading" style={{ borderBottom: "1px solid #1e2548", paddingBottom: "0.75rem", marginBottom: "1rem" }}>
+                  <div className="editor-heading" style={{ borderBottom: "1px solid var(--border)", paddingBottom: "0.75rem", marginBottom: "1rem" }}>
                     <div>
                       <p className="hero-eyebrow" style={{ margin: 0 }}>CHI TIẾT VÉ ĐIỆN TỬ</p>
-                      <h3 style={{ margin: "0.2rem 0 0", color: "#ffffff" }}>{eventName(detail)}</h3>
+                      <h3 style={{ margin: "0.2rem 0 0", color: "var(--text-primary)" }}>{eventName(detail)}</h3>
                     </div>
                     <button type="button" className="event-modal-close-btn" onClick={() => setDetail(null)}>
                       ✕
@@ -294,7 +294,7 @@ function MyTickets({ token, events, registrations, onUnauthorized, onBrowseEvent
                     </div>
                     <div className="speaker-detail-item" style={{ gridColumn: "1 / -1" }}>
                       <dt>Mã vé bảo mật (Full Code)</dt>
-                      <dd style={{ fontFamily: "monospace", color: "#a5b4fc", fontWeight: 700, wordBreak: "break-all" }}>
+                      <dd style={{ fontFamily: "monospace", color: "var(--primary)", fontWeight: 700, wordBreak: "break-all" }}>
                         {detail.ticket_code}
                       </dd>
                     </div>
@@ -310,9 +310,9 @@ function MyTickets({ token, events, registrations, onUnauthorized, onBrowseEvent
 
               {/* QR Code Panel */}
               {qrTicketId && (
-                <div className="qr-panel" style={{ marginTop: "1rem", textAlign: "center", background: "#080b1a", border: "1px solid #232b50", borderRadius: 12, padding: "1.25rem" }}>
+                <div className="qr-panel" style={{ marginTop: "1rem", textAlign: "center", background: "var(--surface-muted)", border: "1px solid var(--border)", borderRadius: 12, padding: "1.25rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                    <strong style={{ color: "#ffffff", fontSize: "0.95rem" }}>Mã QR Check-in</strong>
+                    <strong style={{ color: "var(--text-primary)", fontSize: "0.95rem" }}>Mã QR Check-in</strong>
                     <button type="button" className="event-modal-close-btn" onClick={closeQr}>✕</button>
                   </div>
 
@@ -326,10 +326,10 @@ function MyTickets({ token, events, registrations, onUnauthorized, onBrowseEvent
 
                   {qrUrl && (
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
-                      <div style={{ background: "#ffffff", padding: "12px", borderRadius: "12px", boxShadow: "0 0 20px rgba(255,255,255,0.15)" }}>
+                      <div style={{ background: "#ffffff", padding: "12px", borderRadius: "12px", boxShadow: "var(--shadow-md)" }}>
                         <img src={qrUrl} alt="Mã QR vé sự kiện" style={{ width: 180, height: 180, display: "block" }} />
                       </div>
-                      <p style={{ fontSize: "0.78rem", color: "#94a3b8", margin: 0, maxWidth: 260 }}>
+                      <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: 0, maxWidth: 260 }}>
                         Xuất trình mã QR này cho nhân viên soát vé tại cửa sự kiện.
                       </p>
                     </div>

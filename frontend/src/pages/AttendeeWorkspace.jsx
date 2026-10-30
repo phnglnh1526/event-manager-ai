@@ -664,11 +664,11 @@ function AttendeeWorkspace({ token, currentUser, onLogout, onUnauthorized, onPro
           ) : (
             /* --- MY REGISTRATIONS VIEW --- */
             <>
-              <section className="dashboard-title-row">
-                <div>
-                  <p className="eyebrow">SỰ KIỆN CỦA TÔI</p>
+              <section className="attendee-page-header">
+                <div className="attendee-page-header-content">
+                  <span className="eyebrow">SỰ KIỆN CỦA TÔI</span>
                   <h1>Sự kiện đã đăng ký</h1>
-                  <p>Quản lý các sự kiện bạn đã đăng ký tham gia và tra cứu trạng thái vé.</p>
+                  <p>Quản lý các sự kiện bạn đã đăng ký tham gia và tra cứu trạng thái vé điện tử.</p>
                 </div>
               </section>
 
@@ -690,12 +690,15 @@ function AttendeeWorkspace({ token, currentUser, onLogout, onUnauthorized, onPro
                     return (
                       <article className="my-registration-card" key={item.id}>
                         <div className="my-registration-info">
-                          <h3>{actionEvent.title}</h3>
-                          <div className="my-registration-meta">
-                            <span>📅 Ngày đăng ký: <strong>{display(item.created_at)}</strong></span>
-                            <span className={`registration-status status-${item.status.toLowerCase()}`}>
-                              {registrationStatusLabel(item)}
-                            </span>
+                          <div className="my-registration-icon">🎟️</div>
+                          <div className="my-registration-details">
+                            <h3>{actionEvent.title}</h3>
+                            <div className="my-registration-meta">
+                              <span>📅 Ngày đăng ký: <strong>{display(item.created_at)}</strong></span>
+                              <span className={`registration-status status-${item.status.toLowerCase()}`}>
+                                {registrationStatusLabel(item)}
+                              </span>
+                            </div>
                           </div>
                         </div>
 
@@ -703,7 +706,7 @@ function AttendeeWorkspace({ token, currentUser, onLogout, onUnauthorized, onPro
                           {isRegistered && (
                             <button
                               type="button"
-                              className="secondary-button"
+                              className="secondary-button compact-button"
                               onClick={() => setView("tickets")}
                             >
                               Xem vé
@@ -713,7 +716,7 @@ function AttendeeWorkspace({ token, currentUser, onLogout, onUnauthorized, onPro
                           {isRegistered ? (
                             <button
                               type="button"
-                              className="danger-button"
+                              className="danger-button compact-button"
                               disabled={actionEventId === item.event_id}
                               onClick={(e) => openConfirmation("cancel", actionEvent, item, e.currentTarget)}
                             >
@@ -722,7 +725,7 @@ function AttendeeWorkspace({ token, currentUser, onLogout, onUnauthorized, onPro
                           ) : event ? (
                             <button
                               type="button"
-                              className="primary-button"
+                              className="primary-button compact-button"
                               disabled={actionEventId === item.event_id}
                               onClick={(e) => openConfirmation("register", event, item, e.currentTarget)}
                             >

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import EventCoverImage from "./EventCoverImage";
+import EventCoverImage, { normalizeCoverImageUrl } from "./EventCoverImage";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
@@ -34,7 +34,7 @@ export function EventImageUpload({
     };
   }, [pendingFile]);
 
-  const displayImage = previewUrl || currentImageUrl;
+  const displayImage = previewUrl || normalizeCoverImageUrl(currentImageUrl);
 
   const validateAndSelectFile = (file) => {
     setLocalError("");

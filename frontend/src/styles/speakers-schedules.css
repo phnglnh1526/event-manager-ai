@@ -1,6 +1,7 @@
 /* ==========================================================================
    EVENT MANAGER AI V2 — SPEAKERS & SCHEDULES STYLES
-   Dark Tech Theme, Modern Speaker Cards, Vertical Timeline Agenda, Mobile-First
+   Theme: Pastel Pink — Modern Minimalist SaaS Dashboard — Soft UI
+   Modern Speaker Cards, Vertical Timeline Agenda, Mobile-First
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -9,7 +10,7 @@
 .speaker-management-root {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--space-5);
 }
 
 .speaker-mgmt-header {
@@ -18,47 +19,48 @@
   align-items: flex-start;
   gap: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid #1a203f;
+  border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
 
 .speaker-mgmt-header h3 {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0.2rem 0 0.15rem;
 }
 
 .speaker-mgmt-header .related-event-tag {
   font-size: 0.78rem;
-  color: #a5b4fc;
+  color: var(--primary-hover);
+  font-weight: 600;
 }
 
 /* Speaker Cards Grid */
 .speaker-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.25rem;
+  gap: var(--space-4);
 }
 
 .speaker-modern-card {
-  background: #0d1024;
-  border: 1px solid #1e2548;
-  border-radius: var(--radius-lg, 16px);
-  padding: 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card-sm);
+  padding: 1.35rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
   position: relative;
   overflow: hidden;
 }
 
 .speaker-modern-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(217, 70, 239, 0.4);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
 }
 
 /* Speaker Avatar & Header */
@@ -69,19 +71,19 @@
 }
 
 .speaker-avatar {
-  width: 52px;
-  height: 52px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  font-size: 1.1rem;
-  font-weight: 800;
+  color: #FFFFFF;
+  font-size: 1.05rem;
+  font-weight: 700;
   letter-spacing: 0.04em;
-  box-shadow: 0 0 14px rgba(236, 72, 153, 0.35);
-  border: 2px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(110, 55, 75, 0.12);
+  border: 2px solid var(--surface);
   flex-shrink: 0;
 }
 
@@ -93,7 +95,7 @@
 .speaker-name {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-primary);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -102,7 +104,7 @@
 
 .speaker-title-badge {
   font-size: 0.75rem;
-  color: #f472b6;
+  color: var(--primary-hover);
   font-weight: 600;
   display: block;
   white-space: nowrap;
@@ -113,7 +115,7 @@
 
 .speaker-org {
   font-size: 0.72rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -130,7 +132,7 @@
 
 .speaker-bio-clamped {
   font-size: 0.82rem;
-  color: #cbd5e1;
+  color: var(--text-body);
   line-height: 1.5;
   margin: 0;
   display: -webkit-box;
@@ -144,11 +146,11 @@
   align-items: center;
   gap: 0.4rem;
   font-size: 0.74rem;
-  color: #94a3b8;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid #1a203f;
+  color: var(--text-secondary);
+  background: var(--light-pink);
+  border: 1px solid var(--border);
   padding: 0.25rem 0.55rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   width: fit-content;
   max-width: 100%;
   overflow: hidden;
@@ -161,10 +163,10 @@
   align-items: center;
   gap: 0.35rem;
   font-size: 0.7rem;
-  color: #a5b4fc;
+  color: var(--primary-hover);
   margin-top: auto;
   padding-top: 0.5rem;
-  border-top: 1px solid #161b38;
+  border-top: 1px solid var(--border-subtle);
 }
 
 /* Speaker Actions */
@@ -173,81 +175,83 @@
   align-items: center;
   gap: 0.5rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #1a203f;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .speaker-btn-view {
   flex: 1;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid #232b50;
-  color: #f1f5f9;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
   font-size: 0.78rem;
   font-weight: 600;
   padding: 0.45rem 0.65rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .speaker-btn-view:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: #3b4679;
+  background: var(--soft-pink);
+  border-color: var(--border-hover);
 }
 
 .speaker-btn-edit {
-  background: rgba(217, 70, 239, 0.12);
-  border: 1px solid rgba(217, 70, 239, 0.35);
-  color: #f0abfc;
+  background: var(--soft-pink);
+  border: 1px solid var(--border);
+  color: var(--primary-hover);
   font-size: 0.78rem;
   font-weight: 600;
   padding: 0.45rem 0.75rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .speaker-btn-edit:hover {
-  background: rgba(217, 70, 239, 0.22);
-  color: #ffffff;
+  background: var(--border);
+  color: var(--text-primary);
+  border-color: var(--primary);
 }
 
 .speaker-btn-delete {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
   font-size: 0.78rem;
   font-weight: 600;
   padding: 0.45rem 0.65rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .speaker-btn-delete:hover {
-  background: rgba(239, 68, 68, 0.22);
-  color: #ffffff;
+  background: #FCE4EC;
+  border-color: var(--danger);
 }
 
 /* Speaker Detail Modal / Section */
 .speaker-detail-card {
-  background: #0d1024;
-  border: 1px solid #1e2548;
-  border-radius: var(--radius-lg, 16px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  box-shadow: var(--card-shadow);
 }
 
 .speaker-detail-header {
@@ -255,28 +259,28 @@
   align-items: center;
   gap: 1.25rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #1a203f;
+  border-bottom: 1px solid var(--border);
 }
 
 .speaker-detail-avatar {
-  width: 64px;
-  height: 64px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  font-size: 1.4rem;
-  font-weight: 800;
-  box-shadow: 0 0 18px rgba(236, 72, 153, 0.4);
+  color: #FFFFFF;
+  font-size: 1.35rem;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(110, 55, 75, 0.12);
   flex-shrink: 0;
 }
 
 .speaker-detail-info h3 {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -297,19 +301,19 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .speaker-detail-item dd {
   font-size: 0.88rem;
-  color: #f1f5f9;
+  color: var(--text-primary);
   margin: 0;
 }
 
 .speaker-detail-bio-box {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid #1a203f;
-  border-radius: 10px;
+  background: var(--light-pink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 1rem 1.15rem;
 }
 
@@ -318,13 +322,13 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #ec4899;
+  color: var(--primary-hover);
   margin: 0 0 0.5rem;
 }
 
 .speaker-detail-bio-box p {
   font-size: 0.85rem;
-  color: #cbd5e1;
+  color: var(--text-body);
   line-height: 1.6;
   margin: 0;
   white-space: pre-wrap;
@@ -336,13 +340,13 @@
 .schedule-management-root {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--space-5);
 }
 
 .schedule-context-banner {
-  background: linear-gradient(135deg, rgba(16, 20, 41, 0.85) 0%, rgba(21, 25, 50, 0.6) 100%);
-  border: 1px solid #1e2548;
-  border-radius: 12px;
+  background: var(--gradient-accent-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 1rem 1.25rem;
   display: flex;
   align-items: center;
@@ -354,7 +358,7 @@
 .schedule-context-title h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0.15rem 0 0;
 }
 
@@ -364,7 +368,7 @@
   gap: 0.85rem;
   flex-wrap: wrap;
   font-size: 0.8rem;
-  color: #cbd5e1;
+  color: var(--text-secondary);
 }
 
 .schedule-context-meta span {
@@ -374,7 +378,7 @@
 }
 
 .schedule-context-meta svg {
-  color: #ec4899;
+  color: var(--primary);
 }
 
 /* Timeline Container */
@@ -391,7 +395,7 @@
   bottom: 2rem;
   left: 85px;
   width: 2px;
-  background: linear-gradient(180deg, #ec4899 0%, #8b5cf6 50%, #1e2548 100%);
+  background: linear-gradient(180deg, var(--primary) 0%, var(--soft-pink) 100%);
 }
 
 /* Timeline Item Row */
@@ -420,15 +424,15 @@
 
 .timeline-time-start {
   font-size: 0.95rem;
-  font-weight: 800;
-  color: #ffffff;
+  font-weight: 700;
+  color: var(--text-primary);
   letter-spacing: -0.01em;
   line-height: 1;
 }
 
 .timeline-time-end {
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--text-muted);
   margin-top: 0.25rem;
 }
 
@@ -438,9 +442,9 @@
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #080b1a;
-  border: 3px solid #ec4899;
-  box-shadow: 0 0 10px rgba(236, 72, 153, 0.6);
+  background: var(--surface);
+  border: 3px solid var(--primary);
+  box-shadow: 0 0 8px rgba(110, 55, 75, 0.15);
   flex-shrink: 0;
   margin-top: 0.85rem;
   z-index: 2;
@@ -449,20 +453,21 @@
 /* Agenda Card */
 .timeline-card {
   flex: 1;
-  background: #0d1024;
-  border: 1px solid #1e2548;
-  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card-sm);
   padding: 1.15rem 1.35rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
 }
 
 .timeline-card:hover {
   transform: translateX(3px);
-  border-color: rgba(217, 70, 239, 0.35);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .timeline-card-header {
@@ -475,19 +480,19 @@
 .timeline-card-title {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0;
   line-height: 1.3;
 }
 
 .timeline-duration-badge {
   font-size: 0.7rem;
-  font-weight: 700;
-  color: #a5b4fc;
-  background: rgba(165, 180, 252, 0.1);
-  border: 1px solid rgba(165, 180, 252, 0.25);
-  padding: 0.15rem 0.5rem;
-  border-radius: 9999px;
+  font-weight: 600;
+  color: var(--primary-hover);
+  background: var(--soft-pink);
+  border: 1px solid var(--border);
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -504,15 +509,15 @@
   align-items: center;
   gap: 0.35rem;
   font-size: 0.76rem;
-  color: #cbd5e1;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid #1a203f;
+  color: var(--text-secondary);
+  background: var(--light-pink);
+  border: 1px solid var(--border);
   padding: 0.25rem 0.6rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .timeline-meta-pill svg {
-  color: #ec4899;
+  color: var(--primary);
 }
 
 .timeline-speaker-pill {
@@ -521,21 +526,21 @@
   gap: 0.4rem;
   font-size: 0.76rem;
   font-weight: 600;
-  color: #f0abfc;
-  background: rgba(217, 70, 239, 0.1);
-  border: 1px solid rgba(217, 70, 239, 0.25);
+  color: var(--primary-hover);
+  background: var(--soft-pink);
+  border: 1px solid var(--border);
   padding: 0.25rem 0.6rem;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
 }
 
 .timeline-speaker-avatar-mini {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #ec4899;
-  color: #ffffff;
+  background: var(--primary);
+  color: #FFFFFF;
   font-size: 0.6rem;
-  font-weight: 800;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -543,7 +548,7 @@
 
 .timeline-card-desc {
   font-size: 0.82rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   line-height: 1.5;
   margin: 0;
 }
@@ -554,7 +559,7 @@
   justify-content: flex-end;
   gap: 0.5rem;
   padding-top: 0.65rem;
-  border-top: 1px solid #161b38;
+  border-top: 1px solid var(--border-subtle);
 }
 
 /* --------------------------------------------------------------------------

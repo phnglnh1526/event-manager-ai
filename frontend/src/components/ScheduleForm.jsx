@@ -23,13 +23,13 @@ function ScheduleForm({
     <section className="schedule-form form-section-card" aria-labelledby="schedule-form-title">
       <div
         className="editor-heading"
-        style={{ borderBottom: "1px solid #1a203f", paddingBottom: "0.75rem", marginBottom: "1rem" }}
+        style={{ borderBottom: "1px solid var(--border)", paddingBottom: "0.75rem", marginBottom: "1rem" }}
       >
         <div>
           <p className="hero-eyebrow" style={{ margin: 0 }}>
             {editing ? "CHỈNH SỬA PHIÊN LỊCH TRÌNH" : "THÊM PHIÊN MỚI"}
           </p>
-          <h3 id="schedule-form-title" style={{ color: "#ffffff", margin: "0.25rem 0 0" }}>
+          <h3 id="schedule-form-title" style={{ color: "var(--text-primary)", margin: "0.25rem 0 0" }}>
             {editing ? "Cập nhật phiên" : "Thêm phiên lịch trình"}
           </h3>
         </div>
@@ -40,12 +40,12 @@ function ScheduleForm({
 
       <div
         style={{
-          background: "rgba(217, 70, 239, 0.08)",
-          border: "1px solid rgba(217, 70, 239, 0.25)",
+          background: "var(--light-rose)",
+          border: "1px solid var(--border)",
           borderRadius: 8,
           padding: "0.65rem 0.85rem",
           fontSize: "0.8rem",
-          color: "#f0abfc",
+          color: "var(--primary-active)",
           marginBottom: "1rem",
         }}
       >
@@ -129,7 +129,7 @@ function ScheduleForm({
               </option>
             ))}
           </select>
-          {speakersLoading && <small style={{ color: "#94a3b8" }}>Đang tải danh sách diễn giả...</small>}
+          {speakersLoading && <small style={{ color: "var(--text-muted)" }}>Đang tải danh sách diễn giả...</small>}
         </div>
       </div>
 

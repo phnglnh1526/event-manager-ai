@@ -26,9 +26,9 @@ function AttendanceOverview({ attendance }) {
           <svg viewBox="0 0 120 120" aria-hidden="true">
             <defs>
               <linearGradient id="attendanceGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#ec4899" />
-                <stop offset="50%" stopColor="#d946ef" />
-                <stop offset="100%" stopColor="#8b5cf6" />
+                <stop offset="0%" stopColor="#D97594" />
+                <stop offset="50%" stopColor="#B94F72" />
+                <stop offset="100%" stopColor="#963B5B" />
               </linearGradient>
             </defs>
             <circle className="donut-background" cx="60" cy="60" r="48" pathLength="100" />

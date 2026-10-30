@@ -28,13 +28,13 @@ function AnnouncementForm({
     <section className="announcement-editor form-section-card" aria-labelledby="announcement-form-title">
       <div
         className="editor-heading"
-        style={{ borderBottom: "1px solid #1a203f", paddingBottom: "0.85rem", marginBottom: "1.15rem" }}
+        style={{ borderBottom: "1px solid var(--border)", paddingBottom: "0.85rem", marginBottom: "1.15rem" }}
       >
         <div>
           <p className="hero-eyebrow" style={{ margin: 0 }}>
             {isEditing ? "CHỈNH SỬA THÔNG BÁO" : "TẠO THÔNG BÁO MỚI"}
           </p>
-          <h3 id="announcement-form-title" style={{ color: "#ffffff", margin: "0.25rem 0 0.35rem" }}>
+          <h3 id="announcement-form-title" style={{ color: "var(--text-primary)", margin: "0.25rem 0 0.35rem" }}>
             {isEditing ? "Cập nhật thông báo" : "Soạn thông báo sự kiện"}
           </h3>
           {isEditing && (
@@ -64,7 +64,7 @@ function AnnouncementForm({
             <AIIcon size="compact" />
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <span style={{ fontWeight: 700, color: "#ffffff" }}>Trợ lý AI tạo thông báo</span>
+                <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>Trợ lý AI tạo thông báo</span>
                 {ai.source && <AIBadge source={ai.source} />}
               </div>
               <span className="ai-assistant-subtext">
@@ -270,7 +270,7 @@ function AnnouncementForm({
               className="secondary-button"
               onClick={() => onSave("DRAFT")}
               disabled={saving}
-              style={{ borderColor: "#f59e0b", color: "#fbbf24" }}
+              style={{ borderColor: "var(--warning)", color: "var(--warning)" }}
             >
               Hủy đăng (Về nháp)
             </button>
@@ -280,7 +280,7 @@ function AnnouncementForm({
               className="primary-button"
               onClick={() => onSave("PUBLISHED")}
               disabled={saving}
-              style={{ background: "#22c55e", color: "#080b1a", fontWeight: 800 }}
+              style={{ background: "var(--success)", color: "#ffffff", fontWeight: 700 }}
             >
               Đăng thông báo ngay
             </button>

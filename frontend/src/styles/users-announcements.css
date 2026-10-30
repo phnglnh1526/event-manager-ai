@@ -1,6 +1,7 @@
 /* ==========================================================================
    EVENT MANAGER AI V2 — USER MANAGEMENT & ANNOUNCEMENTS STYLES
-   Dark Tech Theme, Role Badges, AI Announcement Generator, Clean Layout
+   Theme: Pastel Pink — Modern Professional SaaS Dashboard — Soft UI
+   Role Badges, AI Announcement Generator, Clean Layout
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -9,23 +10,33 @@
 .users-mgmt-console {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 12px;
+}
+
+.users-console {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl, 18px);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
 }
 
 .users-toolbar-bar {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 12px;
   flex-wrap: wrap;
-  background: #0d1024;
-  border: 1px solid #1e2548;
-  border-radius: 12px;
-  padding: 0.85rem 1.15rem;
+  background: var(--surface);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 10px 18px;
+  box-shadow: none;
 }
 
 .users-search-input-wrap {
-  flex: 1;
-  min-width: 240px;
+  flex: 1 1 240px;
+  max-width: 380px;
   position: relative;
   display: flex;
   align-items: center;
@@ -34,52 +45,83 @@
 .users-search-input-wrap svg {
   position: absolute;
   left: 0.85rem;
-  color: #64748b;
+  color: var(--text-muted);
   pointer-events: none;
 }
 
-.users-filter-select {
-  background: #080b1a;
-  border: 1px solid #232b50;
-  border-radius: 8px;
-  color: #f8fafc;
+.users-toolbar-bar .filter-search-input {
+  width: 100%;
+  height: 38px;
+  min-height: 38px;
+  padding: 6px 12px 6px 34px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  background: #FCF8FA;
   font-size: 0.85rem;
-  padding: 0.6rem 1.8rem 0.6rem 0.85rem;
+}
+
+.users-filter-select {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 150px !important;
+  max-width: 190px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 6px 30px 6px 10px !important;
   outline: none;
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23756771' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .users-filter-select:focus {
-  border-color: #ec4899;
+  border-color: var(--primary);
+  background-color: var(--surface);
+  box-shadow: var(--focus-ring);
+}
+
+.users-console .reg-table-container {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* User Role Badges */
 .role-badge-admin {
-  background: rgba(217, 70, 239, 0.15);
-  border: 1px solid rgba(217, 70, 239, 0.35);
-  color: #f0abfc;
+  background: var(--soft-pink);
+  border: 1px solid var(--border);
+  color: var(--primary-hover);
+  border-radius: var(--radius-full);
 }
 
 .role-badge-organizer {
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  color: #7dd3fc;
+  background: var(--info-soft);
+  border: 1px solid var(--info-border);
+  color: var(--info-text);
+  border-radius: var(--radius-full);
 }
 
 .role-badge-staff {
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #fcd34d;
+  background: var(--warning-soft);
+  border: 1px solid var(--warning-border);
+  color: var(--warning-text);
+  border-radius: var(--radius-full);
 }
 
 .role-badge-attendee {
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  color: #86efac;
+  background: var(--success-soft);
+  border: 1px solid var(--success-border);
+  color: var(--success-text);
+  border-radius: var(--radius-full);
 }
 
 /* User Identity Cell */
@@ -93,16 +135,16 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 0.82rem;
   letter-spacing: 0.04em;
-  box-shadow: 0 0 10px rgba(236, 72, 153, 0.3);
-  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(110, 55, 75, 0.12);
+  border: 2px solid var(--surface);
   flex-shrink: 0;
 }
 
@@ -118,25 +160,26 @@
 }
 
 .user-full-name-line strong {
-  color: #ffffff;
-  font-weight: 700;
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .user-username-tag {
   font-size: 0.72rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-family: var(--font-mono, monospace);
 }
 
 .user-you-pill {
   font-size: 0.65rem;
   font-weight: 700;
-  background: rgba(236, 72, 153, 0.2);
-  color: #f472b6;
-  border: 1px solid rgba(236, 72, 153, 0.4);
-  padding: 0.1rem 0.4rem;
-  border-radius: 9999px;
+  background: var(--soft-pink);
+  color: var(--primary-hover);
+  border: 1px solid var(--primary);
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-full);
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* --------------------------------------------------------------------------
@@ -144,38 +187,39 @@
    -------------------------------------------------------------------------- */
 .announcement-workspace-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: minmax(320px, 38%) minmax(0, 62%);
+  gap: 16px;
   align-items: start;
 }
 
 .announcements-cards-column {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 12px;
 }
 
 .announcement-modern-card {
-  background: #0d1024;
-  border: 1px solid #1e2548;
-  border-radius: var(--radius-lg, 16px);
-  padding: 1.25rem 1.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card-sm, 14px);
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
   position: relative;
 }
 
 .announcement-modern-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(217, 70, 239, 0.35);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .announcement-modern-card.selected {
-  border-color: #ec4899;
-  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.3);
+  border-color: var(--primary);
+  box-shadow: 0 6px 20px rgba(110, 55, 75, 0.08);
 }
 
 .announcement-card-head {
@@ -186,16 +230,16 @@
 }
 
 .announcement-card-title {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0;
   line-height: 1.35;
 }
 
 .announcement-card-preview {
   font-size: 0.85rem;
-  color: #cbd5e1;
+  color: var(--text-body);
   line-height: 1.55;
   margin: 0;
   display: -webkit-box;
@@ -209,9 +253,9 @@
   align-items: center;
   justify-content: space-between;
   padding-top: 0.65rem;
-  border-top: 1px solid #1a203f;
+  border-top: 1px solid var(--border-subtle);
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted);
   flex-wrap: wrap;
   gap: 0.5rem;
 }
@@ -220,12 +264,12 @@
    3. AI ANNOUNCEMENT ASSISTANT
    -------------------------------------------------------------------------- */
 .ai-announcement-assistant {
-  background: linear-gradient(135deg, rgba(16, 20, 41, 0.95) 0%, rgba(30, 16, 52, 0.4) 100%);
-  border: 1px solid rgba(217, 70, 239, 0.3);
-  border-radius: 12px;
+  background: var(--gradient-accent-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 1.15rem 1.25rem;
   margin: 1rem 0;
-  box-shadow: 0 4px 16px rgba(217, 70, 239, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .ai-assistant-toggle-bar {
@@ -242,45 +286,46 @@
   gap: 0.5rem;
   font-size: 0.85rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .ai-assistant-label svg {
-  color: #ec4899;
+  color: var(--primary-hover);
 }
 
 .ai-assistant-subtext {
-  font-size: 0.74rem;
-  color: #94a3b8;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
   display: block;
   margin-top: 0.15rem;
 }
 
 .ai-assistant-btn-trigger {
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
-  color: #ffffff;
+  background: var(--primary);
+  color: #FFFFFF;
   border: none;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.5rem 0.95rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  box-shadow: 0 2px 10px rgba(217, 70, 239, 0.3);
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 10px rgba(110, 55, 75, 0.08);
+  transition: all var(--transition-fast);
 }
 
 .ai-assistant-btn-trigger:hover:not(:disabled) {
-  opacity: 0.92;
+  background: var(--primary-hover);
   transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(110, 55, 75, 0.14);
 }
 
 .ai-assistant-form-fields {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid rgba(217, 70, 239, 0.2);
+  border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 0.85rem;

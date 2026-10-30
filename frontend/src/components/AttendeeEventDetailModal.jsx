@@ -207,7 +207,7 @@ function AttendeeEventDetailModal({
                 <p>Đang tải thông tin diễn giả...</p>
               </div>
             ) : speakers.length === 0 ? (
-              <div style={{ color: "#94a3b8", fontSize: "0.85rem", fontStyle: "italic", background: "#11152e", padding: "0.85rem", borderRadius: 8 }}>
+              <div style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontStyle: "italic", background: "var(--surface-muted)", border: "1px solid var(--border)", padding: "0.85rem", borderRadius: 8 }}>
                 Chưa có diễn giả nào được công bố hoặc bạn có thể hỏi Trợ lý AI để cập nhật.
               </div>
             ) : (
@@ -240,7 +240,7 @@ function AttendeeEventDetailModal({
                 <p>Đang tải lịch trình...</p>
               </div>
             ) : schedules.length === 0 ? (
-              <div style={{ color: "#94a3b8", fontSize: "0.85rem", fontStyle: "italic", background: "#11152e", padding: "0.85rem", borderRadius: 8 }}>
+              <div style={{ color: "var(--text-muted)", fontSize: "0.85rem", fontStyle: "italic", background: "var(--surface-muted)", border: "1px solid var(--border)", padding: "0.85rem", borderRadius: 8 }}>
                 Chưa có lịch trình phân đoạn chi tiết hoặc bạn có thể hỏi Trợ lý AI để biết thêm.
               </div>
             ) : (
@@ -252,7 +252,7 @@ function AttendeeEventDetailModal({
                     </div>
                     <div className="attendee-timeline-title">{sch.title}</div>
                     {sch.description && (
-                      <p style={{ margin: "0 0 0.4rem", fontSize: "0.8rem", color: "#94a3b8" }}>
+                      <p style={{ margin: "0 0 0.4rem", fontSize: "0.8rem", color: "var(--text-muted)" }}>
                         {sch.description}
                       </p>
                     )}

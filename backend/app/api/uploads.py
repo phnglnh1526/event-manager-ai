@@ -77,15 +77,9 @@ async def upload_event_image(
     db.commit()
 
     # Determine public URL
-    forwarded_proto = request.headers.get("x-forwarded-proto")
-    forwarded_host = request.headers.get("x-forwarded-host")
-    host = forwarded_host or request.headers.get("host")
-    proto = forwarded_proto or request.url.scheme
-
-    if host and "localhost" not in host:
-        public_url = f"{proto}://{host}/api/uploads/file/{file_id}"
-    else:
-        public_url = f"https://event-manager-api-aeyc.onrender.com/api/uploads/file/{file_id}"
+    # Return root-relative URL so it is reachable consistently via frontend proxy (e.g. Vite or Nginx)
+    # and direct API calls, without relying on internal container hostnames (such as backend:8000).
+    public_url = f"/api/uploads/file/{file_id}"
 
     return UploadImageResponse(
         url=public_url,
@@ -93,7 +87,7 @@ async def upload_event_image(
     )
 
 
-@router.get("/file/{file_id}")
+@router.api_route("/file/{file_id}", methods=["GET", "HEAD"])
 def get_uploaded_file(
     file_id: str,
     db: Session = Depends(get_db),

@@ -1,6 +1,7 @@
 /* ==========================================================================
    EVENT MANAGER AI V2 — REGISTRATION, TICKET & CHECK-IN STYLES
-   Dark Tech Theme, Digital Ticket Design, High-Speed Staff Check-In
+   Theme: Pastel Pink — Modern Minimalist SaaS Dashboard — Soft UI
+   Digital Ticket Design, High-Speed Staff Check-In
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
@@ -9,18 +10,19 @@
 .registration-mgmt-root {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--space-5);
 }
 
 .reg-search-filter-bar {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
   flex-wrap: wrap;
-  background: #0d1024;
-  border: 1px solid #1e2548;
-  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
+  box-shadow: var(--shadow-sm);
 }
 
 .reg-search-box {
@@ -34,34 +36,36 @@
 .reg-search-box svg {
   position: absolute;
   left: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted);
   pointer-events: none;
 }
 
 .reg-search-input {
   width: 100%;
-  background: #080b1a;
-  border: 1px solid #232b50;
-  border-radius: 8px;
-  color: #f8fafc;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
   font-size: 0.85rem;
-  padding: 0.55rem 0.75rem 0.55rem 2.2rem;
+  padding: 0.6rem 0.75rem 0.6rem 2.2rem;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .reg-search-input:focus {
-  border-color: #ec4899;
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: var(--focus-ring);
 }
 
 .reg-table-container {
-  background: #0d1024;
-  border: 1px solid #1e2548;
-  border-radius: var(--radius-lg, 16px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-kpi);
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--card-shadow);
   max-width: 100%;
 }
 
@@ -74,24 +78,26 @@
 }
 
 .reg-table th {
-  background: #111530;
-  color: #94a3b8;
+  background: var(--light-pink);
+  color: var(--text-secondary);
   font-weight: 700;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  padding: 0.85rem 1.15rem;
-  border-bottom: 1px solid #1e2548;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .reg-table td {
-  padding: 1rem 1.15rem;
-  border-bottom: 1px solid #161b38;
-  color: #cbd5e1;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  vertical-align: middle;
 }
 
 .reg-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--light-pink);
 }
 
 .reg-user-cell {
@@ -104,12 +110,12 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ec4899, #8b5cf6);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 0.75rem;
   flex-shrink: 0;
 }
@@ -118,23 +124,23 @@
   display: inline-flex;
   align-items: center;
   font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.2rem 0.6rem;
-  border-radius: 9999px;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .reg-status-registered {
-  background: rgba(34, 197, 94, 0.15);
-  border: 1px solid rgba(34, 197, 94, 0.35);
-  color: #4ade80;
+  background: var(--success-soft);
+  border: 1px solid var(--success-border);
+  color: var(--success-text);
 }
 
 .reg-status-cancelled {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #f87171;
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
 }
 
 /* Pagination */
@@ -143,10 +149,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 1.15rem;
-  border-top: 1px solid #1a203f;
-  background: #090c1f;
+  border-top: 1px solid var(--border);
+  background: var(--light-pink);
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   flex-wrap: wrap;
   gap: 0.75rem;
 }
@@ -158,23 +164,23 @@
 }
 
 .reg-page-btn {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid #232b50;
-  color: #cbd5e1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
   font-size: 0.78rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 6px;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--transition-fast);
 }
 
 .reg-page-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: var(--soft-pink);
+  border-color: var(--border-hover);
 }
 
 .reg-page-btn:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -184,35 +190,36 @@
 .digital-ticket-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-  gap: 1.5rem;
+  gap: var(--space-5);
 }
 
 .digital-ticket-card {
-  background: #0d1024;
-  border: 1px solid #232b50;
-  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-kpi);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .digital-ticket-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(217, 70, 239, 0.4);
+  border-color: var(--border-hover);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .digital-ticket-card.selected {
-  border-color: #ec4899;
-  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.3);
+  border-color: var(--primary);
+  box-shadow: 0 8px 24px rgba(110, 55, 75, 0.12);
 }
 
-/* Ticket Header with Glow Banner */
+/* Ticket Header with Banner */
 .ticket-card-top {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
-  border-bottom: 1px solid #1e2548;
+  background: var(--gradient-accent-soft);
+  border-bottom: 1px solid var(--border);
   padding: 1.15rem 1.35rem;
   display: flex;
   align-items: center;
@@ -222,43 +229,38 @@
 
 .ticket-brand {
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #f472b6;
+  color: var(--primary-hover);
 }
 
 .ticket-status-pill {
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 0.2rem 0.65rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-full);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .ticket-status-active {
-  background: rgba(34, 197, 94, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.45);
-  color: #4ade80;
+  background: var(--success-soft);
+  border: 1px solid var(--success-border);
+  color: var(--success-text);
 }
 
 .ticket-status-used {
-  background: rgba(148, 163, 184, 0.2);
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  color: #cbd5e1;
+  background: #F1EDEF;
+  border: 1px solid #E0D4D8;
+  color: var(--text-secondary);
 }
 
-.ticket-status-void {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.45);
-  color: #f87171;
-}
-
+.ticket-status-void,
 .ticket-status-cancelled {
-  background: rgba(239, 68, 68, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.45);
-  color: #f87171;
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-text);
 }
 
 /* Ticket Body */
@@ -272,8 +274,8 @@
 
 .ticket-event-title {
   font-size: 1.15rem;
-  font-weight: 800;
-  color: #ffffff;
+  font-weight: 700;
+  color: var(--text-primary);
   margin: 0;
   line-height: 1.3;
   overflow-wrap: break-word;
@@ -285,8 +287,8 @@
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
   padding: 0.75rem 0;
-  border-top: 1px dashed #1e2548;
-  border-bottom: 1px dashed #1e2548;
+  border-top: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--border);
 }
 
 .ticket-meta-block {
@@ -299,12 +301,13 @@
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .ticket-meta-block strong {
   font-size: 0.85rem;
-  color: #f8fafc;
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 /* Stub Notch (Perforated ticket illusion) */
@@ -322,24 +325,24 @@
   position: absolute;
   width: 20px;
   height: 20px;
-  background: var(--bg-primary, #050816);
+  background: var(--bg-primary);
   border-radius: 50%;
   top: -2px;
 }
 
 .ticket-notch-left {
   left: -10px;
-  border-right: 1px solid #232b50;
+  border-right: 1px solid var(--border);
 }
 
 .ticket-notch-right {
   right: -10px;
-  border-left: 1px solid #232b50;
+  border-left: 1px solid var(--border);
 }
 
 .ticket-dash-line {
   width: 100%;
-  border-bottom: 2px dashed #1e2548;
+  border-bottom: 2px dashed var(--border);
 }
 
 /* Ticket Barcode / Code Section */
@@ -349,7 +352,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  background: rgba(8, 11, 26, 0.5);
+  background: var(--light-pink);
   flex-wrap: wrap;
 }
 
@@ -365,7 +368,7 @@
   font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #a5b4fc;
+  color: var(--primary-hover);
   overflow-wrap: break-word;
 }
 
@@ -375,16 +378,16 @@
 .checkin-workspace-grid {
   display: grid;
   grid-template-columns: 1fr 380px;
-  gap: 1.5rem;
+  gap: var(--space-5);
   align-items: start;
 }
 
 .checkin-control-card {
-  background: #0d1024;
-  border: 1px solid #1e2548;
-  border-radius: var(--radius-lg, 16px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
   padding: 1.6rem 1.85rem;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -402,33 +405,33 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #a5b4fc;
+  color: var(--text-secondary);
 }
 
 .checkin-event-select {
   width: 100%;
-  background: #080b1a;
-  border: 1.5px solid #232b50;
-  border-radius: 10px;
-  color: #ffffff;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 0.75rem 1rem;
   outline: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
 }
 
 .checkin-event-select:focus {
-  border-color: #ec4899;
-  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.25);
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
 }
 
 /* Quick Event Context Badge */
 .checkin-selected-event-bar {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid #1e2548;
-  border-radius: 12px;
+  background: var(--light-pink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
   padding: 0.85rem 1.15rem;
   display: flex;
   align-items: center;
@@ -443,7 +446,7 @@
   align-items: center;
   gap: 0.85rem;
   font-size: 0.8rem;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   flex-wrap: wrap;
   overflow-wrap: break-word;
 }
@@ -455,7 +458,7 @@
 }
 
 .checkin-event-meta-items svg {
-  color: #ec4899;
+  color: var(--primary);
 }
 
 /* Scanner Entry & Big Manual Input */
@@ -470,25 +473,26 @@
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  background: linear-gradient(135deg, #ec4899 0%, #d946ef 50%, #8b5cf6 100%);
-  color: #ffffff;
+  background: var(--primary);
+  color: #FFFFFF;
   border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 700;
-  padding: 0.9rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.85rem 1.5rem;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(217, 70, 239, 0.35);
-  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(110, 55, 75, 0.12);
+  transition: all var(--transition-fast);
 }
 
 .checkin-scanner-trigger-btn:hover:not(:disabled) {
+  background: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(217, 70, 239, 0.45);
+  box-shadow: 0 6px 18px rgba(110, 55, 75, 0.18);
 }
 
 .checkin-scanner-trigger-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
   transform: none;
 }
@@ -501,43 +505,47 @@
 
 .checkin-ticket-code-input {
   flex: 1;
-  background: #080b1a;
-  border: 2px solid #232b50;
-  border-radius: 12px;
-  color: #ffffff;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
   font-family: var(--font-mono, monospace);
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 600;
   letter-spacing: 0.05em;
-  padding: 0.85rem 1.15rem;
+  padding: 0.75rem 1.15rem;
   outline: none;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .checkin-ticket-code-input:focus {
-  border-color: #ec4899;
-  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.25);
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: var(--focus-ring);
 }
 
 .checkin-submit-btn {
-  background: #38bdf8;
-  color: #080b1a;
+  background: var(--primary);
+  color: #FFFFFF;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 600;
   padding: 0 1.6rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--transition-fast);
   white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(110, 55, 75, 0.12);
 }
 
 .checkin-submit-btn:hover:not(:disabled) {
-  background: #7dd3fc;
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(110, 55, 75, 0.18);
 }
 
 .checkin-submit-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
@@ -562,9 +570,9 @@
 
 /* Success Card */
 .checkin-success-hero {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(16, 185, 129, 0.08) 100%);
-  border: 1.5px solid #22c55e;
-  border-radius: 14px;
+  background: var(--success-soft);
+  border: 1.5px solid var(--success);
+  border-radius: var(--radius-card-sm);
   padding: 1.4rem 1.6rem;
   display: flex;
   flex-direction: column;
@@ -581,28 +589,28 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #22c55e;
-  color: #080b1a;
+  background: var(--success);
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
-  font-weight: 800;
-  box-shadow: 0 0 16px rgba(34, 197, 94, 0.5);
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(120, 184, 154, 0.35);
   flex-shrink: 0;
 }
 
 .checkin-success-title {
   font-size: 1.25rem;
-  font-weight: 800;
-  color: #ffffff;
+  font-weight: 700;
+  color: var(--success-text);
   margin: 0;
 }
 
 .checkin-success-details {
-  background: rgba(8, 11, 26, 0.5);
-  border: 1px solid rgba(34, 197, 94, 0.25);
-  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--success-border);
+  border-radius: var(--radius-sm);
   padding: 0.85rem 1rem;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -612,20 +620,21 @@
 .checkin-success-details div span {
   font-size: 0.7rem;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: var(--text-muted);
   display: block;
 }
 
 .checkin-success-details div strong {
   font-size: 0.88rem;
-  color: #ffffff;
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 /* Error Card with Distinct Categorized UI */
 .checkin-error-hero {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.08) 100%);
-  border: 1.5px solid #ef4444;
-  border-radius: 14px;
+  background: var(--danger-soft);
+  border: 1.5px solid var(--danger);
+  border-radius: var(--radius-card-sm);
   padding: 1.4rem 1.6rem;
   display: flex;
   flex-direction: column;
@@ -642,27 +651,27 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #ef4444;
-  color: #ffffff;
+  background: var(--danger);
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
-  font-weight: 800;
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+  font-weight: 700;
+  box-shadow: 0 2px 10px rgba(219, 113, 132, 0.35);
   flex-shrink: 0;
 }
 
 .checkin-error-title {
   font-size: 1.15rem;
-  font-weight: 800;
-  color: #ffffff;
+  font-weight: 700;
+  color: var(--danger-text);
   margin: 0;
 }
 
 .checkin-error-msg {
   font-size: 0.9rem;
-  color: #fca5a5;
+  color: var(--danger-text);
   margin: 0;
   line-height: 1.5;
 }

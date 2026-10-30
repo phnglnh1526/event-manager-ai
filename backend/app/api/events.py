@@ -26,13 +26,28 @@ def _database_error(db: Session, operation: str) -> HTTPException:
     )
 
 
+def _normalize_cover_image_url(url: str | None) -> str | None:
+    if not url:
+        return None
+    cleaned = url.strip()
+    if not cleaned:
+        return None
+    if "/api/uploads/file/" in cleaned:
+        idx = cleaned.find("/api/uploads/file/")
+        return cleaned[idx:]
+    return cleaned
+
+
 @router.post("", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
 def create_event(
     payload: EventCreate,
     current_user: User = Depends(event_manager),
     db: Session = Depends(get_db),
 ) -> Event:
-    event = Event(**payload.model_dump(), owner_id=current_user.id)
+    data = payload.model_dump()
+    if data.get("cover_image_url"):
+        data["cover_image_url"] = _normalize_cover_image_url(data["cover_image_url"])
+    event = Event(**data, owner_id=current_user.id)
     db.add(event)
     try:
         db.commit()
@@ -83,6 +98,8 @@ def update_event(
 ) -> Event:
     event = get_event_for_management(event_id, current_user, db)
     changes = payload.model_dump(exclude_unset=True)
+    if "cover_image_url" in changes:
+        changes["cover_image_url"] = _normalize_cover_image_url(changes["cover_image_url"])
     start_time = changes.get("start_time", event.start_time)
     end_time = changes.get("end_time", event.end_time)
     if end_time <= start_time:
