@@ -43,11 +43,17 @@ def _jwt_algorithm() -> str:
 @dataclass(frozen=True)
 class Settings:
     app_name: str = os.getenv("APP_NAME", "event-manager-api")
-    mysql_host: str = os.getenv("MYSQL_HOST", "localhost")
-    mysql_port: int = int(os.getenv("MYSQL_PORT", "3306"))
-    mysql_database: str = os.getenv("MYSQL_DATABASE", "event_manager")
-    mysql_user: str = os.getenv("MYSQL_USER", "event_user")
-    mysql_password: str = os.getenv("MYSQL_PASSWORD", "")
+    database_url: str = (
+        os.getenv("DATABASE_URL")
+        or os.getenv("MYSQL_URL")
+        or os.getenv("MYSQL_PUBLIC_URL")
+        or ""
+    ).strip()
+    mysql_host: str = os.getenv("MYSQL_HOST") or os.getenv("MYSQLHOST", "localhost")
+    mysql_port: int = int(os.getenv("MYSQL_PORT") or os.getenv("MYSQLPORT", "3306"))
+    mysql_database: str = os.getenv("MYSQL_DATABASE") or os.getenv("MYSQLDATABASE", "event_manager")
+    mysql_user: str = os.getenv("MYSQL_USER") or os.getenv("MYSQLUSER", "event_user")
+    mysql_password: str = os.getenv("MYSQL_PASSWORD") or os.getenv("MYSQLPASSWORD", "")
     mysql_ssl: bool = os.getenv("MYSQL_SSL", "").strip().lower() in ("1", "true", "yes")
     mysql_ssl_ca: str = os.getenv("MYSQL_SSL_CA", "").strip()
     jwt_secret_key: str = _required_env("JWT_SECRET_KEY")
@@ -58,11 +64,17 @@ class Settings:
     frontend_url: str = os.getenv("FRONTEND_URL", "").strip()
     cors_origins: tuple[str, ...] = tuple(
         _unique_values(
-            *_split_csv(os.getenv("CORS_ORIGINS", "")),
-            os.getenv("FRONTEND_URL", "").strip(),
-            "http://localhost:3000",
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
+            *[
+                origin
+                for origin in (
+                    *_split_csv(os.getenv("CORS_ORIGINS", "")),
+                    os.getenv("FRONTEND_URL", "").strip(),
+                    "http://localhost:3000",
+                    "http://localhost:5173",
+                    "http://127.0.0.1:5173",
+                )
+                if origin and origin != "*"
+            ]
         )
     )
     ai_mode: str = os.getenv("AI_MODE", "mock").strip().lower()

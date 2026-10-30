@@ -1,6 +1,6 @@
 import ssl as _ssl
 
-from sqlalchemy import URL, create_engine
+from sqlalchemy import URL, create_engine, make_url
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -8,14 +8,18 @@ from app.core.config import get_settings
 
 settings = get_settings()
 
-database_url = URL.create(
-    drivername="mysql+pymysql",
-    username=settings.mysql_user,
-    password=settings.mysql_password,
-    host=settings.mysql_host,
-    port=settings.mysql_port,
-    database=settings.mysql_database,
-)
+if settings.database_url:
+    raw_url = make_url(settings.database_url)
+    database_url = raw_url.set(drivername="mysql+pymysql")
+else:
+    database_url = URL.create(
+        drivername="mysql+pymysql",
+        username=settings.mysql_user,
+        password=settings.mysql_password,
+        host=settings.mysql_host,
+        port=settings.mysql_port,
+        database=settings.mysql_database,
+    )
 
 _connect_args: dict = {}
 if settings.mysql_ssl_ca:
