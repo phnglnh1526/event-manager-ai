@@ -120,13 +120,13 @@ function EventAIChat({ event, token, onUnauthorized, onClose }) {
           <AIIcon size="default" />
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <h3 id={`event-ai-title-${event.id}`} style={{ margin: 0, fontSize: "0.95rem", color: "#ffffff", fontWeight: 700 }}>
+              <h3 id={`event-ai-title-${event.id}`} style={{ margin: 0, fontSize: "0.95rem", color: "var(--text-primary)", fontWeight: 700 }}>
                 Trợ lý sự kiện AI
               </h3>
               <AIBadge label="Online" />
             </div>
-            <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
-              Hỏi về: <strong style={{ color: "#f0abfc" }}>{event.title}</strong>
+            <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+              Hỏi về: <strong style={{ color: "var(--primary)" }}>{event.title}</strong>
             </span>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import Pagination from "../components/Pagination";
 import PasswordInput from "../components/PasswordInput";
 import WorkspaceHeader from "../components/WorkspaceHeader";
 import { createUser, getUsers, resetUserPassword, updateUser } from "../services/api";
@@ -334,7 +335,7 @@ function UserFormDrawer({
                   </option>
                 ))}
               </select>
-              <small style={{ color: "#94a3b8", fontSize: "0.74rem" }}>
+              <small style={{ color: "var(--text-muted)", fontSize: "0.74rem" }}>
                 {protectSelf
                   ? "Bạn không thể tự tước quyền Quản trị viên của chính mình."
                   : "Vai trò xác định các phân hệ và quyền hạn người dùng được phép thực thi."}
@@ -397,6 +398,8 @@ function UsersPage({ token, currentUser, onLogout, onUnauthorized, activeView, o
   const [query, setQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [success, setSuccess] = useState("");
@@ -446,6 +449,24 @@ function UsersPage({ token, currentUser, onLogout, onUnauthorized, activeView, o
         (statusFilter === "ALL" || (statusFilter === "ACTIVE") === user.is_active)
     );
   }, [users, query, roleFilter, statusFilter]);
+
+  // Reset page when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, roleFilter, statusFilter]);
+
+  // Clamp current page within valid range
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(visibleUsers.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(maxPage);
+    }
+  }, [visibleUsers.length, pageSize, currentPage]);
+
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return visibleUsers.slice(start, start + pageSize);
+  }, [visibleUsers, currentPage, pageSize]);
 
   const closeDrawer = useCallback(() => {
     setDrawer(null);
@@ -673,16 +694,16 @@ function UsersPage({ token, currentUser, onLogout, onUnauthorized, activeView, o
               <option value="INACTIVE">Đã vô hiệu</option>
             </select>
 
-            <span style={{ fontSize: "0.8rem", color: "#94a3b8", marginLeft: "auto" }}>
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginLeft: "auto" }}>
               {loading ? (
                 "Đang tải..."
               ) : filtersActive ? (
                 <span>
-                  Hiển thị <strong style={{ color: "#ffffff" }}>{visibleUsers.length}</strong> / {users.length} người dùng
+                  Hiển thị <strong style={{ color: "var(--text-primary)" }}>{visibleUsers.length}</strong> / {users.length} người dùng
                 </span>
               ) : (
                 <span>
-                  Tổng số: <strong style={{ color: "#ffffff" }}>{users.length}</strong> tài khoản
+                  Tổng số: <strong style={{ color: "var(--text-primary)" }}>{users.length}</strong> tài khoản
                 </span>
               )}
             </span>
@@ -734,7 +755,7 @@ function UsersPage({ token, currentUser, onLogout, onUnauthorized, activeView, o
                   </tr>
                 </thead>
                 <tbody>
-                  {visibleUsers.map((user) => {
+                  {paginatedUsers.map((user) => {
                     const isSelf = user.id === currentUser.id;
                     const username = user.email.split("@")[0];
 
@@ -756,7 +777,7 @@ function UsersPage({ token, currentUser, onLogout, onUnauthorized, activeView, o
                         </td>
 
                         <td>
-                          <span style={{ color: "#cbd5e1", fontSize: "0.85rem" }}>{user.email}</span>
+                          <span style={{ color: "var(--text-primary)", fontSize: "0.85rem" }}>{user.email}</span>
                         </td>
 
                         <td>
@@ -768,7 +789,7 @@ function UsersPage({ token, currentUser, onLogout, onUnauthorized, activeView, o
                         </td>
 
                         <td>
-                          <span style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
+                          <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
                             {friendlyDate(user.created_at)}
                           </span>
                         </td>
@@ -788,13 +809,13 @@ function UsersPage({ token, currentUser, onLogout, onUnauthorized, activeView, o
                               onClick={() => requestStatusChange(user)}
                               disabled={isSelf && user.is_active}
                               style={{
-                                background: user.is_active ? "rgba(239, 68, 68, 0.12)" : "rgba(34, 197, 94, 0.12)",
-                                border: `1px solid ${user.is_active ? "rgba(239, 68, 68, 0.35)" : "rgba(34, 197, 94, 0.35)"}`,
-                                color: user.is_active ? "#f87171" : "#4ade80",
+                                background: user.is_active ? "var(--danger-soft)" : "var(--success-soft)",
+                                border: `1px solid ${user.is_active ? "var(--danger-border)" : "var(--success-border)"}`,
+                                color: user.is_active ? "var(--danger-text)" : "var(--success-text)",
                                 fontSize: "0.78rem",
                                 fontWeight: 600,
                                 padding: "0.45rem 0.75rem",
-                                borderRadius: 8,
+                                borderRadius: "var(--radius-sm)",
                                 cursor: isSelf && user.is_active ? "not-allowed" : "pointer",
                                 opacity: isSelf && user.is_active ? 0.4 : 1,
                               }}
@@ -808,6 +829,19 @@ function UsersPage({ token, currentUser, onLogout, onUnauthorized, activeView, o
                   })}
                 </tbody>
               </table>
+
+              <Pagination
+                totalItems={visibleUsers.length}
+                currentPage={currentPage}
+                pageSize={pageSize}
+                pageSizeOptions={[10, 20, 50]}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize);
+                  setCurrentPage(1);
+                }}
+                itemLabel="người dùng"
+              />
             </div>
           )}
         </section>

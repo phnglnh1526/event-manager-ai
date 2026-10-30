@@ -116,9 +116,9 @@ function RegistrationManagement({ event, token, onUnauthorized }) {
         <div>
           <p className="hero-eyebrow" style={{ margin: 0 }}>DANH SÁCH ĐĂNG KÝ SỰ KIỆN</p>
           <h3>Quản lý đăng ký</h3>
-          <span style={{ fontSize: "0.8rem", color: "#a5b4fc" }}>Sự kiện: <strong>{event.title}</strong></span>
+          <span style={{ fontSize: "0.8rem", color: "var(--primary)" }}>Sự kiện: <strong>{event.title}</strong></span>
         </div>
-        <span className="read-only-badge" style={{ background: "rgba(148, 163, 184, 0.15)", color: "#cbd5e1", padding: "0.3rem 0.75rem", borderRadius: 9999, fontSize: "0.75rem", fontWeight: 700 }}>
+        <span className="read-only-badge" style={{ background: "var(--surface-muted)", color: "var(--text-muted)", padding: "0.3rem 0.75rem", borderRadius: 9999, fontSize: "0.75rem", fontWeight: 700 }}>
           Chỉ xem
         </span>
       </div>
@@ -141,7 +141,7 @@ function RegistrationManagement({ event, token, onUnauthorized }) {
             </div>
             <div className="capacity-metric-item">
               <span className="metric-label">Đã hủy đăng ký</span>
-              <strong className="metric-val" style={{ color: "#f87171" }}>{cancelledCount}</strong>
+              <strong className="metric-val" style={{ color: "var(--error)" }}>{cancelledCount}</strong>
             </div>
             <div className="capacity-metric-item">
               <span className="metric-label">Sức chứa tối đa</span>
@@ -150,7 +150,7 @@ function RegistrationManagement({ event, token, onUnauthorized }) {
           </div>
 
           <div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "#cbd5e1", marginBottom: "0.4rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "0.4rem" }}>
               <span>Tỷ lệ lấp đầy: <strong>{maxAttendees > 0 ? `${formatRate(usageRate)}%` : "Tự do"}</strong></span>
               <span>Còn <strong>{maxAttendees > 0 ? remainingSlots : "Còn chỗ"}</strong> chỗ trống</span>
             </div>
@@ -242,13 +242,13 @@ function RegistrationManagement({ event, token, onUnauthorized }) {
                         U{reg.user_id}
                       </div>
                       <div>
-                        <strong style={{ color: "#ffffff", display: "block" }}>Người dùng #{reg.user_id}</strong>
-                        <span style={{ fontSize: "0.74rem", color: "#64748b" }}>User ID: {reg.user_id}</span>
+                        <strong style={{ color: "var(--text-primary)", display: "block" }}>Người dùng #{reg.user_id}</strong>
+                        <span style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>User ID: {reg.user_id}</span>
                       </div>
                     </div>
                   </td>
                   <td>
-                    <span style={{ fontFamily: "monospace", fontWeight: 700, color: "#a5b4fc" }}>
+                    <span style={{ fontFamily: "monospace", fontWeight: 700, color: "var(--primary)" }}>
                       REG-{reg.id}
                     </span>
                   </td>

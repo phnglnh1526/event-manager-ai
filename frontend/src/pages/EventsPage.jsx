@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import EventAIChat from "../components/EventAIChat";
 import EventCoverImage from "../components/EventCoverImage";
 import EventForm from "../components/EventForm";
+import Pagination from "../components/Pagination";
 import RegistrationManagement from "../components/RegistrationManagement";
 import ScheduleManagement from "../components/ScheduleManagement";
 import SpeakerManagement from "../components/SpeakerManagement";
@@ -61,6 +62,8 @@ function EventsPage({ token, currentUser, onLogout, onUnauthorized, activeView, 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [dateFilter, setDateFilter] = useState("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(9);
 
   // Editor modal state
   const [editorId, setEditorId] = useState(undefined); // undefined = closed, null = new, number = edit
@@ -350,6 +353,24 @@ function EventsPage({ token, currentUser, onLogout, onUnauthorized, activeView, 
     setDateFilter("ALL");
   };
 
+  // Reset page when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter, dateFilter]);
+
+  // Clamp current page within valid range
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(filteredEvents.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(maxPage);
+    }
+  }, [filteredEvents.length, pageSize, currentPage]);
+
+  const paginatedEvents = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredEvents.slice(start, start + pageSize);
+  }, [filteredEvents, currentPage, pageSize]);
+
   return (
     <div className="dashboard-shell">
       <WorkspaceHeader
@@ -518,113 +539,130 @@ function EventsPage({ token, currentUser, onLogout, onUnauthorized, activeView, 
 
         {/* EVENT CARDS GRID */}
         {!loading && !error && filteredEvents.length > 0 && (
-          <section className="events-cards-grid" aria-label="Danh sách thẻ sự kiện">
-            {filteredEvents.map((event) => {
-              const isSelected = detail?.id === event.id;
-              const canManage = currentUser?.role === "ADMIN" || currentUser?.id === event.owner_id;
-              const statusClass = `status-badge-${event.status.toLowerCase()}`;
-              const statusLabel = EVENT_STATUS_LABELS[event.status] || event.status;
+          <>
+            <section className="events-cards-grid" aria-label="Danh sách thẻ sự kiện">
+              {paginatedEvents.map((event) => {
+                const isSelected = detail?.id === event.id;
+                const canManage = currentUser?.role === "ADMIN" || currentUser?.id === event.owner_id;
+                const statusClass = `status-badge-${event.status.toLowerCase()}`;
+                const statusLabel = EVENT_STATUS_LABELS[event.status] || event.status;
 
-              return (
-                <article
-                  key={event.id}
-                  className={`event-mgmt-card ${isSelected ? "selected" : ""}`}
-                >
-                  {/* Media Cover Image with Badges */}
-                  <div className="mgmt-card-media">
-                    <EventCoverImage src={event.cover_image_url} alt={event.title} />
+                return (
+                  <article
+                    key={event.id}
+                    className={`event-mgmt-card ${isSelected ? "selected" : ""}`}
+                  >
+                    {/* Media Cover Image with Badges */}
+                    <div className="mgmt-card-media">
+                      <EventCoverImage src={event.cover_image_url} alt={event.title} />
 
-                    <span className={`mgmt-card-status-badge ${statusClass}`}>
-                      {statusLabel}
-                    </span>
+                      <span className={`mgmt-card-status-badge ${statusClass}`}>
+                        {statusLabel}
+                      </span>
 
-                    <span className="mgmt-card-date-tag">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                      </svg>
-                      {displayDateTime(event.start_time)}
-                    </span>
-                  </div>
-
-                  {/* Card Body */}
-                  <div className="mgmt-card-body">
-                    <h3 className="mgmt-card-title">{event.title}</h3>
-                    <p className="mgmt-card-desc">{event.description || "Chưa có mô tả chi tiết."}</p>
-
-                    <div className="mgmt-card-meta">
-                      <div className="mgmt-meta-item">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                          <circle cx="12" cy="10" r="3" />
+                      <span className="mgmt-card-date-tag">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                          <line x1="16" y1="2" x2="16" y2="6" />
+                          <line x1="8" y1="2" x2="8" y2="6" />
+                          <line x1="3" y1="10" x2="21" y2="10" />
                         </svg>
-                        <span>{event.location}</span>
-                      </div>
+                        {displayDateTime(event.start_time)}
+                      </span>
+                    </div>
 
-                      <div className="mgmt-meta-item">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                          <circle cx="9" cy="7" r="4" />
-                          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                        </svg>
-                        <span>
-                          Sức chứa: <strong>{event.max_attendees} người</strong>
-                        </span>
+                    {/* Card Body */}
+                    <div className="mgmt-card-body">
+                      <h3 className="mgmt-card-title">{event.title}</h3>
+                      <p className="mgmt-card-desc">{event.description || "Chưa có mô tả chi tiết."}</p>
+
+                      <div className="mgmt-card-meta">
+                        <div className="mgmt-meta-item">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                          </svg>
+                          <span>{event.location}</span>
+                        </div>
+
+                        <div className="mgmt-meta-item">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                          </svg>
+                          <span>
+                            Sức chứa: <strong>{event.max_attendees} người</strong>
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Card Actions */}
-                  <div className="mgmt-card-actions">
-                    <button
-                      type="button"
-                      className="mgmt-btn-view"
-                      onClick={() => loadEvent(event.id, false, "overview")}
-                      title="Xem chi tiết & không gian sự kiện"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
-                      Xem
-                    </button>
+                    {/* Card Actions */}
+                    <div className="mgmt-card-actions">
+                      <button
+                        type="button"
+                        className="mgmt-btn-view"
+                        onClick={() => loadEvent(event.id, false, "overview")}
+                        title="Xem chi tiết & không gian sự kiện"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                        Xem
+                      </button>
 
-                    {canManage && (
-                      <>
-                        <button
-                          type="button"
-                          className="mgmt-btn-edit"
-                          onClick={() => loadEvent(event.id, true)}
-                          title="Chỉnh sửa thông tin sự kiện"
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                          </svg>
-                          Sửa
-                        </button>
+                      {canManage && (
+                        <>
+                          <button
+                            type="button"
+                            className="mgmt-btn-edit"
+                            onClick={() => loadEvent(event.id, true)}
+                            title="Chỉnh sửa thông tin sự kiện"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            </svg>
+                            Sửa
+                          </button>
 
-                        <button
-                          type="button"
-                          className="mgmt-btn-delete"
-                          onClick={() => remove(event.id)}
-                          title="Xóa sự kiện"
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          </svg>
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-          </section>
+                          <button
+                            type="button"
+                            className="mgmt-btn-delete"
+                            onClick={() => remove(event.id)}
+                            title="Xóa sự kiện"
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </section>
+
+            <Pagination
+              totalItems={filteredEvents.length}
+              currentPage={currentPage}
+              pageSize={pageSize}
+              pageSizeOptions={[9, 18, 27]}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              itemLabel="sự kiện"
+              hideIfSinglePage={true}
+              standalone={true}
+            />
+          </>
         )}
 
         {/* EVENT CREATE / EDIT MODAL */}

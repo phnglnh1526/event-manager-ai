@@ -79,102 +79,142 @@ function MyFeedback({ token, events, registrations, onUnauthorized }) {
     finally { busy.current = false; setSaving(false); }
   };
   const formVisible = !feedback || editing;
+  const currentEvent = eventMap.get(Number(eventId)) || eventMap.get(eventId);
 
   return (
     <section className="my-feedback">
-      <div className="dashboard-title-row">
-        <div>
-          <p className="eyebrow">TRẢI NGHIỆM CỦA BẠN</p>
+      <div className="attendee-page-header">
+        <div className="attendee-page-header-content">
+          <span className="eyebrow">TRẢI NGHIỆM CỦA BẠN</span>
           <h1>Phản hồi của tôi</h1>
           <p>Chia sẻ cảm nhận và đánh giá sau khi tham gia sự kiện.</p>
         </div>
       </div>
+
       {eligible.length === 0 ? (
         <div className="state-panel">
           <strong>Bạn chưa có sự kiện nào đủ điều kiện để gửi phản hồi.</strong>
+          <p>Chỉ những sự kiện bạn đã đăng ký và tham dự mới có thể gửi phản hồi.</p>
         </div>
       ) : (
-        <>
-          <div className="editor-field feedback-event-field">
-            <label htmlFor="feedback-event">Sự kiện</label>
-            <select id="feedback-event" value={eventId} onChange={(event) => switchEvent(event.target.value)} disabled={saving}>
-              {eligible.map((item) => (
-                <option key={item.id} value={item.event_id}>
-                  {eventMap.get(item.event_id)?.title || `Sự kiện #${item.event_id}`}
-                </option>
-              ))}
-            </select>
-          </div>
-          {loading ? (
-            <div className="state-panel"><div className="app-loader"/><p>Đang tải phản hồi...</p></div>
-          ) : (
-            <div className="feedback-card">
-              {success && <div className="inline-message success-message">{success}</div>}
-              {error && <div className="inline-message error-message">{error}</div>}
-              {formVisible ? (
-                <>
-                  <p>{feedback ? "Cập nhật phản hồi của bạn." : "Chưa có phản hồi nào được gửi."}</p>
-                  <fieldset className="rating-field">
-                    <legend>Đánh giá của bạn *</legend>
-                    <div>
-                      {[1, 2, 3, 4, 5].map((number) => (
-                        <button
-                          type="button"
-                          key={number}
-                          aria-label={`Đánh giá ${number} trên 5 sao`}
-                          className={number <= rating ? "selected" : ""}
-                          onClick={() => { setRating(number); setDirty(true); setError(""); }}
-                        >
-                          ★
-                        </button>
-                      ))}
-                    </div>
-                  </fieldset>
-                  <div className="editor-field">
-                    <label htmlFor="feedback-comment">Nhận xét / Ý kiến đóng góp</label>
-                    <textarea
-                      id="feedback-comment"
-                      rows={6}
-                      maxLength={2000}
-                      value={comment}
-                      onChange={(event) => { setComment(event.target.value); setDirty(true); }}
-                      placeholder="Chia sẻ trải nghiệm của bạn về nội dung, diễn giả, công tác tổ chức..."
-                    />
-                    <span className="character-count">{comment.length}/2000</span>
-                  </div>
-                  <div className="feedback-actions">
-                    {feedback && (
-                      <button type="button" className="secondary-button" onClick={() => { setEditing(false); setDirty(false); setError(""); }}>
-                        Hủy
-                      </button>
-                    )}
-                    <button type="button" className="primary-button" disabled={saving} onClick={submit}>
-                      {saving ? "Đang lưu..." : feedback ? "Lưu thay đổi" : "Gửi phản hồi"}
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="feedback-view">
-                    <span className="registration-status status-registered">PHẢN HỒI CỦA BẠN</span>
-                    <div className="rating-display" aria-label={`${feedback.rating} trên 5 sao`}>
-                      {"★".repeat(feedback.rating)}{"☆".repeat(5 - feedback.rating)}
-                    </div>
-                    <p>{feedback.comment || "Chưa có nhận xét."}</p>
-                    <dl>
-                      <div><dt>Đã gửi</dt><dd>{display(feedback.created_at)}</dd></div>
-                      <div><dt>Cập nhật lần cuối</dt><dd>{display(feedback.updated_at)}</dd></div>
-                    </dl>
-                  </div>
-                  <div className="feedback-actions">
-                    <button type="button" className="secondary-button" onClick={edit}>Chỉnh sửa</button>
-                    <button type="button" className="danger-button" disabled={saving} onClick={remove}>Xóa</button>
-                  </div>
-                </>
-              )}
+        <div className="feedback-workspace-grid">
+          {/* Left Column: Event Selection & Information Card */}
+          <aside className="feedback-event-selector-panel">
+            <h3 className="feedback-panel-title">
+              <span>📌</span> Chọn sự kiện đánh giá
+            </h3>
+
+            <div className="editor-field feedback-event-field" style={{ margin: 0 }}>
+              <select
+                id="feedback-event"
+                value={eventId}
+                onChange={(event) => switchEvent(event.target.value)}
+                disabled={saving}
+                style={{ width: "100%", height: "40px" }}
+              >
+                {eligible.map((item) => (
+                  <option key={item.id} value={item.event_id}>
+                    {eventMap.get(item.event_id)?.title || `Sự kiện #${item.event_id}`}
+                  </option>
+                ))}
+              </select>
             </div>
-          )}
-        </>
+
+            {currentEvent && (
+              <div className="feedback-event-meta-card">
+                <strong>{currentEvent.title}</strong>
+                {currentEvent.start_time && (
+                  <span>📅 Thời gian: {display(currentEvent.start_time)}</span>
+                )}
+                {currentEvent.location && (
+                  <span>📍 Địa điểm: {currentEvent.location}</span>
+                )}
+                <span style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "4px" }}>
+                  💡 Góp ý chân thực của bạn giúp Ban tổ chức cải thiện chất lượng các kỳ sự kiện tiếp theo.
+                </span>
+              </div>
+            )}
+          </aside>
+
+          {/* Right Column: Feedback Input / Read View */}
+          <div className="feedback-form-panel">
+            {loading ? (
+              <div className="state-panel"><div className="app-loader"/><p>Đang tải phản hồi...</p></div>
+            ) : (
+              <div className="feedback-card">
+                {success && <div className="inline-message success-message">{success}</div>}
+                {error && <div className="inline-message error-message">{error}</div>}
+                {formVisible ? (
+                  <>
+                    <p style={{ margin: "0 0 6px", fontSize: "0.88rem", fontWeight: 650, color: "var(--text-primary)" }}>
+                      {feedback ? "Chỉnh sửa phản hồi của bạn:" : "Đánh giá chất lượng sự kiện:"}
+                    </p>
+                    <fieldset className="rating-field">
+                      <legend>Đánh giá số sao *</legend>
+                      <div>
+                        {[1, 2, 3, 4, 5].map((number) => (
+                          <button
+                            type="button"
+                            key={number}
+                            aria-label={`Đánh giá ${number} trên 5 sao`}
+                            className={number <= rating ? "selected" : ""}
+                            onClick={() => { setRating(number); setDirty(true); setError(""); }}
+                          >
+                            ★
+                          </button>
+                        ))}
+                      </div>
+                    </fieldset>
+                    <div className="editor-field">
+                      <label htmlFor="feedback-comment">Nhận xét / Ý kiến đóng góp</label>
+                      <textarea
+                        id="feedback-comment"
+                        rows={5}
+                        maxLength={2000}
+                        value={comment}
+                        onChange={(event) => { setComment(event.target.value); setDirty(true); }}
+                        placeholder="Chia sẻ trải nghiệm của bạn về nội dung bài giảng, diễn giả, công tác tổ chức, địa điểm..."
+                      />
+                      <span className="character-count">{comment.length}/2000 ký tự</span>
+                    </div>
+                    <div className="feedback-actions">
+                      {feedback && (
+                        <button type="button" className="secondary-button compact-button" onClick={() => { setEditing(false); setDirty(false); setError(""); }}>
+                          Hủy
+                        </button>
+                      )}
+                      <button type="button" className="primary-button compact-button" disabled={saving} onClick={submit}>
+                        {saving ? "Đang lưu..." : feedback ? "Lưu thay đổi" : "Gửi phản hồi"}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="feedback-view">
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+                        <span className="registration-status status-registered">ĐÃ GỬI PHẢN HỒI</span>
+                        <div className="rating-display" aria-label={`${feedback.rating} trên 5 sao`}>
+                          {"★".repeat(feedback.rating)}{"☆".repeat(5 - feedback.rating)}
+                        </div>
+                      </div>
+                      <p>{feedback.comment || "Không có nhận xét văn bản."}</p>
+                      <dl>
+                        <div><dt>Đã gửi: </dt><dd>{display(feedback.created_at)}</dd></div>
+                        {feedback.updated_at && feedback.updated_at !== feedback.created_at && (
+                          <div><dt>Cập nhật: </dt><dd>{display(feedback.updated_at)}</dd></div>
+                        )}
+                      </dl>
+                    </div>
+                    <div className="feedback-actions">
+                      <button type="button" className="secondary-button compact-button" onClick={edit}>Chỉnh sửa</button>
+                      <button type="button" className="danger-button compact-button" disabled={saving} onClick={remove}>Xóa</button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </section>
   );

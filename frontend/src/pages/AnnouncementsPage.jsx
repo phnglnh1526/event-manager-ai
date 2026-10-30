@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import AnnouncementForm from "../components/AnnouncementForm";
 import EventSelector from "../components/EventSelector";
+import Pagination from "../components/Pagination";
 import WorkspaceHeader from "../components/WorkspaceHeader";
 import { ANNOUNCEMENT_STATUS_LABELS } from "../locales/vi";
 import {
@@ -38,6 +39,8 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
   const [events, setEvents] = useState([]);
   const [selectedEventId, setSelectedEventId] = useState("");
   const [announcements, setAnnouncements] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
   const [eventsLoading, setEventsLoading] = useState(true);
   const [listLoading, setListLoading] = useState(false);
   const [eventsError, setEventsError] = useState("");
@@ -107,6 +110,22 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
       });
     return () => controller.abort();
   }, [selectedEventId, token, reload, handleError]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedEventId]);
+
+  useEffect(() => {
+    const maxPage = Math.max(1, Math.ceil(announcements.length / pageSize));
+    if (currentPage > maxPage) {
+      setCurrentPage(maxPage);
+    }
+  }, [announcements.length, pageSize, currentPage]);
+
+  const paginatedAnnouncements = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return announcements.slice(start, start + pageSize);
+  }, [announcements, currentPage, pageSize]);
 
   const resetEditor = () => {
     aiSequence.current += 1;
@@ -298,11 +317,11 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
 
       <main className="dashboard-main announcements-page">
         {/* Banner with Event Selector */}
-        <section className="dashboard-hero-banner" style={{ padding: "1.25rem 1.5rem" }}>
+        <section className="dashboard-hero-banner" style={{ padding: "12px 18px", marginBottom: "12px" }}>
           <div className="hero-banner-content">
             <div className="hero-banner-headings">
               <p className="hero-eyebrow">TRUYỀN THÔNG SỰ KIỆN</p>
-              <h1 style={{ fontSize: "1.5rem", margin: "0.2rem 0" }}>Thông báo sự kiện</h1>
+              <h1 style={{ fontSize: "1.4rem", margin: "0.15rem 0 0.25rem" }}>Thông báo sự kiện</h1>
               <p className="hero-banner-desc">
                 Soạn thảo, cập nhật và phát hành thông báo tức thì đến người tham dự với sự hỗ trợ của AI.
               </p>
@@ -329,15 +348,15 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "1.25rem",
+            marginBottom: "12px",
             flexWrap: "wrap",
-            gap: "1rem",
+            gap: "10px",
           }}
         >
           <div>
             {selectedEvent && (
-              <span style={{ fontSize: "0.85rem", color: "#a5b4fc" }}>
-                Đang xem thông báo của: <strong style={{ color: "#ffffff" }}>{selectedEvent.title}</strong>
+              <span style={{ fontSize: "0.84rem", color: "var(--primary-hover)" }}>
+                Đang xem thông báo của: <strong style={{ color: "var(--text-primary)" }}>{selectedEvent.title}</strong>
               </span>
             )}
           </div>
@@ -346,9 +365,9 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
             className="primary-button"
             onClick={openNew}
             disabled={!selectedEventId || eventsLoading}
-            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem" }}
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", minHeight: "38px", padding: "8px 16px" }}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
               <line x1="12" y1="5" x2="12" y2="19" />
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
@@ -388,10 +407,10 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
                   justifyContent: "space-between",
                   alignItems: "center",
                   paddingBottom: "0.5rem",
-                  borderBottom: "1px solid #1a203f",
+                  borderBottom: "1px solid var(--border)",
                 }}
               >
-                <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "#ffffff", margin: 0 }}>
+                <h3 style={{ fontSize: "1.05rem", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
                   Danh sách thông báo ({announcements.length})
                 </h3>
               </div>
@@ -413,15 +432,24 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
               )}
 
               {!listLoading && !listError && announcements.length === 0 && (
-                <div className="compact-state">
-                  <strong>Chưa có thông báo nào cho sự kiện này.</strong>
-                  <p>Nhấp vào "+ Tạo thông báo mới" để gửi bản tin đầu tiên đến người tham dự.</p>
+                <div className="compact-state" style={{ padding: "1.5rem 1.25rem" }}>
+                  <strong style={{ fontSize: "1rem" }}>Chưa có thông báo nào cho sự kiện này.</strong>
+                  <p style={{ margin: "0.3rem 0 0.85rem", fontSize: "0.85rem" }}>Bắt đầu soạn bản tin đầu tiên để truyền tải thông tin đến người tham dự.</p>
+                  <button
+                    type="button"
+                    className="primary-button"
+                    onClick={openNew}
+                    disabled={!selectedEventId}
+                    style={{ minHeight: "36px", padding: "6px 14px" }}
+                  >
+                    + Tạo thông báo đầu tiên
+                  </button>
                 </div>
               )}
 
               {!listLoading && announcements.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  {announcements.map((item) => {
+                  {paginatedAnnouncements.map((item) => {
                     const isSelected = editor?.id === item.id;
                     const statusClass = `status-badge-${item.status.toLowerCase()}`;
 
@@ -449,7 +477,7 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
                         <div className="announcement-card-meta">
                           <span>Khởi tạo: {formatDate(item.created_at || item.updated_at)}</span>
                           {item.published_at && (
-                            <span style={{ color: "#4ade80", fontWeight: 600 }}>
+                            <span style={{ color: "var(--success-text)", fontWeight: 600 }}>
                               ✓ Đã đăng: {formatDate(item.published_at)}
                             </span>
                           )}
@@ -457,6 +485,15 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
                       </article>
                     );
                   })}
+
+                  <Pagination
+                    totalItems={announcements.length}
+                    currentPage={currentPage}
+                    pageSize={pageSize}
+                    onPageChange={setCurrentPage}
+                    itemLabel="thông báo"
+                    hideIfSinglePage={true}
+                  />
                 </div>
               )}
             </div>
@@ -482,23 +519,23 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
                   className="form-section-card"
                   style={{
                     textAlign: "center",
-                    padding: "3rem 1.5rem",
+                    padding: "2rem 1.25rem",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <div className="ai-sparkle-icon" style={{ width: 48, height: 48, margin: "0 auto 1rem" }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <div className="ai-sparkle-icon" style={{ width: 42, height: 42, margin: "0 auto 0.75rem" }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
                     </svg>
                   </div>
-                  <h4 style={{ color: "#ffffff", margin: "0 0 0.5rem" }}>Trình biên tập thông báo</h4>
-                  <p style={{ color: "#94a3b8", fontSize: "0.85rem", maxWidth: 360, margin: "0 0 1.25rem" }}>
+                  <h4 style={{ color: "var(--text-primary)", margin: "0 0 0.35rem", fontSize: "1.05rem" }}>Trình biên tập thông báo</h4>
+                  <p style={{ color: "var(--text-secondary)", fontSize: "0.82rem", maxWidth: 340, margin: "0 0 1rem" }}>
                     Chọn một thông báo từ danh sách bên trái để xem và sửa, hoặc bấm nút tạo thông báo mới với sự hỗ trợ của AI.
                   </p>
-                  <button type="button" className="primary-button" onClick={openNew} disabled={!selectedEventId}>
+                  <button type="button" className="primary-button" onClick={openNew} disabled={!selectedEventId} style={{ minHeight: "38px", padding: "8px 16px" }}>
                     + Soạn thông báo mới
                   </button>
                 </div>

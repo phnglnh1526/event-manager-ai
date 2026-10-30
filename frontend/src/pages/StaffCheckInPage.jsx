@@ -261,13 +261,13 @@ function StaffCheckInPage({ token, currentUser, onLogout, onUnauthorized, onProf
                   Bật Camera Quét Mã QR
                 </button>
 
-                <div className="manual-divider" style={{ textAlign: "center", margin: "0.25rem 0", color: "#64748b", fontSize: "0.78rem" }}>
+                <div className="manual-divider" style={{ textAlign: "center", margin: "0.25rem 0", color: "var(--text-muted)", fontSize: "0.78rem" }}>
                   <span>— HOẶC QUÉT BẰNG MÁY BARCODE / NHẬP TAY —</span>
                 </div>
 
                 {/* Big Fast Input for Handheld Scanner or Manual typing */}
                 <form onSubmit={submit}>
-                  <label htmlFor="ticket-code-input" style={{ fontSize: "0.8rem", fontWeight: 700, color: "#cbd5e1", marginBottom: "0.4rem", display: "block" }}>
+                  <label htmlFor="ticket-code-input" style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.4rem", display: "block" }}>
                     2. Mã vé người tham dự (Ticket Code)
                   </label>
                   <div className="checkin-fast-input-wrapper">
@@ -307,7 +307,7 @@ function StaffCheckInPage({ token, currentUser, onLogout, onUnauthorized, onProf
                       <div className="checkin-success-head">
                         <div className="checkin-success-icon">✓</div>
                         <div>
-                          <p className="hero-eyebrow" style={{ color: "#4ade80", borderColor: "rgba(34,197,94,0.3)" }}>
+                          <p className="hero-eyebrow" style={{ color: "var(--success)", borderColor: "var(--success)" }}>
                             XÁC THỰC THÀNH CÔNG
                           </p>
                           <h3 className="checkin-success-title">Check-in Hợp lệ!</h3>
@@ -325,7 +325,7 @@ function StaffCheckInPage({ token, currentUser, onLogout, onUnauthorized, onProf
                         </div>
                         <div>
                           <span>Mã vé đã quét</span>
-                          <strong style={{ fontFamily: "monospace", color: "#4ade80" }}>
+                          <strong style={{ fontFamily: "monospace", color: "var(--success)" }}>
                             {result.ticketCode}
                           </strong>
                         </div>
@@ -339,7 +339,7 @@ function StaffCheckInPage({ token, currentUser, onLogout, onUnauthorized, onProf
                         type="button"
                         className="primary-button"
                         onClick={focusInputNext}
-                        style={{ alignSelf: "flex-start", background: "#22c55e", color: "#080b1a", fontWeight: 800 }}
+                        style={{ alignSelf: "flex-start", background: "var(--success)", color: "#ffffff", fontWeight: 800 }}
                       >
                         Quét vé tiếp theo (Phím cách / Click)
                       </button>
@@ -352,7 +352,7 @@ function StaffCheckInPage({ token, currentUser, onLogout, onUnauthorized, onProf
                       <div className="checkin-error-head">
                         <div className="checkin-error-icon">✕</div>
                         <div>
-                          <p className="hero-eyebrow" style={{ color: "#f87171", borderColor: "rgba(239,68,68,0.3)" }}>
+                          <p className="hero-eyebrow" style={{ color: "var(--error)", borderColor: "var(--error)" }}>
                             TỪ CHỐI CHECK-IN
                           </p>
                           <h3 className="checkin-error-title">{result.title}</h3>
@@ -362,8 +362,8 @@ function StaffCheckInPage({ token, currentUser, onLogout, onUnauthorized, onProf
                       <p className="checkin-error-msg">{result.message}</p>
 
                       {result.failedCode && (
-                        <div style={{ fontSize: "0.8rem", color: "#94a3b8" }}>
-                          Mã vé vừa nhập: <code style={{ color: "#f87171" }}>{result.failedCode}</code>
+                        <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                          Mã vé vừa nhập: <code style={{ color: "var(--error)" }}>{result.failedCode}</code>
                         </div>
                       )}
 

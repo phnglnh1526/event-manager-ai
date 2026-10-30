@@ -3,12 +3,12 @@ import React from "react";
 function SpeakerForm({ form, editing, loading, error, onChange, onSubmit, onCancel }) {
   return (
     <section className="speaker-form form-section-card" aria-labelledby="speaker-form-title">
-      <div className="editor-heading" style={{ borderBottom: "1px solid #1a203f", paddingBottom: "0.75rem", marginBottom: "1rem" }}>
+      <div className="editor-heading" style={{ borderBottom: "1px solid var(--border)", paddingBottom: "0.75rem", marginBottom: "1rem" }}>
         <div>
           <p className="hero-eyebrow" style={{ margin: 0 }}>
             {editing ? "CHỈNH SỬA DIỄN GIẢ" : "THÊM DIỄN GIẢ MỚI"}
           </p>
-          <h3 id="speaker-form-title" style={{ color: "#ffffff", margin: "0.25rem 0 0" }}>
+          <h3 id="speaker-form-title" style={{ color: "var(--text-primary)", margin: "0.25rem 0 0" }}>
             {editing ? "Cập nhật diễn giả" : "Thêm diễn giả mới"}
           </h3>
         </div>
