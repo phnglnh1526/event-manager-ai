@@ -16,6 +16,7 @@ from app.models import (
     Schedule,
     Speaker,
     Ticket,
+    UploadedFile,
     User,
 )
 
@@ -47,6 +48,7 @@ def run() -> None:
         Schedule,
         Registration,
         Ticket,
+        UploadedFile,
         CheckIn,
         Feedback,
         Announcement,
@@ -250,7 +252,20 @@ def run() -> None:
 
         db.expire_all()
         assert sorted(inspect(engine).get_table_names()) == table_names_before
-        assert len(table_names_before) == 9
+        expected_tables = {
+            "announcements",
+            "checkins",
+            "events",
+            "feedbacks",
+            "registrations",
+            "schedules",
+            "speakers",
+            "tickets",
+            "uploaded_files",
+            "users",
+        }
+        assert set(table_names_before) == expected_tables, f"Database table mismatch: expected {expected_tables}, got {set(table_names_before)}"
+        assert len(table_names_before) == 10
         assert counts_before == {
             model.__tablename__: db.scalar(select(func.count()).select_from(model))
             for model in all_models

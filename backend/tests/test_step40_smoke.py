@@ -214,7 +214,21 @@ def run() -> None:
             headers=headers["admin"],
             json={"question": "Sự kiện ở đâu?"},
         ).status_code == 404
-        assert len(inspect(engine).get_table_names()) == 9
+        expected_tables = {
+            "announcements",
+            "checkins",
+            "events",
+            "feedbacks",
+            "registrations",
+            "schedules",
+            "speakers",
+            "tickets",
+            "uploaded_files",
+            "users",
+        }
+        actual_tables = set(inspect(engine).get_table_names())
+        assert actual_tables == expected_tables, f"Database table mismatch: expected {expected_tables}, got {actual_tables}"
+        assert len(actual_tables) == 10
         assert db.scalar(select(func.count(Event.id)).where(Event.id.in_([item.id for item in events]))) == 4
         print("STEP40_TESTS_OK")
     finally:
