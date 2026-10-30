@@ -6,6 +6,7 @@ import EventCoverImage from "../components/EventCoverImage";
 import MyFeedback from "../components/MyFeedback";
 import MyTickets from "../components/MyTickets";
 import WorkspaceHeader from "../components/WorkspaceHeader";
+import useAutoRefresh from "../hooks/useAutoRefresh";
 import {
   cancelMyRegistration,
   getAttendeeEvents,
@@ -232,6 +233,24 @@ function AttendeeWorkspace({ token, currentUser, onLogout, onUnauthorized, onPro
 
     return () => controller.abort();
   }, [token, reload, handleError]);
+
+  // Near real-time auto-refresh: re-fetches events and registrations periodically and on tab focus
+  useAutoRefresh(
+    () => {
+      if (confirmation || inFlight.current) return;
+      getAttendeeEvents(token)
+        .then((items) => {
+          setEvents(items);
+          setChatEvent((current) => (current && items.some((item) => item.id === current.id) ? current : null));
+          setDetailEvent((current) => (current && items.some((item) => item.id === current.id) ? items.find((item) => item.id === current.id) : null));
+        })
+        .catch(() => {});
+      getMyRegistrations(token)
+        .then((items) => setRegistrations(items))
+        .catch(() => {});
+    },
+    { interval: 20000, enabled: !confirmation && !inFlight.current }
+  );
 
   const registrationMap = useMemo(() => new Map(registrations.map((item) => [item.event_id, item])), [registrations]);
   const eventMap = useMemo(() => new Map(events.map((item) => [item.id, item])), [events]);

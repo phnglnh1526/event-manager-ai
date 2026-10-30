@@ -161,6 +161,77 @@
   font-weight: 650;
 }
 
+/* Native Select Event Selector Styles */
+.analytics-event-selector-wrap {
+  width: 100%;
+}
+
+.selector-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.selector-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.selector-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.selector-select-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.selector-select {
+  width: 100%;
+  height: 38px;
+  min-height: 38px;
+  padding: 6px 36px 6px 12px;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 10px);
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  font-weight: 600;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selector-select:focus {
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
+}
+
+.selector-caret-svg {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: var(--text-muted);
+}
+
 /* --------------------------------------------------------------------------
    2. SELECTED EVENT HERO CARD (Real Event Details & Cover)
    -------------------------------------------------------------------------- */

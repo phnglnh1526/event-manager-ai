@@ -1,22 +1,46 @@
 import React, { useEffect, useState } from "react";
+import { API_BASE_URL } from "../services/api";
 
 export function normalizeCoverImageUrl(url) {
   if (!url || typeof url !== "string") return null;
   const trimmed = url.trim();
   if (!trimmed) return null;
 
-  // If the image is stored in our uploaded files endpoint, extract the relative path
-  // so it always resolves through the current frontend origin / Vite proxy
-  // (fixing Docker internal backend:8000 hostnames or third-party hostnames)
+  // Blob and inline data URLs pass directly
+  if (trimmed.startsWith("blob:") || trimmed.startsWith("data:")) {
+    return trimmed;
+  }
+
+  // Internal upload endpoint matcher: /api/uploads/file/<id>
   const uploadMatch = trimmed.match(/\/api\/uploads\/file\/[a-zA-Z0-9_-]+/);
   if (uploadMatch) {
-    return uploadMatch[0];
+    const relPath = uploadMatch[0];
+    // If API_BASE_URL is configured and points to a reachable external host (not docker internal 'backend:8000')
+    if (API_BASE_URL && !API_BASE_URL.includes("backend:8000")) {
+      return `${API_BASE_URL}${relPath}`;
+    }
+    return relPath;
+  }
+
+  // If URL contains Docker internal backend:8000 hostname, strip or re-route to API_BASE_URL
+  if (trimmed.includes("backend:8000")) {
+    const pathPart = trimmed.split("backend:8000")[1];
+    if (API_BASE_URL && !API_BASE_URL.includes("backend:8000")) {
+      return `${API_BASE_URL}${pathPart}`;
+    }
+    return pathPart;
   }
 
   return trimmed;
 }
 
-export function EventCoverImage({ src, alt = "Ảnh sự kiện", className = "", fallbackClassName = "" }) {
+export function EventCoverImage({
+  src,
+  alt = "Ảnh sự kiện",
+  className = "",
+  fallbackClassName = "",
+  loading = "lazy",
+}) {
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
@@ -59,7 +83,7 @@ export function EventCoverImage({ src, alt = "Ảnh sự kiện", className = ""
       alt={alt}
       className={`event-cover-img ${className}`.trim()}
       onError={() => setHasError(true)}
-      loading="lazy"
+      loading={loading}
     />
   );
 }

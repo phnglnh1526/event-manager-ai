@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Pagination from "../components/Pagination";
 import PasswordInput from "../components/PasswordInput";
 import WorkspaceHeader from "../components/WorkspaceHeader";
+import useAutoRefresh from "../hooks/useAutoRefresh";
 import { createUser, getUsers, resetUserPassword, updateUser } from "../services/api";
 
 const ROLES = ["ATTENDEE", "STAFF", "ORGANIZER", "ADMIN"];
@@ -436,6 +437,17 @@ function UsersPage({ token, currentUser, onLogout, onUnauthorized, activeView, o
     loadUsers(controller.signal);
     return () => controller.abort();
   }, [loadUsers]);
+
+  // Near real-time auto-refresh: re-fetches user list when not actively performing modal actions
+  useAutoRefresh(
+    () => {
+      if (editingUser || creatingUser || resetPasswordUser || confirmation) return;
+      getUsers(token)
+        .then((items) => setUsers(items))
+        .catch(() => {});
+    },
+    { interval: 25000, enabled: !editingUser && !creatingUser && !resetPasswordUser && !confirmation }
+  );
 
   const visibleUsers = useMemo(() => {
     const term = query.trim().toLowerCase();

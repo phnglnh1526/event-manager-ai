@@ -6,6 +6,7 @@ import EventSelector, { SelectedEventCard } from "../components/EventSelector";
 import KpiCard from "../components/KpiCard";
 import RatingDistribution from "../components/RatingDistribution";
 import WorkspaceHeader from "../components/WorkspaceHeader";
+import useAutoRefresh from "../hooks/useAutoRefresh";
 import { generateFeedbackSummary, getEvents, getEventStatistics } from "../services/api";
 
 const friendlyError = (error, fallback) =>
@@ -127,6 +128,24 @@ function DashboardPage({ token, currentUser, onLogout, onUnauthorized, activeVie
     setAiError("");
     setAiLoading(false);
   }, [selectedEventId]);
+
+  // Near real-time auto-refresh: background re-fetches statistics & events list periodically and on tab focus
+  useAutoRefresh(
+    () => {
+      if (!selectedEventId || aiLoading || aiInFlight.current) return;
+      getEventStatistics(selectedEventId, token)
+        .then((data) => {
+          setStatistics(data);
+        })
+        .catch(() => {});
+      getEvents(token)
+        .then((data) => {
+          setEvents(data);
+        })
+        .catch(() => {});
+    },
+    { interval: 15000, enabled: !aiLoading }
+  );
 
   const handleEventChange = (eventId) => {
     aiRequestSequence.current += 1;

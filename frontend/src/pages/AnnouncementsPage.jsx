@@ -4,6 +4,7 @@ import AnnouncementForm from "../components/AnnouncementForm";
 import EventSelector from "../components/EventSelector";
 import Pagination from "../components/Pagination";
 import WorkspaceHeader from "../components/WorkspaceHeader";
+import useAutoRefresh from "../hooks/useAutoRefresh";
 import { ANNOUNCEMENT_STATUS_LABELS } from "../locales/vi";
 import {
   createAnnouncement,
@@ -110,6 +111,17 @@ function AnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, activ
       });
     return () => controller.abort();
   }, [selectedEventId, token, reload, handleError]);
+
+  // Near real-time auto-refresh: re-fetches announcements when not actively editing
+  useAutoRefresh(
+    () => {
+      if (!selectedEventId || editor !== null || formDirty || saving || ai.loading) return;
+      getAnnouncements(selectedEventId, token)
+        .then(setAnnouncements)
+        .catch(() => {});
+    },
+    { interval: 20000, enabled: Boolean(selectedEventId) && editor === null && !formDirty && !saving && !ai.loading }
+  );
 
   useEffect(() => {
     setCurrentPage(1);

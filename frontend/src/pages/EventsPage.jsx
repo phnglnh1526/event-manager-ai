@@ -8,6 +8,7 @@ import RegistrationManagement from "../components/RegistrationManagement";
 import ScheduleManagement from "../components/ScheduleManagement";
 import SpeakerManagement from "../components/SpeakerManagement";
 import WorkspaceHeader from "../components/WorkspaceHeader";
+import useAutoRefresh from "../hooks/useAutoRefresh";
 import { EVENT_STATUS_LABELS } from "../locales/vi";
 import { createEvent, deleteEvent, getEvent, getEvents, updateEvent, uploadEventImage } from "../services/api";
 
@@ -111,6 +112,19 @@ function EventsPage({ token, currentUser, onLogout, onUnauthorized, activeView, 
       });
     return () => controller.abort();
   }, [token, reload, handleRequestError]);
+
+  // Near real-time auto-refresh: re-fetches events list periodically and on tab focus when not actively editing
+  useAutoRefresh(
+    () => {
+      if (editorId !== undefined || dirty || submitting) return;
+      getEvents(token)
+        .then((items) => {
+          setEvents(items);
+        })
+        .catch(() => {});
+    },
+    { interval: 20000, enabled: editorId === undefined && !dirty && !submitting }
+  );
 
   const confirmDiscard = () => (!dirty && !speakerDirty) || window.confirm("Hủy các thay đổi chưa lưu?");
 
@@ -224,6 +238,10 @@ function EventsPage({ token, currentUser, onLogout, onUnauthorized, activeView, 
       } catch (uploadErr) {
         requestInFlight.current = false;
         setSubmitting(false);
+        if (uploadErr.status === 401) {
+          onUnauthorized();
+          return;
+        }
         setFormError(uploadErr.message || "Tải ảnh sự kiện thất bại. Vui lòng thử lại.");
         return;
       }
@@ -246,6 +264,12 @@ function EventsPage({ token, currentUser, onLogout, onUnauthorized, activeView, 
       setSuccess(editorId == null ? "Tạo sự kiện thành công." : "Cập nhật sự kiện thành công.");
       resetEditor();
       setDetail(result);
+      setEvents((prev) => {
+        if (editorId == null) {
+          return [result, ...prev];
+        }
+        return prev.map((e) => (e.id === result.id ? result : e));
+      });
       setWorkspaceTab("overview");
       setSpeakerDirty(false);
       setReload((value) => value + 1);
@@ -799,41 +823,96 @@ function EventsPage({ token, currentUser, onLogout, onUnauthorized, activeView, 
                     <div className="event-overview-hero">
                       <EventCoverImage src={detail.cover_image_url} alt={detail.title} />
                     </div>
-                    <p className="event-detail-description">{detail.description || "Chưa có mô tả chi tiết."}</p>
-                    <dl>
-                      <div>
-                        <dt>Địa điểm</dt>
-                        <dd>{detail.location}</dd>
+                    {detail.description && (
+                      <div className="event-detail-description-box">
+                        <p className="event-detail-description">{detail.description}</p>
                       </div>
-                      <div>
-                        <dt>Bắt đầu</dt>
-                        <dd>{displayDateTime(detail.start_time)}</dd>
+                    )}
+                    <div className="event-spec-grid">
+                      <div className="event-spec-item">
+                        <span className="spec-label">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                          </svg>
+                          Địa điểm
+                        </span>
+                        <strong className="spec-value">{detail.location}</strong>
                       </div>
-                      <div>
-                        <dt>Kết thúc</dt>
-                        <dd>{displayDateTime(detail.end_time)}</dd>
+
+                      <div className="event-spec-item">
+                        <span className="spec-label">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                          </svg>
+                          Bắt đầu
+                        </span>
+                        <strong className="spec-value">{displayDateTime(detail.start_time)}</strong>
                       </div>
-                      <div>
-                        <dt>Sức chứa tối đa</dt>
-                        <dd>{detail.max_attendees} người</dd>
+
+                      <div className="event-spec-item">
+                        <span className="spec-label">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                          </svg>
+                          Kết thúc
+                        </span>
+                        <strong className="spec-value">{displayDateTime(detail.end_time)}</strong>
                       </div>
-                      <div>
-                        <dt>Ngày tạo</dt>
-                        <dd>{displayDateTime(detail.created_at)}</dd>
+
+                      <div className="event-spec-item">
+                        <span className="spec-label">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                          </svg>
+                          Sức chứa tối đa
+                        </span>
+                        <strong className="spec-value">{detail.max_attendees} người</strong>
                       </div>
-                      <div>
-                        <dt>Cập nhật lần cuối</dt>
-                        <dd>{displayDateTime(detail.updated_at)}</dd>
+
+                      <div className="event-spec-item">
+                        <span className="spec-label">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                          </svg>
+                          Ngày tạo
+                        </span>
+                        <strong className="spec-value">{displayDateTime(detail.created_at)}</strong>
                       </div>
-                    </dl>
-                    <button
-                      type="button"
-                      className="primary-button"
-                      onClick={() => loadEvent(detail.id, true)}
-                      style={{ marginTop: "1rem" }}
-                    >
-                      Chỉnh sửa sự kiện này
-                    </button>
+
+                      <div className="event-spec-item">
+                        <span className="spec-label">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                          </svg>
+                          Cập nhật lần cuối
+                        </span>
+                        <strong className="spec-value">{displayDateTime(detail.updated_at)}</strong>
+                      </div>
+                    </div>
+
+                    <div className="event-overview-footer-actions">
+                      <button
+                        type="button"
+                        className="primary-button"
+                        onClick={() => loadEvent(detail.id, true)}
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                        </svg>
+                        Chỉnh sửa sự kiện này
+                      </button>
+                    </div>
                   </div>
                 ) : workspaceTab === "speakers" ? (
                   <SpeakerManagement

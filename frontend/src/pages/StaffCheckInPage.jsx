@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import EventAIChat from "../components/EventAIChat";
 import QRScanner from "../components/QRScanner";
 import WorkspaceHeader from "../components/WorkspaceHeader";
+import useAutoRefresh from "../hooks/useAutoRefresh";
 import { checkInTicket, getCheckInEvents } from "../services/api";
 
 const literal = (value) => (typeof value === "string" ? value.slice(0, 16) : "");
@@ -49,6 +50,20 @@ function StaffCheckInPage({ token, currentUser, onLogout, onUnauthorized, onProf
       });
     return () => controller.abort();
   }, [token, onUnauthorized]);
+
+  // Near real-time auto-refresh: re-fetches check-in events list periodically and on tab focus
+  useAutoRefresh(
+    () => {
+      if (submitting || inFlight.current) return;
+      getCheckInEvents(token)
+        .then((items) => {
+          setEvents(items);
+          setSelectedId((current) => (items.some((i) => String(i.id) === current) ? current : items.length ? String(items[0].id) : ""));
+        })
+        .catch(() => {});
+    },
+    { interval: 20000, enabled: !submitting }
+  );
 
   // Keep input focused for instant barcode/keyboard scanning
   useEffect(() => {
