@@ -31,6 +31,8 @@ Thumbs.db
 *.log
 npm-debug.log*
 logs/
+backend.zip
+frontend.zip
 
 # Local submission artifacts
 event-manager-ai-v*.zip
