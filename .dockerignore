@@ -1,0 +1,28 @@
+# Git and environment secrets
+.git
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Database backups and dumps
+*.sql
+*.sqlite
+*.db
+mysql_data/
+
+# Python / Node caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+node_modules/
+dist/
+.vite/
+
+# Temporary / testing scripts
+backend/scripts/
+backend/tests/
+*.log
+event-manager-ai-v*.zip

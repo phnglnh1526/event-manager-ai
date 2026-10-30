@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import useAutoRefresh from "../hooks/useAutoRefresh";
 import { getMyAnnouncement, getMyAnnouncements } from "../services/api";
 
 const dateFormatter = new Intl.DateTimeFormat("vi-VN", { dateStyle: "medium", timeStyle: "short" });
@@ -28,6 +29,16 @@ function MyAnnouncementsPage({ token, currentUser, onLogout, onUnauthorized, emb
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [token, handleError]);
+
+  // Near real-time auto-refresh: re-fetches announcements on tab focus and every 20s
+  useAutoRefresh(
+    () => {
+      getMyAnnouncements(token)
+        .then((items) => setAnnouncements(items))
+        .catch(() => {});
+    },
+    { interval: 20000, enabled: true }
+  );
 
   const openDetail = async (announcementId) => {
     const sequence = detailSequence.current + 1;

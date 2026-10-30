@@ -125,6 +125,8 @@ export function EventImageUpload({
               src={displayImage}
               alt="Cover preview"
               className="event-image-preview-img"
+              fallbackClassName="event-image-preview-fallback"
+              loading="eager"
             />
             {uploading && (
               <div className="event-image-uploading-overlay">
